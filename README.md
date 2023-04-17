@@ -15,7 +15,7 @@
 **To access versatile demo of Segment-and-Track-Anything, please click [here](https://www.youtube.com/watch?v=R4aU6FotTb0).** -->
 <div align=center>
 
-[![Segment-and-Track-Anything Versatile Demo](https://res.cloudinary.com/marcomontalbano/image/upload/v1681654606/video_to_markdown/images/youtube--R4aU6FotTb0-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=R4aU6FotTb0 "Segment-and-Track-Anything Versatile Demo")
+[![Segment-and-Track-Anything Versatile Demo](https://res.cloudinary.com/marcomontalbano/image/upload/v1681713095/video_to_markdown/images/youtube--UPhtpf1k6HA-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://youtu.be/UPhtpf1k6HA "Segment-and-Track-Anything Versatile Demo")
 </div>
 
 This video showcases the segmentation and tracking capabilities of SAM-Track in various scenarios, such as street views, AR, cells, animations, aerial shots, and more.
