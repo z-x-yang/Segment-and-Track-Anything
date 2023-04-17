@@ -105,3 +105,6 @@ Licenses for borrowed code can be found in `licenses.md` file.
 * Associating Object with Transformers -[https://github.com/yoxu515/aot-benchmark](https://github.com/yoxu515/aot-benchmark)
 * Segment Anything - [https://github.com/facebookresearch/segment-anything](https://github.com/facebookresearch/segment-anything)
 * Gradio (for building WebUI) - [https://github.com/gradio-app/gradio](https://github.com/gradio-app/gradio)
+
+### About us
+Thank you for your interest in this project. Our team consists of members from the CCAI, College of Computer Science and Technology at Zhejiang University. The project is led by [Prof.Wenguan Wang](https://sites.google.com/view/wenguanwang) and [Dr.Zongxin Yang](https://z-x-yang.github.io/).
