@@ -1,18 +1,7 @@
 # Segment and Track Anything (SAM-Track)
-**Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM (Segment Anything Model)**](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**AOT (Associating Object with Transformers)**](https://github.com/yoxu515/aot-benchmark) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while AOT is responsible for tracking all identified objects.
+**Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
 ## Demos
-<!-- ### Animals in the wild
-![Swimming Blackswan](./assets/blackswan_seg.gif)
-![Two Camels](./assets/camel_seg.gif)
-![Walking Bear](./assets/bear_seg.gif)
-
-### Human activities
-![Park Swing](./assets/swing_seg.gif)
-![Park Skating](./assets/skate-park_seg.gif)
-![Street Basketball](./assets/840_iSXIa0hE8Ek_seg.gif)
-
-**To access versatile demo of Segment-and-Track-Anything, please click [here](https://www.youtube.com/watch?v=R4aU6FotTb0).** -->
 <div align=center>
 
 [![Segment-and-Track-Anything Versatile Demo](https://res.cloudinary.com/marcomontalbano/image/upload/v1681713095/video_to_markdown/images/youtube--UPhtpf1k6HA-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://youtu.be/UPhtpf1k6HA "Segment-and-Track-Anything Versatile Demo")
@@ -20,7 +9,6 @@
 
 This video showcases the segmentation and tracking capabilities of SAM-Track in various scenarios, such as street views, AR, cells, animations, aerial shots, and more.
 
-<!-- **Street Basketball (tracked objects > 250)** -->
 
 ## TODO
  - [ ] Colab notebook
@@ -44,7 +32,7 @@ This video showcases the segmentation and tracking capabilities of SAM-Track in 
 
 The [Segment-Anything](https://github.com/facebookresearch/segment-anything) repository has been cloned and renamed as sam, and the [aot-benchmark](https://github.com/yoxu515/aot-benchmark) repository has been cloned and renamed as aot.
 
-Please check the dependency requirements in [SAM](https://github.com/facebookresearch/segment-anything) and [AOT](https://github.com/yoxu515/aot-benchmark).
+Please check the dependency requirements in [SAM](https://github.com/facebookresearch/segment-anything) and [DeAOT](https://github.com/yoxu515/aot-benchmark).
 
 The implementation is tested under python 3.9, as well as pytorch 1.10 and torchvision 0.11. We recommend equivalent or higher pytorch version.
 
@@ -58,12 +46,12 @@ To install other libs:
 ```
 pip install numpy opencv-python pycocotools matplotlib Pillow scikit-image
 ```
-It is recommended to install [Pytorch Correlation](https://github.com/ClementPinard/Pytorch-Correlation-extension) for accelerating AOT inference.
+It is recommended to install [Pytorch Correlation](https://github.com/ClementPinard/Pytorch-Correlation-extension) for accelerating DeAOT inference.
 
 ### Model Preparation
-Download SAM model to ckpt, the default model is [sam_vit_b_01ec64.pth](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth).
+Download SAM model to ckpt, the default model is SAM-VIT-B ([sam_vit_b_01ec64.pth](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth)).
 
-Download AOT model to ckpt, the default model is [R50_DeAOTL_PRE_YTB_DAV.pth](https://drive.google.com/file/d/1QoChMkTVxdYZ_eBlZhK2acq9KMQZccPJ/view).
+Download DeAOT/AOT model to ckpt, the default model is R50-DeAOT-L ([R50_DeAOTL_PRE_YTB_DAV.pth](https://drive.google.com/file/d/1QoChMkTVxdYZ_eBlZhK2acq9KMQZccPJ/view)).
 
 You can download the default weights using the command line as shown below.
 ```
@@ -75,7 +63,7 @@ bash script/download_ckpt.sh
 - Then run demo.ipynb step by step to generate results. 
 - The results will be saved as masks for each frame and a gif file for visualization.
 
-The arguments for SAM-Track, AOT and SAM can be manually modified in model_args.py for purpose of using other models or controling the behavior of each model.
+The arguments for SAM-Track, DeAOT and SAM can be manually modified in model_args.py for purpose of using other models or controling the behavior of each model.
 
 ### WebUI App
 Our user-friendly visual interface allows you to easily obtain the results of your experiments. Simply initiate it using the command line.
@@ -88,7 +76,7 @@ Users can upload the video directly on the UI and use Segtracker to track all ob
 ![Gradio](./assets/gradio.jpg)
 
 Parameters:
- - **aot_model**: used to select which version of AOT to use for tracking and propagation.
+ - **aot_model**: used to select which version of DeAOT/AOT to use for tracking and propagation.
  - **sam_gap**: used to control how often SAM is used to add newly appearing objects at specified frame intervals. Increase to decrease the frequency of discovering new targets, but significantly improve speed of inference.
  - **points_per_side**: used to control the number of points per side used for generating masks by sampling a grid over the image. Increasing the size enhances the ability to detect small objects, but larger targets may be segmented into finer granularity.
  - **max_obj_num**: used to limit the maximum number of objects that SAM-Track can detect and track. A larger number of objects necessitates a greater utilization of memory, with approximately 16GB of memory capable of processing a maximum of 255 objects.
@@ -102,9 +90,9 @@ Usage:
 ### Credits
 Licenses for borrowed code can be found in `licenses.md` file.
 
-* Associating Object with Transformers -[https://github.com/yoxu515/aot-benchmark](https://github.com/yoxu515/aot-benchmark)
-* Segment Anything - [https://github.com/facebookresearch/segment-anything](https://github.com/facebookresearch/segment-anything)
+* DeAOT/AOT - [https://github.com/yoxu515/aot-benchmark](https://github.com/yoxu515/aot-benchmark)
+* SAM - [https://github.com/facebookresearch/segment-anything](https://github.com/facebookresearch/segment-anything)
 * Gradio (for building WebUI) - [https://github.com/gradio-app/gradio](https://github.com/gradio-app/gradio)
 
 ### About us
-Thank you for your interest in this project. Our team consists of members from the CCAI, College of Computer Science and Technology at Zhejiang University. The project is led by [Prof.Wenguan Wang](https://sites.google.com/view/wenguanwang) and [Dr.Zongxin Yang](https://z-x-yang.github.io/).
+Thank you for your interest in this project. The project is supervised by the ReLER Lab at Zhejiang University’s College of Computer Science and Technology. ReLER was established by Yang Yi, a Qiu Shi Distinguished Professor at Zhejiang University. Our dedicated team of contributors includes [Yuanyou Xu](https://github.com/yoxu515), [Yangming Cheng](https://github.com/yamy-cheng), [Liulei Li](https://github.com/lingorX), [Zongxin Yang](https://z-x-yang.github.io/), [Wenguan Wang](https://sites.google.com/view/wenguanwang) and [Yi Yang](https://scholar.google.com/citations?user=RMSuNFwAAAAJ&hl=en).
