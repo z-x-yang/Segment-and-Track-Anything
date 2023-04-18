@@ -41,10 +41,11 @@ def seg_track_anything(input_video_file, aot_model, sam_gap, max_obj_num, points
     # reset aot args
     aot_args["model"] = aot_model
     aot_args["model_path"] = aot_model2ckpt[aot_model]
+
     # reset sam args
-    sam_args["sam_gap"] = sam_gap
-    sam_args["max_obj_num"] = max_obj_num
-    sam_args["points_per_side"] = points_per_side
+    segtracker_args["sam_gap"] = sam_gap
+    segtracker_args["max_obj_num"] = max_obj_num
+    sam_args["generator_args"]["points_per_side"] = points_per_side
 
     output_dir = io_args['output_mask_dir']
     if not os.path.exists(output_dir):
