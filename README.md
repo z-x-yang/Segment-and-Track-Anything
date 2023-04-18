@@ -1,4 +1,9 @@
 # Segment and Track Anything (SAM-Track)
+
+<p align="center">
+<img src="https://github.com/z-x-yang/Segment-and-Track-Anything/tree/main/assets/demo_3x2.gif" width="1000">
+</p>
+
 **Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
 ## Demos
