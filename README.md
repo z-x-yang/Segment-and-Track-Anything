@@ -14,12 +14,13 @@
 
 This video showcases the segmentation and tracking capabilities of SAM-Track in various scenarios, such as street views, AR, cells, animations, aerial shots, and more.
 
-
+Bilibili Video Link: [Versatile Demo](https://www.bilibili.com/video/BV1M24y1c77y/)
 ## TODO
  - [ ] Colab notebook
  - [ ] 1.0-Version Interactive WebUI
-    - We will develop a function that allows interactive modification of the mask for the first frame of the video based on the user's requirements. We demonstrate the interactive segmentation capabilities of Segment-and-Track-Anything in [Demo1](https://www.youtube.com/watch?v=ctnD03w-5VA) and [Demo2](https://www.youtube.com/watch?v=DfCUGUxALYo).
-
+    - We will create a feature that enables users to interactively modify the mask for the initial video frame according to their needs. The interactive segmentation capabilities of Segment-and-Track-Anything is demonstrated in [Demo1](https://www.youtube.com/watch?v=ctnD03w-5VA) and [Demo2](https://www.youtube.com/watch?v=DfCUGUxALYo).
+    - Bilibili Video Link: [Demo1](https://www.bilibili.com/video/BV1JL411v7uE/), [Demo2](https://www.bilibili.com/video/BV1Qs4y1w763/).
+    
 **Demo1** showcases SAM-Track's ability to interactively segment and track individual objects.  The user specified that SAM-Track tracked a man playing street basketball.
 <div align=center>
 
