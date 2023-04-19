@@ -52,7 +52,12 @@ To install other libs:
 ```
 pip install numpy opencv-python pycocotools matplotlib Pillow scikit-image
 ```
-It is recommended to install [Pytorch Correlation](https://github.com/ClementPinard/Pytorch-Correlation-extension) for accelerating DeAOT inference.
+It is recommended to install [Pytorch Correlation](https://github.com/ClementPinard/Pytorch-Correlation-extension) for accelerating DeAOT inference:
+
+```
+git clone https://github.com/ClementPinard/Pytorch-Correlation-extension.git
+cd Pytorch-Correlation-extension; python setup.py install
+```
 
 ### Model Preparation
 Download SAM model to ckpt, the default model is SAM-VIT-B ([sam_vit_b_01ec64.pth](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth)).
