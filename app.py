@@ -40,7 +40,7 @@ def video_app():
                             minimum = 1,
                             step=1,
                             maximum = 9999,
-                            value=4
+                            value=30
                         )
                         points_per_side = gr.Slider(
                             label = "points_per_side",
