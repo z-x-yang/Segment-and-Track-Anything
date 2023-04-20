@@ -40,10 +40,15 @@ The [Segment-Anything](https://github.com/facebookresearch/segment-anything) rep
 
 Please check the dependency requirements in [SAM](https://github.com/facebookresearch/segment-anything) and [DeAOT](https://github.com/yoxu515/aot-benchmark).
 
-The implementation is tested under python 3.9, as well as pytorch 1.10 and torchvision 0.11. We recommend equivalent or higher pytorch version.
+The implementation is tested under python 3.9, as well as pytorch 1.10 and torchvision 0.11. **We recommend equivalent or higher pytorch version**.
 
-To install SAM:
+Use the install.sh to install the necessary libs for SAM-Track
 ```
+bash script/install.sh
+```
+
+<!-- To install SAM: -->
+<!-- ```
 cd sam; pip install -e .
 ```
 
@@ -57,7 +62,7 @@ It is recommended to install [Pytorch Correlation](https://github.com/ClementPin
 ```
 git clone https://github.com/ClementPinard/Pytorch-Correlation-extension.git
 cd Pytorch-Correlation-extension; python setup.py install
-```
+``` -->
 
 ### Model Preparation
 Download SAM model to ckpt, the default model is SAM-VIT-B ([sam_vit_b_01ec64.pth](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth)).
