@@ -19,7 +19,7 @@ aot_args = {
     'gpu_id': 0,
 }
 segtracker_args = {
-    'sam_gap': 4,
+    'sam_gap': 10,
     'match_iou_thr': 0.5,
     'min_area': 200,
     'max_obj_num': 255,

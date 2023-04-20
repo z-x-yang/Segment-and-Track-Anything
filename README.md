@@ -59,7 +59,7 @@ bash script/download_ckpt.sh
 
 ### Run Demo
 - The video to be processed can be put in ./assets. 
-- Then run demo.ipynb step by step to generate results. 
+- Then run **demo.ipynb** step by step to generate results. 
 - The results will be saved as masks for each frame and a gif file for visualization.
 
 The arguments for SAM-Track, DeAOT and SAM can be manually modified in model_args.py for purpose of using other models or controling the behavior of each model.
