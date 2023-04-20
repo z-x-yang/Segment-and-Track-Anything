@@ -1,0 +1,6 @@
+.vscode
+ckpt/*
+assets/*masks
+assets/*mp4
+*.pyc
+debug/*
