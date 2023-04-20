@@ -175,7 +175,8 @@ def tracking_objects_in_video(SegTracker, input_video):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     pred_list = []
-    
+    masked_pred_list = []
+
     torch.cuda.empty_cache()
     gc.collect()
     sam_gap = SegTracker.sam_gap
@@ -189,7 +190,7 @@ def tracking_objects_in_video(SegTracker, input_video):
             frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
             
             if frame_idx == 0:
-                pred_list.append(SegTracker.merged_mask)
+                pred_list.append(SegTracker.refined_merged_mask)
                 frame_idx += 1
                 continue
             elif (frame_idx % sam_gap) == 0:
@@ -238,7 +239,8 @@ def tracking_objects_in_video(SegTracker, input_video):
         frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
         pred_mask = pred_list[frame_idx]
         masked_frame = draw_mask(frame, pred_mask)
-        # masked_frame = masked_pred_list[frame_idx]
+        masked_pred_list.append(masked_frame)
+
         masked_frame = cv2.cvtColor(masked_frame,cv2.COLOR_RGB2BGR)
         out.write(masked_frame)
         print('frame {} writed'.format(frame_idx),end='\r')
@@ -249,12 +251,16 @@ def tracking_objects_in_video(SegTracker, input_video):
     print('\nfinished')
 
     # save colorized masks as a gif
-    imageio.mimsave(io_args['output_gif'],pred_list,fps=fps)
+    imageio.mimsave(io_args['output_gif'], masked_pred_list, fps=fps)
     print("{} saved".format(io_args['output_gif']))
+
+    # zip predicted mask
+    os.system(f"zip -r ./assets/{video_name}_pred_mask.zip {io_args['output_mask_dir']}")
 
     # manually release memory (after cuda out of memory)
     del SegTracker
     torch.cuda.empty_cache()
     gc.collect()
 
-    return io_args['output_video']
+
+    return io_args['output_video'], f"./assets/{video_name}_pred_mask.zip"

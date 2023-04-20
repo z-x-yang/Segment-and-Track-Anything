@@ -70,6 +70,7 @@ def sam_refine(Seg_Tracker, origin_frame, point_prompt, click_state, logit, aot_
     if point_prompt == "Positive":
         coordinate = "[[{},{},1]]".format(evt.index[0], evt.index[1])
     else:
+        # TODO：add everything positive points
         coordinate = "[[{},{},0]]".format(evt.index[0], evt.index[1])
     
     # prompt for sam model
@@ -82,7 +83,7 @@ def sam_refine(Seg_Tracker, origin_frame, point_prompt, click_state, logit, aot_
     #     logit = None
 
     if Seg_Tracker is None:
-        Seg_Tracker, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
+        Seg_Tracker, _, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
     # Refine acc to click
     predicted_mask, masked_frame = Seg_Tracker.refine_first_frame_click( 
@@ -91,7 +92,6 @@ def sam_refine(Seg_Tracker, origin_frame, point_prompt, click_state, logit, aot_
                                                       labels=np.array(prompt["input_label"]),
                                                       multimask=prompt["multimask_output"],
                                                     )
-
 
 
     with torch.cuda.amp.autocast():
@@ -118,12 +118,12 @@ def init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_fra
     
     Seg_Tracker = SegTracker(segtracker_args, sam_args, aot_args)
     Seg_Tracker.restart_tracker()
-    return Seg_Tracker, origin_frame
+    return Seg_Tracker, origin_frame, [[], []]
 
 def segment_everything(Seg_Tracker, aot_model, origin_frame, sam_gap, max_obj_num, points_per_side):
     
     if Seg_Tracker is None:
-        Seg_Tracker, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
+        Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
     frame_idx = 0
 
@@ -168,9 +168,9 @@ def metaseg_app():
         masks = gr.State([])
         masked_frame = gr.State([])
         origin_frame = gr.State(None)
-        template_mask = gr.State(None)
         select_correction_frame = gr.State(None)
         corrected_state = gr.State([[],[],[]])
+        tab_state = gr.State("everything")
         Seg_Tracker = gr.State(None)
 
         aot_model = gr.State(None)
@@ -226,26 +226,37 @@ def metaseg_app():
                             interactive=True
                         )
 
-                        initial_seg_tracker = gr.Button(value="Initial Seg-Tracker", interactive=True)
+                        # initial_seg_tracker = gr.Button(value="Initial Seg-Tracker", interactive=True)
 
 
                     # args for modify and tracking 
                     with gr.Column(scale=0.5):
 
                         with gr.Blocks(Label="Interactive segment"):
-                            point_prompt = gr.Radio(
-                                choices=["Positive",  "Negative"],
-                                value="Positive",
-                                label="Point Prompt",
-                                interactive=True)
+                            tab_everything = gr.Tab(label="Segment everything")
+                            with tab_everything:
+                                seg_every_first_frame = gr.Button(value="Segment everything for first frame", interactive=True)
+                                point_prompt = gr.Radio(
+                                    choices=["Positive"],
+                                    value="Positive",
+                                    label="Point Prompt",
+                                    interactive=True)
 
-                            interactive_mode = gr.Radio(
-                                        choices=["click", "bbox"],
-                                        value="click",
-                                        label="Interactive Mode",
-                                        interactive=True)
+                            tab_click = gr.Tab(label="Click")
+                            with tab_click:
+                                point_prompt = gr.Radio(
+                                    choices=["Positive",  "Negative"],
+                                    value="Positive",
+                                    label="Point Prompt",
+                                    interactive=True)
 
-                            seg_every_first_frame = gr.Button(value="Segment everything for first frame", interactive=True)
+                            tab_bbox = gr.Tab(label="Bbox")
+                            with tab_bbox:
+                                bbox_point_prompt = gr.Radio(
+                                            choices=["Positive"],
+                                            value="Positive",
+                                            label="Point Prompt",
+                                            interactive=True)
 
                             undo_but = gr.Button(
                                         value="Undo",
@@ -256,21 +267,21 @@ def metaseg_app():
                                         value="Reset",
                                         interactive=True
                                                 )
+
                     track_for_video = gr.Button(
                         value="Start Tracking",
                         interactive=True
                         )
 
             with gr.Column(scale=0.5):
-                output_video = gr.Video(label='output')
+                output_video = gr.Video(label='output').style(height=380)
 
                 # TODO: V2-Interactively correct intermediate frames
                 # image_output = gr.Image(type="pil", interactive=True, elem_id="image_output").style(height=360)
                 # image_selection_slider = gr.Slider(minimum=0, maximum=100, step=0.1, value=0, label="Image Selection", interactive=True)
                 # correct_track_button = gr.Button(value="Interactive Correction")
 
-                output_mask = gr.File(label="predicted_mask")
-
+                output_mask = gr.File(label="predicted_mask").style(height=50)
 
 
         ###########################################
@@ -288,8 +299,8 @@ def metaseg_app():
             ]
         )
 
-        # Init Seg-Tracker
-        initial_seg_tracker.click(
+        # listen to the tab to init SegTracker
+        tab_everything.select(
             fn=init_SegTracker,
             inputs=[
                 aot_model,
@@ -299,9 +310,57 @@ def metaseg_app():
                 origin_frame
             ],
             outputs=[
-                Seg_Tracker, input_video_first_frame
-            ]
+                Seg_Tracker, input_video_first_frame, click_state
+            ],
+            queue=False,
+            
         )
+        
+        tab_click.select(
+            fn=init_SegTracker,
+            inputs=[
+                aot_model,
+                sam_gap,
+                max_obj_num,
+                points_per_side,
+                origin_frame
+            ],
+            outputs=[
+                Seg_Tracker, input_video_first_frame, click_state
+            ],
+            queue=False,
+        )
+
+        tab_bbox.select(
+            fn=init_SegTracker,
+            inputs=[
+                aot_model,
+                sam_gap,
+                max_obj_num,
+                points_per_side,
+                origin_frame
+            ],
+            outputs=[
+                Seg_Tracker, input_video_first_frame, click_state
+            ],
+            queue=False,
+        )
+
+
+        # Init Seg-Tracker
+        # initial_seg_tracker.click(
+        #     fn=init_SegTracker,
+        #     inputs=[
+        #         aot_model,
+        #         sam_gap,
+        #         max_obj_num,
+        #         points_per_side,
+        #         origin_frame
+        #     ],
+        #     outputs=[
+        #         Seg_Tracker, input_video_first_frame, click_state
+        #     ]
+        # )
 
         # Use SAM to segment everything for the first frame of video
         seg_every_first_frame.click(
@@ -344,14 +403,22 @@ def metaseg_app():
                 input_video,
             ],
             outputs=[
-                output_video,
+                output_video, output_mask
             ]
         )
 
         reset_but.click(
-            lambda: ([[],[]]),
-            [],
-            [click_state],
+            fn=init_SegTracker,
+            inputs=[
+                aot_model,
+                sam_gap,
+                max_obj_num,
+                points_per_side,
+                origin_frame
+            ],
+            outputs=[
+                Seg_Tracker, input_video_first_frame, click_state
+            ],
             queue=False,
             show_progress=False
         ) 
@@ -360,6 +427,8 @@ def metaseg_app():
             examples=[
                 os.path.join(os.path.dirname(__file__), "assets", "840_iSXIa0hE8Ek.mp4"),
                 os.path.join(os.path.dirname(__file__), "assets", "blackswan.mp4"),
+                os.path.join(os.path.dirname(__file__), "assets", "cxk.mp4"),
+
                 # os.path.join(os.path.dirname(__file__), "assets", "bear.mp4"),
                 # os.path.join(os.path.dirname(__file__), "assets", "camel.mp4"),
                 # os.path.join(os.path.dirname(__file__), "assets", "skate-park.mp4"),

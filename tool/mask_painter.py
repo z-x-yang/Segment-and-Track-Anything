@@ -200,11 +200,11 @@ def mask_painter(input_image, input_mask, background_alpha=0.5, background_blur_
 	assert mode in ['00', '01', '10', '11'], 'mode should be 00, 01, 10, or 11'
 
 	# downsample input image and mask
-	width, height = input_image.shape[0], input_image.shape[1]
-	res = 1024
-	ratio = min(1.0 * res / max(width, height), 1.0)  
-	input_image = cv2.resize(input_image, (int(height*ratio), int(width*ratio)))
-	input_mask = cv2.resize(input_mask, (int(height*ratio), int(width*ratio)))
+	# width, height = input_image.shape[0], input_image.shape[1]
+	# res = 1024
+	# ratio = min(1.0 * res / max(width, height), 1.0)  
+	# input_image = cv2.resize(input_image, (int(height*ratio), int(width*ratio)))
+	# input_mask = cv2.resize(input_mask, (int(height*ratio), int(width*ratio)))
 	
 	# 0: background, 1: foreground
 	msk = np.clip(input_mask, 0, 1)

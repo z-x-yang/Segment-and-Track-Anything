@@ -39,8 +39,8 @@ class Segmentor:
         # self.torch_dtype = torch.float16 if 'cuda' in sam_args["gpu_id"] else torch.float32
         self.model = sam_model_registry[sam_args["model_type"]](checkpoint=sam_args["sam_checkpoint"])
         self.model.to(device=self.device)
-        self.interactive_predictor = SamPredictor(self.model)
         self.everything_generator = SamAutomaticMaskGenerator(model=self.model,**sam_args['generator_args'])
+        self.interactive_predictor = self.everything_generator.predictor
         self.embedded = False
 
     @torch.no_grad()
@@ -101,36 +101,37 @@ class Segmentor:
                 logit:
                 painted_iamge: paint mask and point
         '''
-        self.set_image(origin_frame)
+        if not self.embedded:
+            self.set_image(origin_frame)
 
         neg_flag = labels[-1]   # 1 indicates a foreground point and 0 indicates a background point.
-        if neg_flag == 1:
-            #find positive
-            prompts = {
-                'point_coords': points,
-                'point_labels': labels,
-            }
-            masks, scores, logits = self.interactive_predict(prompts, 'point', multimask)
-            mask, logit = masks[np.argmax(scores)], logits[np.argmax(scores), :, :]
-            prompts = {
-                'point_coords': points,
-                'point_labels': labels,
-                'mask_input': logit[None, :, :]
-            }
-            masks, scores, logits = self.interactive_predict(prompts, 'both', multimask)
-            mask, logit = masks[np.argmax(scores)], logits[np.argmax(scores), :, :]
+        # if neg_flag == 1:
+        #find positive
+        prompts = {
+            'point_coords': points,
+            'point_labels': labels,
+        }
+        masks, scores, logits = self.interactive_predict(prompts, 'point', multimask)
+        mask, logit = masks[np.argmax(scores)], logits[np.argmax(scores), :, :]
+        prompts = {
+            'point_coords': points,
+            'point_labels': labels,
+            'mask_input': logit[None, :, :]
+        }
+        masks, scores, logits = self.interactive_predict(prompts, 'both', multimask)
+        mask, logit = masks[np.argmax(scores)], logits[np.argmax(scores), :, :]
             
-        else:
-            #find neg
-            prompts = {
-                'point_coords': points,
-                'point_labels': labels,
-            }
-            masks, scores, logits = self.interactive_predict(prompts, 'point', multimask)
-            mask, logit = masks[np.argmax(scores)], logits[np.argmax(scores), :, :]
+        # else:
+        #     #find neg
+        #     prompts = {
+        #         'point_coords': points,
+        #         'point_labels': labels,
+        #     }
+        #     masks, scores, logits = self.interactive_predict(prompts, 'point', multimask)
+        #     mask, logit = masks[np.argmax(scores)], logits[np.argmax(scores), :, :]
 
         assert len(points)==len(labels)
-        outline = mask_painter(origin_frame, mask.astype('uint8'), mask_color, mask_alpha, contour_color, contour_width)
+        outline = mask_painter(origin_frame.copy(), mask.astype('uint8'), mask_color, mask_alpha, contour_color, contour_width)
         # painted_image = Image.fromarray(painted_image)
         return mask.astype(np.uint8), logit, outline
 

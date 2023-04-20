@@ -32,7 +32,7 @@ class SegTracker():
          Initialize SAM and AOT.
         """
         self.sam = Segmentor(sam_args)
-        # self.tracker = get_aot(aot_args)
+        self.tracker = get_aot(aot_args)
         self.sam_gap = segtracker_args['sam_gap']
         self.match_iou_thr = segtracker_args['match_iou_thr']
         self.min_area = segtracker_args['min_area']
@@ -40,40 +40,51 @@ class SegTracker():
         self.min_new_obj_iou = segtracker_args['min_new_obj_iou']
         self.reference_objs_list = []
         self.object_idx = 1
-        self.merged_mask = None
+        self.origin_merged_mask = None
+        self.refined_merged_mask = None
+
+        # debug
+        self.everything_points = []
+        self.everything_labels = []
 
     def seg(self,frame):
         '''
         Arguments:
             frame: numpy array (h,w,3)
         Return:
-            merged_mask: numpy array (h,w)
+            origin_merged_mask: numpy array (h,w)
         '''
+        # frame = frame[:, :, ::-1]
         anns = self.sam.everything_generator.generate(frame)
+
         # anns is a list recording all predictions in an image
         if len(anns) == 0:
             return
         # merge all predictions into one mask (h,w)
         # note that the merged mask may lost some objects due to the overlapping
-        self.merged_mask = np.zeros(anns[0]['segmentation'].shape,dtype=np.uint8)
+        self.origin_merged_mask = np.zeros(anns[0]['segmentation'].shape,dtype=np.uint8)
         idx = 1
         for ann in anns:
             if ann['area'] > self.min_area:
                 m = ann['segmentation']
-                self.merged_mask[m==1] = idx
+                self.origin_merged_mask[m==1] = idx
                 idx += 1
-        obj_ids = np.unique(self.merged_mask)
+                self.everything_points.append(ann["point_coords"][0])
+                self.everything_labels.append(1)
+
+        obj_ids = np.unique(self.origin_merged_mask)
         obj_ids = obj_ids[obj_ids!=0]
 
         self.object_idx = 1
         for id in obj_ids:
-            if np.sum(self.merged_mask==id) < self.min_area or self.object_idx > self.max_obj_num:
-                self.merged_mask[self.merged_mask==id] = 0
+            if np.sum(self.origin_merged_mask==id) < self.min_area or self.object_idx > self.max_obj_num:
+                self.origin_merged_mask[self.origin_merged_mask==id] = 0
             else:
-                self.merged_mask[self.merged_mask==id] = self.object_idx
+                self.origin_merged_mask[self.origin_merged_mask==id] = self.object_idx
                 self.object_idx += 1
 
-        return self.merged_mask
+        self.refined_merged_mask = self.origin_merged_mask
+        return self.origin_merged_mask
     
     def add_reference(self,frame,mask,frame_step=0):
         '''
@@ -91,7 +102,7 @@ class SegTracker():
         Arguments:
             frame: numpy array (h,w,3)
         Return:
-            merged_mask: numpy array (h,w)
+            origin_merged_mask: numpy array (h,w)
         '''
         pred_mask = self.tracker.track(frame)
         if update_memory:
@@ -144,42 +155,43 @@ class SegTracker():
         # get interactive_mask
         interactive_mask, logit, outline = self.sam.segment_with_click(origin_frame, points, labels, multimask)
 
-        point_flag = labels[-1]
-        if point_flag == 0:
-            # neg
-            self.merged_mask[interactive_mask > 0] = 0
-        else:
-            # pos
-            self.merged_mask = self.add_mask(interactive_mask)
+        # cv2.imwrite('./debug/interactive_mask.png', interactive_mask * 255)
+
+        self.refined_merged_mask = self.add_mask(interactive_mask)
 
         # draw mask
-        masked_frame = draw_mask(origin_frame.copy(), self.merged_mask)
+        masked_frame = draw_mask(origin_frame.copy(), self.refined_merged_mask)
+
         # draw points
+        # self.everything_labels = np.array(self.everything_labels).astype(np.int64)
+        # self.everything_points = np.array(self.everything_points).astype(np.int64)
+        # masked_frame = point_painter(masked_frame, np.squeeze(self.everything_points[np.argwhere(self.everything_labels==1)], axis = 1), point_color_ps, point_alpha, point_radius, contour_color, contour_width)
+
         masked_frame = point_painter(masked_frame, np.squeeze(points[np.argwhere(labels==0)], axis = 1), point_color_ne, point_alpha, point_radius, contour_color, contour_width)
         masked_frame = point_painter(masked_frame, np.squeeze(points[np.argwhere(labels==1)], axis = 1), point_color_ps, point_alpha, point_radius, contour_color, contour_width)
         # draw outline
-        if point_flag == 1:
-            masked_frame = np.where(outline > 0, outline, masked_frame)
+        masked_frame = np.where(outline > 0, outline, masked_frame)
 
-        return self.merged_mask, masked_frame
+        return self.refined_merged_mask, masked_frame
 
     
     def add_mask(self, interactive_mask, cover_origin_objects=True, single_object=True):
         # if cover_origin_objects == Ture: interactive_mask will cover original object
         # if single_object == True: added mask is belong to single object
         if not cover_origin_objects:
-            empty_mask = np.where(self.merged_mask == 0, 1, 0)
+            empty_mask = np.where(self.origin_merged_mask == 0, 1, 0)
             interactive_mask = interactive_mask * empty_mask
         
-        if self.merged_mask is None:
-            self.merged_mask = np.zeros(interactive_mask.shape,dtype=np.uint8)
+        if self.origin_merged_mask is None:
+            self.origin_merged_mask = np.zeros(interactive_mask.shape,dtype=np.uint8)
 
-        self.merged_mask[interactive_mask > 0] = self.object_idx
+        refined_merged_mask = self.origin_merged_mask.copy()
+        refined_merged_mask[interactive_mask > 0] = self.object_idx
 
         if not single_object:
             self.object_idx += 1
 
-        return self.merged_mask
+        return refined_merged_mask
     
 
 if __name__ == '__main__':
@@ -191,13 +203,16 @@ if __name__ == '__main__':
     origin_frame = cv2.imread('/data2/cym/Seg_Tra_any/Segment-and-Track-Anything/debug/point.png')
     origin_frame = cv2.cvtColor(origin_frame, cv2.COLOR_BGR2RGB)
 
+    merged_mask = Seg_Tracker.seg(origin_frame)
+    cv2.imwrite('./debug/merged_mask.png', -1)
+
     # one positive point
     # point = np.array([[300, 420]])
-    # label = np.array([1])
+    # label = np.array([0])
 
     # two positive point
-    point = np.array([[250, 370], [300, 420]])
-    label = np.array([1, 1])
+    point = np.array([[250, 370], [300, 420], [480, 150]])
+    label = np.array([1, 0, 1])
 
     prompt = {
         "prompt_type":["click"],
@@ -212,5 +227,6 @@ if __name__ == '__main__':
         labels=np.array(prompt["input_label"]),
         multimask=prompt["multimask_output"],
     )
-
-    cv2.imwrite('./debug/masked_frame.png', masked_frame)
+    
+    masked_frame = Image.fromarray(masked_frame)
+    masked_frame.save('./debug/masked_frame.png')
