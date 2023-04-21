@@ -40,8 +40,8 @@ class SegTracker():
         self.min_new_obj_iou = segtracker_args['min_new_obj_iou']
         self.reference_objs_list = []
         self.object_idx = 1
-        self.origin_merged_mask = None
-        self.refined_merged_mask = None
+        self.origin_merged_mask = None  # init with 0 or segment-everthing
+        self.refined_merged_mask = None # interactively refine by user
 
         # debug
         self.everything_points = []
@@ -147,6 +147,25 @@ class SegTracker():
     def restart_tracker(self):
         self.tracker.restart()
 
+    def seg_acc_bbox(self, origin_frame: np.ndarray, bbox: np.ndarray,):
+        ''''
+        parameters:
+            origin_frame: H, W, C
+            bbox: [[x0, y0], [x1, y1]]
+        '''
+
+        # get interactive_mask
+        interactive_mask = self.sam.segment_with_box(origin_frame, bbox)[0]
+        self.refined_merged_mask = self.add_mask(interactive_mask)
+
+        # draw mask
+        masked_frame = draw_mask(origin_frame.copy(), self.refined_merged_mask)
+
+        # draw bbox
+        masked_frame = cv2.rectangle(masked_frame, bbox[0], bbox[1], (0, 0, 255))
+
+        return self.refined_merged_mask, masked_frame
+
     def refine_first_frame_click(self, origin_frame: np.ndarray, points:np.ndarray, labels: np.ndarray, multimask=True):
         '''
         it is used in first frame in video
@@ -154,8 +173,6 @@ class SegTracker():
         '''
         # get interactive_mask
         interactive_mask, logit, outline = self.sam.segment_with_click(origin_frame, points, labels, multimask)
-
-        # cv2.imwrite('./debug/interactive_mask.png', interactive_mask * 255)
 
         self.refined_merged_mask = self.add_mask(interactive_mask)
 
@@ -174,7 +191,6 @@ class SegTracker():
 
         return self.refined_merged_mask, masked_frame
 
-    
     def add_mask(self, interactive_mask, cover_origin_objects=True, single_object=True):
         # if cover_origin_objects == Ture: interactive_mask will cover original object
         # if single_object == True: added mask is belong to single object

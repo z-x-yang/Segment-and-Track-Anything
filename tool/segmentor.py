@@ -22,7 +22,6 @@ contour_color = 2
 contour_width = 5
 
 
-
 class Segmentor:
     def __init__(self, sam_args):
         """
@@ -134,7 +133,17 @@ class Segmentor:
         # painted_image = Image.fromarray(painted_image)
         return mask.astype(np.uint8), logit, outline
 
+    def segment_with_box(self, origin_frame, bbox):
+        self.set_image(origin_frame)
 
+        masks , _, _ = self.interactive_predictor.predict(
+            point_coords=None,
+            point_labels=None,
+            box=np.array([[bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]]]),
+            multimask_output=False
+        )
+        
+        return masks
 
 # if __name__ == "__main__":
 #     points = np.array([[500, 375], [1125, 625]])

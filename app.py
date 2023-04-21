@@ -16,10 +16,11 @@ from skimage.morphology.binary import binary_dilation
 import argparse
 import torch
 import time
-from seg_track_anything import seg_track_anything, aot_model2ckpt, colorize_mask, tracking_objects_in_video, draw_mask
+from seg_track_anything import aot_model2ckpt, tracking_objects_in_video, draw_mask
 import gc
 import numpy as np
 import json
+from tool.transfer_tools import mask2bbox
 
 def pause_video(play_state):
     print("user pause_video")
@@ -174,9 +175,16 @@ def sam_brush(Seg_Tracker, origin_frame, brush_plane, aot_model, sam_gap, max_ob
         Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
     mask = brush_plane["mask"]
-    import pdb; pdb.set_trace()
+    bbox = mask2bbox(mask[:, :, 0])  # bbox: [[x0, y0], [x1, y1]]
+    predicted_mask, masked_frame = Seg_Tracker.seg_acc_bbox(origin_frame, bbox)
 
-    return Seg_Tracker, origin_frame, origin_frame
+    with torch.cuda.amp.autocast():
+        # Reset the first frame's mask
+        frame_idx = 0
+        Seg_Tracker.restart_tracker()
+        Seg_Tracker.add_reference(origin_frame, predicted_mask, frame_idx)
+
+    return Seg_Tracker, masked_frame, origin_frame
 
 def segment_everything(Seg_Tracker, aot_model, origin_frame, sam_gap, max_obj_num, points_per_side):
     
@@ -309,16 +317,6 @@ def seg_track_app():
                                 interactive=True,
                             )
 
-                        max_obj_num = gr.Slider(
-                            label='max_obj_num',
-                            minimum = 50,
-                            step=1,
-                            maximum = 300,
-                            value=255,
-                            interactive=True
-                        )
-
-                    with gr.Column(scale=0.5):
                         points_per_side = gr.Slider(
                             label = "points_per_side",
                             minimum= 1,
@@ -328,6 +326,8 @@ def seg_track_app():
                             interactive=True
                         )
 
+
+                    with gr.Column(scale=0.5):
                         sam_gap = gr.Slider(
                             label='sam_gap',
                             minimum = 1,
@@ -337,6 +337,14 @@ def seg_track_app():
                             interactive=True,
                         )
 
+                        max_obj_num = gr.Slider(
+                            label='max_obj_num',
+                            minimum = 50,
+                            step=1,
+                            maximum = 300,
+                            value=255,
+                            interactive=True
+                        )
                 track_for_video = gr.Button(
                     value="Start Tracking",
                     interactive=True
