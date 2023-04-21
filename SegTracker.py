@@ -17,7 +17,6 @@ class SegTracker():
         self.mask_generator = SamAutomaticMaskGenerator(model=sam,**sam_args['generator_args'])
 
         self.tracker = get_aot(aot_args)
-        self.match_iou_thr = segtracker_args['match_iou_thr']
         self.min_area = segtracker_args['min_area']
         self.max_obj_num = segtracker_args['max_obj_num']
         self.min_new_obj_iou = segtracker_args['min_new_obj_iou']
