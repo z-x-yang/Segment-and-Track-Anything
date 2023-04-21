@@ -101,8 +101,7 @@ class Segmentor:
                 logit:
                 painted_iamge: paint mask and point
         '''
-        if not self.embedded:
-            self.set_image(origin_frame)
+        self.set_image(origin_frame)
 
         neg_flag = labels[-1]   # 1 indicates a foreground point and 0 indicates a background point.
         # if neg_flag == 1:

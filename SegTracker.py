@@ -54,7 +54,7 @@ class SegTracker():
         Return:
             origin_merged_mask: numpy array (h,w)
         '''
-        # frame = frame[:, :, ::-1]
+        frame = frame[:, :, ::-1]
         anns = self.sam.everything_generator.generate(frame)
 
         # anns is a list recording all predictions in an image
