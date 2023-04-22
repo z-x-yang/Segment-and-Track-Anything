@@ -1,7 +1,12 @@
 # Segment and Track Anything (SAM-Track)
 **Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
-## Demos
+## :loudspeaker:New Features
+- We have introduced a new WebUI that allows interactive user segmentation through strokes and clicks. Feel free to explore and have fun with the [tutorial](./tutorial/1.0-Version.md)!
+    - A video tutorial will be released in the next few days.
+    - 1.0-Version is a developer version, please feel free to contact us if you encounter any bugs :bug:.
+
+## :fire:Demos
 <div align=center>
 
 [![Segment-and-Track-Anything Versatile Demo](https://res.cloudinary.com/marcomontalbano/image/upload/v1681713095/video_to_markdown/images/youtube--UPhtpf1k6HA-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://youtu.be/UPhtpf1k6HA "Segment-and-Track-Anything Versatile Demo")
@@ -9,11 +14,13 @@
 
 This video showcases the segmentation and tracking capabilities of SAM-Track in various scenarios, such as street views, AR, cells, animations, aerial shots, and more.
 
-
-## TODO
+## :calendar:TODO
  - [ ] Colab notebook
- - [ ] 1.0-Version Interactive WebUI
+ - [x] 1.0-Version Interactive WebUI
     - We will develop a function that allows interactive modification of the mask for the first frame of the video based on the user's requirements. We demonstrate the interactive segmentation capabilities of Segment-and-Track-Anything in [Demo1](https://www.youtube.com/watch?v=ctnD03w-5VA) and [Demo2](https://www.youtube.com/watch?v=DfCUGUxALYo).
+ - [ ] 1.5-Version Interactive WebUI
+    - We will develop a function that allow interactive modification of multi-object masks for the first frame of a video. This function will be based on the 1.0-Version.
+    - Furthermore, we plan to include text prompts as an additional form of interaction.
 
 **Demo1** showcases SAM-Track's ability to interactively segment and track individual objects.  The user specified that SAM-Track tracked a man playing street basketball.
 <div align=center>
@@ -27,8 +34,8 @@ This video showcases the segmentation and tracking capabilities of SAM-Track in 
 [![Interactive Segment-and-Track-Anything Demo2](https://res.cloudinary.com/marcomontalbano/image/upload/v1681712071/video_to_markdown/images/youtube--eZrdna8JkoQ-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=eZrdna8JkoQ "Interactive Segment-and-Track-Anything Demo2")
 </div>
 
-## Getting Started
-### Requirements
+## :computer:Getting Started
+### :bookmark_tabs:Requirements
 
 The [Segment-Anything](https://github.com/facebookresearch/segment-anything) repository has been cloned and renamed as sam, and the [aot-benchmark](https://github.com/yoxu515/aot-benchmark) repository has been cloned and renamed as aot.
 
@@ -58,14 +65,14 @@ You can download the default weights using the command line as shown below.
 bash script/download_ckpt.sh
 ```
 
-### Run Demo
+### :heart:Run Demo
 - The video to be processed can be put in ./assets. 
 - Then run demo.ipynb step by step to generate results. 
 - The results will be saved as masks for each frame and a gif file for visualization.
 
 The arguments for SAM-Track, DeAOT and SAM can be manually modified in model_args.py for purpose of using other models or controling the behavior of each model.
 
-### WebUI App
+### :muscle:WebUI App
 Our user-friendly visual interface allows you to easily obtain the results of your experiments. Simply initiate it using the command line.
 
 ```
@@ -87,12 +94,12 @@ Usage:
  - Adjust SAM-Track parameters as needed.
  - Click `Seg and Track` to get the experiment results.
 
-### Credits
+### :full_moon_with_face:Credits
 Licenses for borrowed code can be found in `licenses.md` file.
 
 * DeAOT/AOT - [https://github.com/yoxu515/aot-benchmark](https://github.com/yoxu515/aot-benchmark)
 * SAM - [https://github.com/facebookresearch/segment-anything](https://github.com/facebookresearch/segment-anything)
 * Gradio (for building WebUI) - [https://github.com/gradio-app/gradio](https://github.com/gradio-app/gradio)
 
-### About us
+### :school:About us
 Thank you for your interest in this project. The project is supervised by the ReLER Lab at Zhejiang University’s College of Computer Science and Technology. ReLER was established by Yang Yi, a Qiu Shi Distinguished Professor at Zhejiang University. Our dedicated team of contributors includes [Yuanyou Xu](https://github.com/yoxu515), [Yangming Cheng](https://github.com/yamy-cheng), [Liulei Li](https://github.com/lingorX), [Zongxin Yang](https://z-x-yang.github.io/), [Wenguan Wang](https://sites.google.com/view/wenguanwang) and [Yi Yang](https://scholar.google.com/citations?user=RMSuNFwAAAAJ&hl=en).

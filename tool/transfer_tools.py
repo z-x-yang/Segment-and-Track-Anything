@@ -16,8 +16,6 @@ def mask2bbox(mask):
 
     return np.array([[x0, y0], [x1, y1]]).astype(np.int64)
 
-
-
 if __name__ == '__main__':
     mask = cv2.imread('./debug/painter_input_mask.jpg', -1)[2:, 2:]
     bbox = mask2bbox(mask)

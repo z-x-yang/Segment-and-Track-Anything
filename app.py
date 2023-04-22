@@ -1,4 +1,4 @@
-from PIL.ImageOps import scale
+from PIL.ImageOps import colorize, scale
 from blib2to3.pgen2.grammar import Label
 import gradio as gr
 import importlib
@@ -80,7 +80,7 @@ def init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_fra
     Seg_Tracker.restart_tracker()
     return Seg_Tracker, origin_frame, [[], []]
 
-def init_SegTracker_Brush(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame):
+def init_SegTracker_Stroke(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame):
     
     if origin_frame is None:
         return None, origin_frame, [[], []], origin_frame
@@ -151,12 +151,6 @@ def sam_refine(Seg_Tracker, origin_frame, point_prompt, click_state, aot_model, 
     else:
         # TODO：add everything positive points
         coordinate = "[[{},{},0]]".format(evt.index[0], evt.index[1])
-    
-    # default value
-    # points = np.array([[evt.index[0],evt.index[1]]])
-    # labels= np.array([1])
-    # if len(logit)==0:
-    #     logit = None
 
     if Seg_Tracker is None:
         Seg_Tracker, _, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
@@ -169,12 +163,12 @@ def sam_refine(Seg_Tracker, origin_frame, point_prompt, click_state, aot_model, 
 
     return Seg_Tracker, masked_frame, click_state
 
-def sam_brush(Seg_Tracker, origin_frame, brush_plane, aot_model, sam_gap, max_obj_num, points_per_side):
+def sam_stroke(Seg_Tracker, origin_frame, stroke_plane, aot_model, sam_gap, max_obj_num, points_per_side):
 
     if Seg_Tracker is None:
         Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
-    mask = brush_plane["mask"]
+    mask = stroke_plane["mask"]
     bbox = mask2bbox(mask[:, :, 0])  # bbox: [[x0, y0], [x1, y1]]
     predicted_mask, masked_frame = Seg_Tracker.seg_acc_bbox(origin_frame, bbox)
 
@@ -219,9 +213,9 @@ def seg_track_app():
         gr.Markdown(
             """
             <h3 center>
-            The algorithm for segment and track anything (SegTracker) in a video. 
-            The current implemented pipeline consists of a segmentation method <a href='https://github.com/facebookresearch/segment-anything' target='_blank'>SAM (Segment Anything Model)</a>
-            and a VOS method <a href='https://github.com/yoxu515/aot-benchmark' target='_blank'>AOT (Associating Object with Transformers)</a> . The pipeline automaticly and dynamically detects and segments new objects by SAM, and tracks all spotted objects by AOT.        
+            Segment and Track Anything is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. 
+            The primary algorithms utilized include the <a href='https://github.com/facebookresearch/segment-anything' target='_blank'>SAM (Segment Anything Model)</a> for automatic/interactive key-frame segmentation and the <a href='https://github.com/yoxu515/aot-benchmark' target='_blank'>DeAOT (Decoupling features in Associating Objects with Transformers) (NeurIPS2022)</a>
+            for efficient multi-object tracking and propagation. 
             </center>
             """
         )  
@@ -229,16 +223,9 @@ def seg_track_app():
         """
         state for 
         """
-        state = gr.State([])
         play_state = gr.State([])
-        video_state = gr.State([[],[],[]])
         click_state = gr.State([[],[]])
-        logits = gr.State([])
-        masks = gr.State([])
         origin_frame = gr.State(None)
-        select_correction_frame = gr.State(None)
-        corrected_state = gr.State([[],[],[]])
-        tab_state = gr.State("everything")
         Seg_Tracker = gr.State(None)
 
         aot_model = gr.State(None)
@@ -249,15 +236,15 @@ def seg_track_app():
         with gr.Row():
             # video input
             with gr.Column(scale=0.5):
-                input_video = gr.Video(label='input_video').style(height=380)
+                input_video = gr.Video(label='Input video').style(height=550)
                 # listen to the user action for play and pause input video
                 input_video.play(fn=play_video, inputs=play_state, outputs=play_state, scroll_to_output=True, show_progress=True)
                 input_video.pause(fn=pause_video, inputs=play_state, outputs=play_state)
 
-                input_video_first_frame = gr.Image(label='input_video_first_frame', interactive=True).style(height=380)
+                input_video_first_frame = gr.Image(label='Segment result of first frame', interactive=True).style(height=550)
 
 
-                tab_everything = gr.Tab(label="Segment everything")
+                tab_everything = gr.Tab(label="Everything")
                 with tab_everything:
                     with gr.Row():
                         seg_every_first_frame = gr.Button(value="Segment everything for first frame", interactive=True)
@@ -267,15 +254,16 @@ def seg_track_app():
                             label="Point Prompt",
                             interactive=True)
 
-                        every_undo_but = gr.Button(
-                                    value="Undo",
-                                    interactive=True
-                                    )
+                        with gr.Column(scale=0.25):
+                            every_undo_but = gr.Button(
+                                        value="Undo",
+                                        interactive=True
+                                        )
 
-                        every_reset_but = gr.Button(
-                                    value="Reset",
-                                    interactive=True
-                                            )
+                            every_reset_but = gr.Button(
+                                        value="Reset",
+                                        interactive=True
+                                                )
 
                 tab_click = gr.Tab(label="Click")
                 with tab_click:
@@ -285,80 +273,85 @@ def seg_track_app():
                                     value="Positive",
                                     label="Point Prompt",
                                     interactive=True)
+
                         # args for modify and tracking 
-                        click_undo_but = gr.Button(
-                                    value="Undo",
-                                    interactive=True
-                                    )
+                        with gr.Column(scale=0.25):
+                            click_undo_but = gr.Button(
+                                        value="Undo",
+                                        interactive=True
+                                        )
+                            click_reset_but = gr.Button(
+                                        value="Reset",
+                                        interactive=True
+                                                )
 
-                        click_reset_but = gr.Button(
-                                    value="Reset",
-                                    interactive=True
-                                            )
-
-                tab_brush = gr.Tab(label="Brush")
-                with tab_brush:
-                    bursh_plane = gr.Image(label='bursh_plane', tool="sketch", interactive=True).style(height=380)
-                    seg_acc_brush = gr.Button(value="Segment", interactive=True)
+                tab_stroke = gr.Tab(label="Stroke")
+                with tab_stroke:
+                    stroke_plane = gr.Image(label='stroke_plane', tool="sketch", brush_radius=10, interactive=True).style(height=550)
+                    with gr.Row():
+                        seg_acc_stroke = gr.Button(value="Segment", interactive=True)
+                        stroke_reset_but = gr.Button(
+                                        value="Reset",
+                                        interactive=True
+                                                )
 
                 with gr.Row():
-            
-                    # args for tracking in video do segment-everthing
-                    with gr.Column(scale=0.5):
+                    with gr.Tab(label="SegTracker Args", scale=0.5):
+                        with gr.Row():
+                            # args for tracking in video do segment-everthing
+                            with gr.Column(scale=0.5):
+                                aot_model = gr.Dropdown(
+                                        label="aot_model",
+                                        choices = [
+                                            "deaotb",
+                                            "deaotl",
+                                            "r50_deaotl"
+                                        ],
+                                        value = "r50_deaotl",
+                                        interactive=True,
+                                    )
 
-                        aot_model = gr.Dropdown(
-                                label="aot_model",
-                                choices = [
-                                    "deaotb",
-                                    "deaotl",
-                                    "r50_deaotl"
-                                ],
-                                value = "r50_deaotl",
-                                interactive=True,
-                            )
+                                points_per_side = gr.Slider(
+                                    label = "points_per_side",
+                                    minimum= 1,
+                                    step = 1,
+                                    maximum=100,
+                                    value=16,
+                                    interactive=True
+                                )
 
-                        points_per_side = gr.Slider(
-                            label = "points_per_side",
-                            minimum= 1,
-                            step = 1,
-                            maximum=100,
-                            value=16,
-                            interactive=True
+                            with gr.Column(scale=0.5):
+                                sam_gap = gr.Slider(
+                                    label='sam_gap',
+                                    minimum = 1,
+                                    step=1,
+                                    maximum = 9999,
+                                    value=100,
+                                    interactive=True,
+                                )
+
+                                max_obj_num = gr.Slider(
+                                    label='max_obj_num',
+                                    minimum = 50,
+                                    step=1,
+                                    maximum = 300,
+                                    value=255,
+                                    interactive=True
+                                )
+                    track_for_video = gr.Button(
+                        value="Start Tracking",
+                        interactive=True,
                         )
-
-
-                    with gr.Column(scale=0.5):
-                        sam_gap = gr.Slider(
-                            label='sam_gap',
-                            minimum = 1,
-                            step=1,
-                            maximum = 9999,
-                            value=100,
-                            interactive=True,
-                        )
-
-                        max_obj_num = gr.Slider(
-                            label='max_obj_num',
-                            minimum = 50,
-                            step=1,
-                            maximum = 300,
-                            value=255,
-                            interactive=True
-                        )
-                track_for_video = gr.Button(
-                    value="Start Tracking",
-                    interactive=True
-                    )
 
             with gr.Column(scale=0.5):
-                output_video = gr.Video(label='output').style(height=380)
+                output_video = gr.Video(label='Output video').style(height=550)
 
                 # TODO: V2-Interactively correct intermediate frames
                 # image_output = gr.Image(type="pil", interactive=True, elem_id="image_output").style(height=360)
                 # image_selection_slider = gr.Slider(minimum=0, maximum=100, step=0.1, value=0, label="Image Selection", interactive=True)
                 # correct_track_button = gr.Button(value="Interactive Correction")
 
-                output_mask = gr.File(label="predicted_mask")
+                output_mask = gr.File(label="Predicted mask")
 
     ##########################################################
     ######################  back-end #########################
@@ -371,7 +364,7 @@ def seg_track_app():
                 input_video
             ],
             outputs=[
-                input_video_first_frame, origin_frame, bursh_plane
+                input_video_first_frame, origin_frame, stroke_plane
             ]
         )
 
@@ -407,8 +400,8 @@ def seg_track_app():
             queue=False,
         )
 
-        tab_brush.select(
-            fn=init_SegTracker_Brush,
+        tab_stroke.select(
+            fn=init_SegTracker_Stroke,
             inputs=[
                 aot_model,
                 sam_gap,
@@ -417,7 +410,7 @@ def seg_track_app():
                 origin_frame,
             ],
             outputs=[
-                Seg_Tracker, input_video_first_frame, click_state, bursh_plane
+                Seg_Tracker, input_video_first_frame, click_state, stroke_plane
             ],
             queue=False,
         )
@@ -470,18 +463,18 @@ def seg_track_app():
             ]
         )
 
-        # Interactively segment acc brush
-        seg_acc_brush.click(
-            fn=sam_brush,
+        # Interactively segment acc stroke
+        seg_acc_stroke.click(
+            fn=sam_stroke,
             inputs=[
-                Seg_Tracker, origin_frame, bursh_plane,
+                Seg_Tracker, origin_frame, stroke_plane,
                 aot_model,
                 sam_gap,
                 max_obj_num,
                 points_per_side,
             ],
             outputs=[
-                Seg_Tracker, input_video_first_frame, bursh_plane
+                Seg_Tracker, input_video_first_frame, stroke_plane
             ]
         )
 
@@ -499,7 +492,27 @@ def seg_track_app():
             ]
         )
 
-        # Reset SegTracker and click_state
+        ####################
+        # Reset and Undo
+        ####################
+
+        # Rest 
+        every_reset_but.click(
+            fn=init_SegTracker,
+            inputs=[
+                aot_model,
+                sam_gap,
+                max_obj_num,
+                points_per_side,
+                origin_frame
+            ],
+            outputs=[
+                Seg_Tracker, input_video_first_frame, click_state
+            ],
+            queue=False,
+            show_progress=False
+        ) 
+
         click_reset_but.click(
             fn=init_SegTracker,
             inputs=[
@@ -516,7 +529,7 @@ def seg_track_app():
             show_progress=False
         ) 
 
-        every_reset_but.click(
+        stroke_reset_but.click(
             fn=init_SegTracker,
             inputs=[
                 aot_model,
@@ -530,7 +543,7 @@ def seg_track_app():
             ],
             queue=False,
             show_progress=False
-        ) 
+        )
 
         # Undo click
         click_undo_but.click(
@@ -563,10 +576,9 @@ def seg_track_app():
 
         gr.Examples(
             examples=[
-                os.path.join(os.path.dirname(__file__), "assets", "840_iSXIa0hE8Ek.mp4"),
+                # os.path.join(os.path.dirname(__file__), "assets", "840_iSXIa0hE8Ek.mp4"),
                 os.path.join(os.path.dirname(__file__), "assets", "blackswan.mp4"),
-                os.path.join(os.path.dirname(__file__), "assets", "Resized_cxk.mp4"),
-
+                # os.path.join(os.path.dirname(__file__), "assets", "Resized_cxk.mp4"),
                 # os.path.join(os.path.dirname(__file__), "assets", "bear.mp4"),
                 # os.path.join(os.path.dirname(__file__), "assets", "camel.mp4"),
                 # os.path.join(os.path.dirname(__file__), "assets", "skate-park.mp4"),
