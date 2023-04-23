@@ -1,3 +1,4 @@
+# Explanation of generator_args is in sam/segment_anything/automatic_mask_generator.py: SamAutomaticMaskGenerator
 sam_args = {
     'sam_checkpoint': "ckpt/sam_vit_b_01ec64.pth",
     'model_type': "vit_b",
@@ -19,9 +20,8 @@ aot_args = {
     'gpu_id': 0,
 }
 segtracker_args = {
-    'sam_gap': 4,
-    'match_iou_thr': 0.5,
-    'min_area': 200,
-    'max_obj_num': 255,
-    'min_new_obj_iou': 0.8,
+    'sam_gap': 10, # the interval to run sam to segment new objects
+    'min_area': 200, # minimal mask area to add a new mask as a new object
+    'max_obj_num': 255, # maximal object number to track in a video
+    'min_new_obj_iou': 0.8, # the background area ratio of a new object should > 80% 
 }

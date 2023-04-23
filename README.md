@@ -1,4 +1,9 @@
 # Segment and Track Anything (SAM-Track)
+
+<p align="center">
+<img src="./assets/demo_3x2.gif" width="880">
+</p>
+
 **Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
 ## :loudspeaker:New Features
@@ -17,7 +22,8 @@ This video showcases the segmentation and tracking capabilities of SAM-Track in 
 ## :calendar:TODO
  - [ ] Colab notebook
  - [x] 1.0-Version Interactive WebUI
-    - We will develop a function that allows interactive modification of the mask for the first frame of the video based on the user's requirements. We demonstrate the interactive segmentation capabilities of Segment-and-Track-Anything in [Demo1](https://www.youtube.com/watch?v=ctnD03w-5VA) and [Demo2](https://www.youtube.com/watch?v=DfCUGUxALYo).
+    - We will create a feature that enables users to interactively modify the mask for the initial video frame according to their needs. The interactive segmentation capabilities of Segment-and-Track-Anything is demonstrated in [Demo1](https://www.youtube.com/watch?v=ctnD03w-5VA) and [Demo2](https://www.youtube.com/watch?v=DfCUGUxALYo).
+    - Bilibili Video Link: [Demo1](https://www.bilibili.com/video/BV1JL411v7uE/), [Demo2](https://www.bilibili.com/video/BV1Qs4y1w763/).
  - [ ] 1.5-Version Interactive WebUI
     - We will develop a function that allows interactive modification of multi-object masks for the first frame of a video. This function will be based on Version 1.0.
     - Furthermore, we plan to include text prompts as an additional form of interaction.
@@ -41,19 +47,12 @@ The [Segment-Anything](https://github.com/facebookresearch/segment-anything) rep
 
 Please check the dependency requirements in [SAM](https://github.com/facebookresearch/segment-anything) and [DeAOT](https://github.com/yoxu515/aot-benchmark).
 
-The implementation is tested under python 3.9, as well as pytorch 1.10 and torchvision 0.11. We recommend equivalent or higher pytorch version.
+The implementation is tested under python 3.9, as well as pytorch 1.10 and torchvision 0.11. **We recommend equivalent or higher pytorch version**.
 
-To install SAM:
+Use the `install.sh` to install the necessary libs for SAM-Track
 ```
-cd sam; pip install -e .
+bash script/install.sh
 ```
-
-To install other libs:
-
-```
-pip install numpy opencv-python pycocotools matplotlib Pillow scikit-image
-```
-It is recommended to install [Pytorch Correlation](https://github.com/ClementPinard/Pytorch-Correlation-extension) for accelerating DeAOT inference.
 
 ### Model Preparation
 Download SAM model to ckpt, the default model is SAM-VIT-B ([sam_vit_b_01ec64.pth](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth)).
@@ -67,7 +66,7 @@ bash script/download_ckpt.sh
 
 ### :heart:Run Demo
 - The video to be processed can be put in ./assets. 
-- Then run demo.ipynb step by step to generate results. 
+- Then run **demo.ipynb** step by step to generate results. 
 - The results will be saved as masks for each frame and a gif file for visualization.
 
 The arguments for SAM-Track, DeAOT and SAM can be manually modified in model_args.py for purpose of using other models or controling the behavior of each model.

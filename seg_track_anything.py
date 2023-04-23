@@ -9,7 +9,6 @@ import gc
 import imageio
 from scipy.ndimage import binary_dilation
 
-
 def save_prediction(pred_mask,output_dir,file_name):
     save_mask = Image.fromarray(pred_mask.astype(np.uint8))
     save_mask = save_mask.convert(mode='P')
@@ -62,11 +61,11 @@ aot_model2ckpt = {
 
 
 def seg_track_anything(input_video_file, aot_model, sam_gap, max_obj_num, points_per_side):
+
     video_name = os.path.basename(input_video_file).split('.')[0]
     io_args = {
         'input_video': f'{input_video_file}',
         'output_mask_dir': f'./assets/{video_name}_masks',
-        'save_video': True,
         'output_video': f'./assets/{video_name}_seg.mp4', # keep same format as input video
         'output_gif': f'./assets/{video_name}_seg.gif',
     }
@@ -74,14 +73,16 @@ def seg_track_anything(input_video_file, aot_model, sam_gap, max_obj_num, points
     # reset aot args
     aot_args["model"] = aot_model
     aot_args["model_path"] = aot_model2ckpt[aot_model]
+
     # reset sam args
-    sam_args["sam_gap"] = sam_gap
-    sam_args["max_obj_num"] = max_obj_num
-    sam_args["points_per_side"] = points_per_side
+    segtracker_args["sam_gap"] = sam_gap
+    segtracker_args["max_obj_num"] = max_obj_num
+    sam_args["generator_args"]["points_per_side"] = points_per_side
 
     output_dir = io_args['output_mask_dir']
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+
     # source video to segment
     cap = cv2.VideoCapture(io_args['input_video'])
     fps = cap.get(cv2.CAP_PROP_FPS)
@@ -89,14 +90,9 @@ def seg_track_anything(input_video_file, aot_model, sam_gap, max_obj_num, points
     output_dir = io_args['output_mask_dir']
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    if io_args['save_video']:
-        width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-        fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
-        out = cv2.VideoWriter(io_args['output_video'], fourcc, fps, (width, height))
     pred_list = []
 
+    # start to track
     torch.cuda.empty_cache()
     gc.collect()
     sam_gap = segtracker_args['sam_gap']
@@ -104,19 +100,17 @@ def seg_track_anything(input_video_file, aot_model, sam_gap, max_obj_num, points
     segtracker = SegTracker(segtracker_args,sam_args,aot_args)
     segtracker.restart_tracker()
 
-
     with torch.cuda.amp.autocast():
         while cap.isOpened():
             ret, frame = cap.read()
             if not ret:
                 break
-
             frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
             if frame_idx == 0:
                 pred_mask = segtracker.seg(frame)
                 torch.cuda.empty_cache()
                 gc.collect()
-                segtracker.add_reference(frame, pred_mask, frame_idx)
+                segtracker.add_reference(frame, pred_mask)
             elif (frame_idx % sam_gap) == 0:
                 seg_mask = segtracker.seg(frame)
                 torch.cuda.empty_cache()
@@ -127,30 +121,55 @@ def seg_track_anything(input_video_file, aot_model, sam_gap, max_obj_num, points
                 save_prediction(new_obj_mask,output_dir,str(frame_idx)+'_new.png')
                 pred_mask = track_mask + new_obj_mask
                 # segtracker.restart_tracker()
-                segtracker.add_reference(frame, pred_mask, frame_idx)
+                segtracker.add_reference(frame, pred_mask)
             else:
                 pred_mask = segtracker.track(frame,update_memory=True)
             torch.cuda.empty_cache()
             gc.collect()
             
             save_prediction(pred_mask,output_dir,str(frame_idx)+'.png')
-            masked_frame = (frame*0.3+colorize_mask(pred_mask)*0.7).astype(np.uint8)
-            pred_list.append(masked_frame)
-            if io_args['save_video']:
-                out.write(masked_frame)
+            pred_list.append(pred_mask)
             
-            print("processed and saved mask for frame {}, obj_num {}".format(frame_idx,segtracker.get_obj_num()),end='\r')
+            
+            print("processed frame {}, obj_num {}".format(frame_idx,segtracker.get_obj_num()),end='\r')
             frame_idx += 1
         cap.release()
         print('\nfinished')
+    ######################
+    # Visualization
+    ######################
 
-    if io_args['save_video']:
-        out.release()
-        print("\n{} saved".format(io_args['output_video']))
-    # save a gif
+    # draw pred mask on frame and save as a video
+    cap = cv2.VideoCapture(io_args['input_video'])
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+    out = cv2.VideoWriter(io_args['output_video'], fourcc, fps, (width, height))
+    # for .mp4
+    frame_idx = 0
+    while cap.isOpened():
+        ret, frame = cap.read()
+        if not ret:
+            break
+        frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
+        pred_mask = pred_list[frame_idx]
+        masked_frame = draw_mask(frame,pred_mask)
+        # masked_frame = masked_pred_list[frame_idx]
+        masked_frame = cv2.cvtColor(masked_frame,cv2.COLOR_RGB2BGR)
+        out.write(masked_frame)
+        print('frame {} writed'.format(frame_idx),end='\r')
+        frame_idx += 1
+    out.release()
+    cap.release()
+    print("\n{} saved".format(io_args['output_video']))
+    print('\nfinished')
+    
+    # save colorized masks as a gif
     imageio.mimsave(io_args['output_gif'],pred_list,fps=fps)
     print("{} saved".format(io_args['output_gif']))
-    
+
     # zip predicted mask
     os.system(f"zip -r ./assets/{video_name}_pred_mask.zip {io_args['output_mask_dir']}")
     
@@ -264,3 +283,4 @@ def tracking_objects_in_video(SegTracker, input_video):
 
 
     return io_args['output_video'], f"./assets/{video_name}_pred_mask.zip"
+
