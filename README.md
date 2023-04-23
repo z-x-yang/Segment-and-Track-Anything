@@ -54,7 +54,7 @@ Use the `install.sh` to install the necessary libs for SAM-Track
 bash script/install.sh
 ```
 
-### Model Preparation
+### :star:Model Preparation
 Download SAM model to ckpt, the default model is SAM-VIT-B ([sam_vit_b_01ec64.pth](https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth)).
 
 Download DeAOT/AOT model to ckpt, the default model is R50-DeAOT-L ([R50_DeAOTL_PRE_YTB_DAV.pth](https://drive.google.com/file/d/1QoChMkTVxdYZ_eBlZhK2acq9KMQZccPJ/view)).
