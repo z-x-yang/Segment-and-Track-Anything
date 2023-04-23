@@ -577,7 +577,7 @@ def seg_track_app():
         gr.Examples(
             examples=[
                 # os.path.join(os.path.dirname(__file__), "assets", "840_iSXIa0hE8Ek.mp4"),
-                # os.path.join(os.path.dirname(__file__), "assets", "blackswan.mp4"),
+                os.path.join(os.path.dirname(__file__), "assets", "blackswan.mp4"),
                 # os.path.join(os.path.dirname(__file__), "assets", "Resized_cxk.mp4"),
                 # os.path.join(os.path.dirname(__file__), "assets", "bear.mp4"),
                 # os.path.join(os.path.dirname(__file__), "assets", "camel.mp4"),
