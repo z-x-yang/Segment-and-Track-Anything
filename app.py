@@ -163,12 +163,12 @@ def sam_refine(Seg_Tracker, origin_frame, point_prompt, click_state, aot_model, 
 
     return Seg_Tracker, masked_frame, click_state
 
-def sam_stroke(Seg_Tracker, origin_frame, stroke_plane, aot_model, sam_gap, max_obj_num, points_per_side):
+def sam_stroke(Seg_Tracker, origin_frame, drawing_board, aot_model, sam_gap, max_obj_num, points_per_side):
 
     if Seg_Tracker is None:
         Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
-    mask = stroke_plane["mask"]
+    mask = drawing_board["mask"]
     bbox = mask2bbox(mask[:, :, 0])  # bbox: [[x0, y0], [x1, y1]]
     predicted_mask, masked_frame = Seg_Tracker.seg_acc_bbox(origin_frame, bbox)
 
@@ -287,7 +287,7 @@ def seg_track_app():
 
                 tab_stroke = gr.Tab(label="Stroke")
                 with tab_stroke:
-                    stroke_plane = gr.Image(label='stroke_plane', tool="sketch", brush_radius=10, interactive=True).style(height=550)
+                    drawing_board = gr.Image(label='Drawing Board', tool="sketch", brush_radius=10, interactive=True)
                     with gr.Row():
                         seg_acc_stroke = gr.Button(value="Segment", interactive=True)
                         stroke_reset_but = gr.Button(
@@ -351,7 +351,7 @@ def seg_track_app():
                 # image_selection_slider = gr.Slider(minimum=0, maximum=100, step=0.1, value=0, label="Image Selection", interactive=True)
                 # correct_track_button = gr.Button(value="Interactive Correction")
 
-                output_mask = gr.File(label="Predicted mask")
+                output_mask = gr.File(label="Predicted masks")
 
     ##########################################################
     ######################  back-end #########################
@@ -364,7 +364,7 @@ def seg_track_app():
                 input_video
             ],
             outputs=[
-                input_video_first_frame, origin_frame, stroke_plane
+                input_video_first_frame, origin_frame, drawing_board
             ]
         )
 
@@ -410,7 +410,7 @@ def seg_track_app():
                 origin_frame,
             ],
             outputs=[
-                Seg_Tracker, input_video_first_frame, click_state, stroke_plane
+                Seg_Tracker, input_video_first_frame, click_state, drawing_board
             ],
             queue=False,
         )
@@ -467,14 +467,14 @@ def seg_track_app():
         seg_acc_stroke.click(
             fn=sam_stroke,
             inputs=[
-                Seg_Tracker, origin_frame, stroke_plane,
+                Seg_Tracker, origin_frame, drawing_board,
                 aot_model,
                 sam_gap,
                 max_obj_num,
                 points_per_side,
             ],
             outputs=[
-                Seg_Tracker, input_video_first_frame, stroke_plane
+                Seg_Tracker, input_video_first_frame, drawing_board
             ]
         )
 
@@ -530,16 +530,16 @@ def seg_track_app():
         ) 
 
         stroke_reset_but.click(
-            fn=init_SegTracker,
+            fn=init_SegTracker_Stroke,
             inputs=[
                 aot_model,
                 sam_gap,
                 max_obj_num,
                 points_per_side,
-                origin_frame
+                origin_frame,
             ],
             outputs=[
-                Seg_Tracker, input_video_first_frame, click_state
+                Seg_Tracker, input_video_first_frame, click_state, drawing_board
             ],
             queue=False,
             show_progress=False

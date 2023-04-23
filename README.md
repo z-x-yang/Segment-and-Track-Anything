@@ -19,7 +19,7 @@ This video showcases the segmentation and tracking capabilities of SAM-Track in 
  - [x] 1.0-Version Interactive WebUI
     - We will develop a function that allows interactive modification of the mask for the first frame of the video based on the user's requirements. We demonstrate the interactive segmentation capabilities of Segment-and-Track-Anything in [Demo1](https://www.youtube.com/watch?v=ctnD03w-5VA) and [Demo2](https://www.youtube.com/watch?v=DfCUGUxALYo).
  - [ ] 1.5-Version Interactive WebUI
-    - We will develop a function that allow interactive modification of multi-object masks for the first frame of a video. This function will be based on the 1.0-Version.
+    - We will develop a function that allows interactive modification of multi-object masks for the first frame of a video. This function will be based on Version 1.0.
     - Furthermore, we plan to include text prompts as an additional form of interaction.
 
 **Demo1** showcases SAM-Track's ability to interactively segment and track individual objects.  The user specified that SAM-Track tracked a man playing street basketball.
@@ -80,19 +80,19 @@ python app.py
 ```
 Users can upload the video directly on the UI and use Segtracker to track all objects within that video. We use the depth-map video as a example.
 
-![Gradio](./assets/gradio.jpg)
+![Interactive WeiUI](./assets/interactive_weiui.jpg)
 
-Parameters:
+SegTracker-Parameters:
  - **aot_model**: used to select which version of DeAOT/AOT to use for tracking and propagation.
  - **sam_gap**: used to control how often SAM is used to add newly appearing objects at specified frame intervals. Increase to decrease the frequency of discovering new targets, but significantly improve speed of inference.
  - **points_per_side**: used to control the number of points per side used for generating masks by sampling a grid over the image. Increasing the size enhances the ability to detect small objects, but larger targets may be segmented into finer granularity.
  - **max_obj_num**: used to limit the maximum number of objects that SAM-Track can detect and track. A larger number of objects necessitates a greater utilization of memory, with approximately 16GB of memory capable of processing a maximum of 255 objects.
 
-Usage:
- - Start app, use your browser to open the web-link.
+Usage: To see the details, please refer to the [tutorial for 1.0-Version WeiUI](./tutorial/1.0-Version.md).
+ <!-- - Start app, use your browser to open the web-link.
  - Click on the `input-video window` to upload a video.
  - Adjust SAM-Track parameters as needed.
- - Click `Seg and Track` to get the experiment results.
+ - Click `Seg and Track` to get the experiment results. -->
 
 ### :full_moon_with_face:Credits
 Licenses for borrowed code can be found in `licenses.md` file.
