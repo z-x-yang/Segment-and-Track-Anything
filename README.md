@@ -78,7 +78,7 @@ Our user-friendly visual interface allows you to easily obtain the results of yo
 ```
 python app.py
 ```
-Users can upload the video directly on the UI and use Segtracker to track all objects within that video. We use the depth-map video as a example.
+Users can upload the video directly on the UI and use SegTracker to automatically/interactively track objects within that video. We use a video of a man playing basketball as an example.
 
 ![Interactive WeiUI](./assets/interactive_weiui.jpg)
 
