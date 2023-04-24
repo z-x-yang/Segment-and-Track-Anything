@@ -181,6 +181,7 @@ def tracking_objects_in_video(SegTracker, input_video):
 
     video_name = os.path.basename(input_video).split('.')[0]
     io_args = {
+        'input_video': f'{input_video}',
         'output_mask_dir': f'{os.path.join(os.path.dirname(__file__), "assets")}/{video_name}_masks',
         'output_video': f'{os.path.join(os.path.dirname(__file__), "assets")}/{video_name}_seg.mp4', # keep same format as input video
         'output_gif': f'{os.path.join(os.path.dirname(__file__), "assets")}/{video_name}_seg.gif',
