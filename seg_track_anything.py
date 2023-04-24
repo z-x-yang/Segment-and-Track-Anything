@@ -248,13 +248,14 @@ def tracking_objects_in_video(SegTracker, input_video):
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
-    if io_args['input_video'][-3:]=='mp4':
-        fourcc =  cv2.VideoWriter_fourcc(*"mp4v")
-    elif io_args['input_video'][-3:] == 'avi':
-        fourcc =  cv2.VideoWriter_fourcc(*"MJPG")
-        # fourcc = cv2.VideoWriter_fourcc(*"XVID")
-    else:
-        fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
+    fourcc =  cv2.VideoWriter_fourcc(*"mp4v")
+    # if io_args['input_video'][-3:]=='mp4':
+    #     fourcc =  cv2.VideoWriter_fourcc(*"mp4v")
+    # elif io_args['input_video'][-3:] == 'avi':
+    #     fourcc =  cv2.VideoWriter_fourcc(*"MJPG")
+    #     # fourcc = cv2.VideoWriter_fourcc(*"XVID")
+    # else:
+    #     fourcc = int(cap.get(cv2.CAP_PROP_FOURCC))
     out = cv2.VideoWriter(io_args['output_video'], fourcc, fps, (width, height))
 
     frame_idx = 0
