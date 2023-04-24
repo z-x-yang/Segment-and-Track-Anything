@@ -208,18 +208,16 @@ def seg_track_app():
     ##########################################################
 
     app = gr.Blocks()
+
     with app:
-        gr.Markdown("# **<h1 align='center'>Segment and Track Anything for Video</h1>**")
         gr.Markdown(
-            """
-            <h3 center>
-            Segment and Track Anything is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. 
-            The primary algorithms utilized include the <a href='https://github.com/facebookresearch/segment-anything' target='_blank'>SAM (Segment Anything Model)</a> for automatic/interactive key-frame segmentation and the <a href='https://github.com/yoxu515/aot-benchmark' target='_blank'>DeAOT (Decoupling features in Associating Objects with Transformers) (NeurIPS2022)</a>
-            for efficient multi-object tracking and propagation. 
-            </center>
-            """
-        )  
-        
+            '''
+            <div style="text-align:center;">
+                <span style="font-size:3em; font-weight:bold;">Segment and Track Anything(SAM-Track)</span>
+            </div>
+            '''
+        )
+
         """
         state for 
         """
@@ -241,7 +239,7 @@ def seg_track_app():
                 input_video.play(fn=play_video, inputs=play_state, outputs=play_state, scroll_to_output=True, show_progress=True)
                 input_video.pause(fn=pause_video, inputs=play_state, outputs=play_state)
 
-                input_video_first_frame = gr.Image(label='Segment result of first frame', interactive=True).style(height=550)
+                input_video_first_frame = gr.Image(label='Segment result of first frame',interactive=True).style(height=550)
 
 
                 tab_everything = gr.Tab(label="Everything")
@@ -341,6 +339,7 @@ def seg_track_app():
                     track_for_video = gr.Button(
                         value="Start Tracking",
                         interactive=True,
+                        elem_id="Start_Tracking_Button"
                         )
 
             with gr.Column(scale=0.5):
@@ -478,8 +477,6 @@ def seg_track_app():
             ]
         )
 
-
-
         # Track object in video
         track_for_video.click(
             fn=tracking_objects,
@@ -586,8 +583,7 @@ def seg_track_app():
                 ],
             inputs=[input_video],
         )
-
-
+    
     app.queue(concurrency_count=1)
     app.launch(debug=True, enable_queue=True, share=True)
 
