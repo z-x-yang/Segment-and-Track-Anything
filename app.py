@@ -1,5 +1,4 @@
 from PIL.ImageOps import colorize, scale
-from blib2to3.pgen2.grammar import Label
 import gradio as gr
 import importlib
 import sys
