@@ -1,4 +1,5 @@
 # Segment and Track Anything (SAM-Track)
+**Online Demo:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1R10N70AJaslzADFqb-a5OihYkllWEVxB?usp=sharing) **Tutorial:** [tutorial](./tutorial/1.0-Version.md)
 
 <p align="center">
 <img src="./assets/demo_3x2.gif" width="880">
@@ -7,10 +8,10 @@
 **Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
 ## :loudspeaker:New Features
-- [2023/4/25] You can easily use SAMTrack in [Colab](https://colab.research.google.com/drive/1R10N70AJaslzADFqb-a5OihYkllWEVxB?usp=sharing) for visual tracking tasks.
+- [2023/4/25] **Online Demo:** You can easily use SAMTrack in [Colab](https://colab.research.google.com/drive/1R10N70AJaslzADFqb-a5OihYkllWEVxB?usp=sharing) for visual tracking tasks.
 
-- [2023/4/23] We have introduced a new WebUI that allows interactive user segmentation through strokes and clicks. Feel free to explore and have fun with the [tutorial](./tutorial/1.0-Version.md)!
-    - [2023/4/24] Check out our new video tutorials!
+- [2023/4/23] **Interactive WebUI:** We have introduced a new WebUI that allows interactive user segmentation through strokes and clicks. Feel free to explore and have fun with the [tutorial](./tutorial/1.0-Version.md)!
+    - [2023/4/24] **Tutorial V1.0:** Check out our new video tutorials!
       - YouTube-Link: [Tutorial for Interactively modify single-object mask for first frame of video](https://www.youtube.com/watch?v=DF0iFSsX8KY)、[Tutorial for Interactively add object by click](https://www.youtube.com/watch?v=UJvKPng9_DA)、[Tutorial for Interactively add object by stroke](https://www.youtube.com/watch?v=m1oFavjIaCM).
       - Bilibili Video Link:[Tutorial for Interactively modify single-object mask for first frame of video](https://www.bilibili.com/video/BV1tM4115791/?spm_id_from=333.999.0.0)、[Tutorial for Interactively add object by click](https://www.bilibili.com/video/BV1Qs4y1A7d1/)、[Tutorial for Interactively add object by stroke](https://www.bilibili.com/video/BV1Lm4y117J4/?spm_id_from=333.999.0.0).
     - 1.0-Version is a developer version, please feel free to contact us if you encounter any bugs :bug:.
@@ -31,7 +32,7 @@ This video showcases the segmentation and tracking capabilities of SAM-Track in 
  - [ ] 1.5-Version Interactive WebUI
     - We will develop a function that allows interactive modification of multi-object masks for the first frame of a video. This function will be based on Version 1.0.
     - Furthermore, we plan to include text prompts as an additional form of interaction.
- - [ ] 2.x-Version Interactive WeiUI
+ - [ ] 2.x-Version Interactive WebUI
     - In version 2.x, the segmentation model will offer two options: SAM and SEEM.
     - We will develop a new function where the fixed-category object detection result can be displayed as a prompt.
 
@@ -86,7 +87,7 @@ python app.py
 ```
 Users can upload the video directly on the UI and use SegTracker to automatically/interactively track objects within that video. We use a video of a man playing basketball as an example.
 
-![Interactive WeiUI](./assets/interactive_weiui.jpg)
+![Interactive WebUI](./assets/interactive_weiui.jpg)
 
 SegTracker-Parameters:
  - **aot_model**: used to select which version of DeAOT/AOT to use for tracking and propagation.
@@ -94,7 +95,7 @@ SegTracker-Parameters:
  - **points_per_side**: used to control the number of points per side used for generating masks by sampling a grid over the image. Increasing the size enhances the ability to detect small objects, but larger targets may be segmented into finer granularity.
  - **max_obj_num**: used to limit the maximum number of objects that SAM-Track can detect and track. A larger number of objects necessitates a greater utilization of memory, with approximately 16GB of memory capable of processing a maximum of 255 objects.
 
-Usage: To see the details, please refer to the [tutorial for 1.0-Version WeiUI](./tutorial/1.0-Version.md).
+Usage: To see the details, please refer to the [tutorial for 1.0-Version WebUI](./tutorial/1.0-Version.md).
 
 ### :full_moon_with_face:Credits
 Licenses for borrowed code can be found in `licenses.md` file.
