@@ -31,6 +31,9 @@ def play_video(play_state):
     play_state.append(time.time())
     return play_state
 
+def clean():
+    return None, None, None, None, None, None, [[], []]
+
 # convert points input to prompt state
 def get_prompt(click_state, click_input):
     inputs = json.loads(click_input)
@@ -50,6 +53,8 @@ def get_prompt(click_state, click_input):
     return prompt
 
 def get_meta_from_video(input_video):
+    if input_video is None:
+        return None, None, None
     print("get meta information of input video")
     cap = cv2.VideoCapture(input_video)
     fps = cap.get(cv2.CAP_PROP_FPS)
@@ -62,18 +67,20 @@ def get_meta_from_video(input_video):
     return first_frame, first_frame, first_frame
 
 def get_meta_from_img_seq(input_img_seq):
+    if input_img_seq is None:
+        return None, None, None
+
     print("get meta information of img seq")
-    import pdb; pdb.set_trace()
     # Create dir
-    file_name = os.path.dirname(input_img_seq)
+    file_name = input_img_seq.name.split('/')[-1].split('.')[0]
     file_path = f'./assets/{file_name}'
-    if os.path.isfile(file_path):
+    if os.path.isdir(file_path):
         os.system(f'rm -r {file_path}')
     os.makedirs(file_path)
     # Unzip file
-    os.system(f'unzip {input_img_seq} -d {file_path}')
+    os.system(f'unzip {input_img_seq.name} -d ./assets')
     
-    imgs_path = [os.path.join(file_path, img_name) for img_name in os.listdir(file_path)]
+    imgs_path = sorted([os.path.join(file_path, img_name) for img_name in os.listdir(file_path)])
     first_frame = imgs_path[0]
     first_frame = cv2.imread(first_frame)
     first_frame = cv2.cvtColor(first_frame, cv2.COLOR_BGR2RGB)
@@ -251,13 +258,16 @@ def seg_track_app():
         with gr.Row():
             # video input
             with gr.Column(scale=0.5):
-                with gr.Tab(label="Video type input"):
+
+                tab_video_input = gr.Tab(label="Video type input")
+                with tab_video_input:
                     input_video = gr.Video(label='Input video').style(height=550)
                     # listen to the user action for play and pause input video
                     input_video.play(fn=play_video, inputs=play_state, outputs=play_state, scroll_to_output=True, show_progress=True)
                     input_video.pause(fn=pause_video, inputs=play_state, outputs=play_state)
-
-                with gr.Tab(label="Image-Seq type input"):
+                
+                tab_img_seq_input = gr.Tab(label="Image-Seq type input")
+                with tab_img_seq_input:
                     input_img_seq = gr.File(label='Input Image-Seq').style(height=550)
 
                 input_first_frame = gr.Image(label='Segment result of first frame',interactive=True).style(height=550)
@@ -399,6 +409,33 @@ def seg_track_app():
             ]
         )
 
+        tab_video_input.select(
+            fn = clean,
+            inputs=[],
+            outputs=[
+                input_video,
+                input_img_seq,
+                Seg_Tracker,
+                input_first_frame,
+                origin_frame,
+                drawing_board,
+                click_state,
+            ]
+        )
+
+        tab_img_seq_input.select(
+            fn = clean,
+            inputs=[],
+            outputs=[
+                input_video,
+                input_img_seq,
+                Seg_Tracker,
+                input_first_frame,
+                origin_frame,
+                drawing_board,
+                click_state,
+            ]
+        )
 
         # listen to the tab to init SegTracker
         tab_everything.select(
