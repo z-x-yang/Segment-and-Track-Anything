@@ -3,6 +3,7 @@ import gradio as gr
 import importlib
 import sys
 import os
+
 from model_args import segtracker_args,sam_args,aot_args
 from SegTracker import SegTracker
 
@@ -78,7 +79,7 @@ def get_meta_from_img_seq(input_img_seq):
         os.system(f'rm -r {file_path}')
     os.makedirs(file_path)
     # Unzip file
-    os.system(f'unzip {input_img_seq.name} -d ./assets')
+    os.system(f'unzip {input_img_seq.name} -d ./assets ')
     
     imgs_path = sorted([os.path.join(file_path, img_name) for img_name in os.listdir(file_path)])
     first_frame = imgs_path[0]
@@ -223,8 +224,8 @@ def segment_everything(Seg_Tracker, aot_model, origin_frame, sam_gap, max_obj_nu
 
     return Seg_Tracker, masked_frame
 
-def tracking_objects(Seg_Tracker, input_video):
-    return tracking_objects_in_video(Seg_Tracker, input_video)
+def tracking_objects(Seg_Tracker, input_video, input_img_seq, fps):
+    return tracking_objects_in_video(Seg_Tracker, input_video, input_img_seq, fps)
 
 def seg_track_app():
 
@@ -268,7 +269,11 @@ def seg_track_app():
                 
                 tab_img_seq_input = gr.Tab(label="Image-Seq type input")
                 with tab_img_seq_input:
-                    input_img_seq = gr.File(label='Input Image-Seq').style(height=550)
+                    with gr.Row():
+                        input_img_seq = gr.File(label='Input Image-Seq').style(height=550)
+                        with gr.Column(scale=0.25):
+                            unzip_button = gr.Button(value="unzip")
+                            fps = gr.Slider(label='fps', minimum=5, maximum=50, value=30, step=1)
 
                 input_first_frame = gr.Image(label='Segment result of first frame',interactive=True).style(height=550)
 
@@ -409,6 +414,17 @@ def seg_track_app():
             ]
         )
 
+        unzip_button.click(
+            fn=get_meta_from_img_seq,
+            inputs=[
+                input_img_seq
+            ],
+            outputs=[
+                input_first_frame, origin_frame, drawing_board
+            ]
+        )
+
+
         tab_video_input.select(
             fn = clean,
             inputs=[],
@@ -538,6 +554,8 @@ def seg_track_app():
             inputs=[
                 Seg_Tracker,
                 input_video,
+                input_img_seq,
+                fps,
             ],
             outputs=[
                 output_video, output_mask
@@ -640,8 +658,13 @@ def seg_track_app():
                 inputs=[input_video],
             )
         
-        with gr.Tab(label='Image seq expamle'):
-            pass
+        with gr.Tab(label='Image-seq expamle'):
+            gr.Examples(
+                examples=[
+                    os.path.join(os.path.dirname(__file__), "assets", "840_iSXIa0hE8Ek.zip"),
+                ],
+                inputs=[input_img_seq],
+            )
     
     app.queue(concurrency_count=1)
     app.launch(debug=True, enable_queue=True, share=True)
