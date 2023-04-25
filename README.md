@@ -7,8 +7,10 @@
 **Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
 ## :loudspeaker:New Features
-- We have introduced a new WebUI that allows interactive user segmentation through strokes and clicks. Feel free to explore and have fun with the [tutorial](./tutorial/1.0-Version.md)!
-    - Check out our new video tutorials!
+- [2023/4/25] You can easily use SAMTrack in [Colab](https://colab.research.google.com/drive/1R10N70AJaslzADFqb-a5OihYkllWEVxB?usp=sharing) for visual tracking tasks.
+
+- [2023/4/23] We have introduced a new WebUI that allows interactive user segmentation through strokes and clicks. Feel free to explore and have fun with the [tutorial](./tutorial/1.0-Version.md)!
+    - [2023/4/24] Check out our new video tutorials!
       - YouTube-Link: [Tutorial for Interactively modify single-object mask for first frame of video](https://www.youtube.com/watch?v=DF0iFSsX8KY)、[Tutorial for Interactively add object by click](https://www.youtube.com/watch?v=UJvKPng9_DA)、[Tutorial for Interactively add object by stroke](https://www.youtube.com/watch?v=m1oFavjIaCM).
       - Bilibili Video Link:[Tutorial for Interactively modify single-object mask for first frame of video](https://www.bilibili.com/video/BV1tM4115791/?spm_id_from=333.999.0.0)、[Tutorial for Interactively add object by click](https://www.bilibili.com/video/BV1Qs4y1A7d1/)、[Tutorial for Interactively add object by stroke](https://www.bilibili.com/video/BV1Lm4y117J4/?spm_id_from=333.999.0.0).
     - 1.0-Version is a developer version, please feel free to contact us if you encounter any bugs :bug:.
@@ -22,8 +24,8 @@
 This video showcases the segmentation and tracking capabilities of SAM-Track in various scenarios, such as street views, AR, cells, animations, aerial shots, and more.
 
 ## :calendar:TODO
- - [ ] Colab notebook
- - [x] 1.0-Version Interactive WebUI
+ - [x] Colab notebook: Completed on April 25th, 2023.
+ - [x] 1.0-Version Interactive WebUI: Completed on April 23rd, 2023.
     - We will create a feature that enables users to interactively modify the mask for the initial video frame according to their needs. The interactive segmentation capabilities of Segment-and-Track-Anything is demonstrated in [Demo1](https://www.youtube.com/watch?v=ctnD03w-5VA) and [Demo2](https://www.youtube.com/watch?v=DfCUGUxALYo).
     - Bilibili Video Link: [Demo1](https://www.bilibili.com/video/BV1JL411v7uE/), [Demo2](https://www.bilibili.com/video/BV1Qs4y1w763/).
  - [ ] 1.5-Version Interactive WebUI
@@ -93,10 +95,6 @@ SegTracker-Parameters:
  - **max_obj_num**: used to limit the maximum number of objects that SAM-Track can detect and track. A larger number of objects necessitates a greater utilization of memory, with approximately 16GB of memory capable of processing a maximum of 255 objects.
 
 Usage: To see the details, please refer to the [tutorial for 1.0-Version WeiUI](./tutorial/1.0-Version.md).
- <!-- - Start app, use your browser to open the web-link.
- - Click on the `input-video window` to upload a video.
- - Adjust SAM-Track parameters as needed.
- - Click `Seg and Track` to get the experiment results. -->
 
 ### :full_moon_with_face:Credits
 Licenses for borrowed code can be found in `licenses.md` file.
