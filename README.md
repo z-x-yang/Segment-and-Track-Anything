@@ -95,7 +95,7 @@ SegTracker-Parameters:
  - **points_per_side**: used to control the number of points per side used for generating masks by sampling a grid over the image. Increasing the size enhances the ability to detect small objects, but larger targets may be segmented into finer granularity.
  - **max_obj_num**: used to limit the maximum number of objects that SAM-Track can detect and track. A larger number of objects necessitates a greater utilization of memory, with approximately 16GB of memory capable of processing a maximum of 255 objects.
 
-Usage: To see the details, please refer to the [tutorial for 1.0-Version WeiUI](./tutorial/1.0-Version.md).
+Usage: To see the details, please refer to the [tutorial for 1.0-Version WebUI](./tutorial/1.0-Version.md).
 
 ### :full_moon_with_face:Credits
 Licenses for borrowed code can be found in `licenses.md` file.
