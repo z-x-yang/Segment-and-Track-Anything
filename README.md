@@ -32,7 +32,7 @@ This video showcases the segmentation and tracking capabilities of SAM-Track in 
  - [ ] 1.5-Version Interactive WebUI
     - We will develop a function that allows interactive modification of multi-object masks for the first frame of a video. This function will be based on Version 1.0.
     - Furthermore, we plan to include text prompts as an additional form of interaction.
- - [ ] 2.x-Version Interactive WeiUI
+ - [ ] 2.x-Version Interactive WebUI
     - In version 2.x, the segmentation model will offer two options: SAM and SEEM.
     - We will develop a new function where the fixed-category object detection result can be displayed as a prompt.
 
@@ -87,7 +87,7 @@ python app.py
 ```
 Users can upload the video directly on the UI and use SegTracker to automatically/interactively track objects within that video. We use a video of a man playing basketball as an example.
 
-![Interactive WeiUI](./assets/interactive_weiui.jpg)
+![Interactive WebUI](./assets/interactive_weiui.jpg)
 
 SegTracker-Parameters:
  - **aot_model**: used to select which version of DeAOT/AOT to use for tracking and propagation.
