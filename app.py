@@ -88,6 +88,16 @@ def get_meta_from_img_seq(input_img_seq):
 
     return first_frame, first_frame, first_frame
 
+def SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask):
+    with torch.cuda.amp.autocast():
+        # Reset the first frame's mask
+        frame_idx = 0
+        Seg_Tracker.restart_tracker()
+        Seg_Tracker.add_reference(origin_frame, predicted_mask, frame_idx)
+        Seg_Tracker.first_frame_mask = predicted_mask
+
+    return Seg_Tracker
+
 def init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame):
     
     if origin_frame is None:
@@ -104,6 +114,7 @@ def init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_fra
     
     Seg_Tracker = SegTracker(segtracker_args, sam_args, aot_args)
     Seg_Tracker.restart_tracker()
+
     return Seg_Tracker, origin_frame, [[], []]
 
 def init_SegTracker_Stroke(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame):
@@ -157,11 +168,7 @@ def refine_acc_prompt(Seg_Tracker, prompt, origin_frame):
                                                       multimask=prompt["multimask_output"],
                                                     )
 
-    with torch.cuda.amp.autocast():
-        # Reset the first frame's mask
-        frame_idx = 0
-        Seg_Tracker.restart_tracker()
-        Seg_Tracker.add_reference(origin_frame, predicted_mask, frame_idx)
+    Seg_Tracker = SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask)
 
     return masked_frame
 
@@ -198,11 +205,20 @@ def sam_stroke(Seg_Tracker, origin_frame, drawing_board, aot_model, sam_gap, max
     bbox = mask2bbox(mask[:, :, 0])  # bbox: [[x0, y0], [x1, y1]]
     predicted_mask, masked_frame = Seg_Tracker.seg_acc_bbox(origin_frame, bbox)
 
-    with torch.cuda.amp.autocast():
-        # Reset the first frame's mask
-        frame_idx = 0
-        Seg_Tracker.restart_tracker()
-        Seg_Tracker.add_reference(origin_frame, predicted_mask, frame_idx)
+    Seg_Tracker = SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask)
+
+    return Seg_Tracker, masked_frame, origin_frame
+
+def gd_detect(Seg_Tracker, origin_frame, grounding_caption, box_threshold, text_threshold, aot_model, sam_gap, max_obj_num, points_per_side):
+    if Seg_Tracker is None:
+        Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
+
+    predicted_mask, annotated_frame= Seg_Tracker.detect_and_seg(origin_frame, grounding_caption, box_threshold, text_threshold)
+
+    Seg_Tracker = SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask)
+
+
+    masked_frame = draw_mask(annotated_frame, predicted_mask)
 
     return Seg_Tracker, masked_frame, origin_frame
 
@@ -218,11 +234,19 @@ def segment_everything(Seg_Tracker, aot_model, origin_frame, sam_gap, max_obj_nu
         torch.cuda.empty_cache()
         gc.collect()
         Seg_Tracker.add_reference(origin_frame, pred_mask, frame_idx)
+        Seg_Tracker.first_frame_mask = pred_mask
 
-        masked_frame = draw_mask(origin_frame.copy(), pred_mask)
-        # masked_frame = (origin_frame*0.3+colorize_mask(pred_mask)*0.7).astype(np.uint8)
+    masked_frame = draw_mask(origin_frame.copy(), pred_mask)
 
     return Seg_Tracker, masked_frame
+
+def add_new_object(Seg_Tracker):
+
+    prev_mask = Seg_Tracker.first_frame_mask
+    Seg_Tracker.update_origin_merged_mask(prev_mask)
+    print("Ready to add new object!")
+
+    return Seg_Tracker, [[], []]
 
 def tracking_objects(Seg_Tracker, input_video, input_img_seq, fps):
     return tracking_objects_in_video(Seg_Tracker, input_video, input_img_seq, fps)
@@ -263,7 +287,6 @@ def seg_track_app():
                 tab_video_input = gr.Tab(label="Video type input")
                 with tab_video_input:
                     input_video = gr.Video(label='Input video').style(height=550)
-                    # listen to the user action for play and pause input video
                     input_video.play(fn=play_video, inputs=play_state, outputs=play_state, scroll_to_output=True, show_progress=True)
                     input_video.pause(fn=pause_video, inputs=play_state, outputs=play_state)
                 
@@ -288,16 +311,15 @@ def seg_track_app():
                             label="Point Prompt",
                             interactive=True)
 
-                        with gr.Column(scale=0.25):
-                            every_undo_but = gr.Button(
-                                        value="Undo",
-                                        interactive=True
-                                        )
+                        every_undo_but = gr.Button(
+                                    value="Undo",
+                                    interactive=True
+                                    )
 
-                            every_reset_but = gr.Button(
-                                        value="Reset",
-                                        interactive=True
-                                                )
+                            # every_reset_but = gr.Button(
+                            #             value="Reset",
+                            #             interactive=True
+                            #                     )
 
                 tab_click = gr.Tab(label="Click")
                 with tab_click:
@@ -309,74 +331,94 @@ def seg_track_app():
                                     interactive=True)
 
                         # args for modify and tracking 
-                        with gr.Column(scale=0.25):
-                            click_undo_but = gr.Button(
-                                        value="Undo",
-                                        interactive=True
-                                        )
-                            click_reset_but = gr.Button(
-                                        value="Reset",
-                                        interactive=True
-                                                )
+                        click_undo_but = gr.Button(
+                                    value="Undo",
+                                    interactive=True
+                                    )
+                            # click_reset_but = gr.Button(
+                            #             value="Reset",
+                            #             interactive=True
+                            #                     )
 
                 tab_stroke = gr.Tab(label="Stroke")
                 with tab_stroke:
                     drawing_board = gr.Image(label='Drawing Board', tool="sketch", brush_radius=10, interactive=True)
                     with gr.Row():
                         seg_acc_stroke = gr.Button(value="Segment", interactive=True)
-                        stroke_reset_but = gr.Button(
-                                        value="Reset",
-                                        interactive=True
-                                                )
-
-                with gr.Row():
-                    with gr.Tab(label="SegTracker Args"):
+                        # stroke_reset_but = gr.Button(
+                        #                 value="Reset",
+                        #                 interactive=True
+                        #                         )
+                
+                tab_text = gr.Tab(label="Text")
+                with tab_text:
+                    grounding_caption = gr.Textbox(label="Detection Prompt")
+                    detect_button = gr.Button(value="Detect")
+                    with gr.Accordion("Advanced options", open=False):
                         with gr.Row():
-                            # args for tracking in video do segment-everthing
                             with gr.Column(scale=0.5):
-                                aot_model = gr.Dropdown(
-                                        label="aot_model",
-                                        choices = [
-                                            "deaotb",
-                                            "deaotl",
-                                            "r50_deaotl"
-                                        ],
-                                        value = "r50_deaotl",
-                                        interactive=True,
-                                    )
-
-                                points_per_side = gr.Slider(
-                                    label = "points_per_side",
-                                    minimum= 1,
-                                    step = 1,
-                                    maximum=100,
-                                    value=16,
-                                    interactive=True
+                                box_threshold = gr.Slider(
+                                    label="Box Threshold", minimum=0.0, maximum=1.0, value=0.25, step=0.001
+                                )
+                            with gr.Column(scale=0.5):
+                                text_threshold = gr.Slider(
+                                    label="Text Threshold", minimum=0.0, maximum=1.0, value=0.25, step=0.001
                                 )
 
-                            with gr.Column(scale=0.5):
-                                sam_gap = gr.Slider(
-                                    label='sam_gap',
-                                    minimum = 1,
-                                    step=1,
-                                    maximum = 9999,
-                                    value=100,
+                with gr.Row():
+                    with gr.Column(scale=0.5):
+                        with gr.Tab(label="SegTracker Args"):
+                            # args for tracking in video do segment-everthing
+                            aot_model = gr.Dropdown(
+                                    label="aot_model",
+                                    choices = [
+                                        "deaotb",
+                                        "deaotl",
+                                        "r50_deaotl"
+                                    ],
+                                    value = "r50_deaotl",
                                     interactive=True,
                                 )
 
-                                max_obj_num = gr.Slider(
-                                    label='max_obj_num',
-                                    minimum = 50,
-                                    step=1,
-                                    maximum = 300,
-                                    value=255,
-                                    interactive=True
-                                )
-                    track_for_video = gr.Button(
-                        value="Start Tracking",
-                        interactive=True,
-                        elem_id="Start_Tracking_Button"
+                            points_per_side = gr.Slider(
+                                label = "points_per_side",
+                                minimum= 1,
+                                step = 1,
+                                maximum=100,
+                                value=16,
+                                interactive=True
+                            )
+
+                            sam_gap = gr.Slider(
+                                label='sam_gap',
+                                minimum = 1,
+                                step=1,
+                                maximum = 9999,
+                                value=100,
+                                interactive=True,
+                            )
+
+                            max_obj_num = gr.Slider(
+                                label='max_obj_num',
+                                minimum = 50,
+                                step=1,
+                                maximum = 300,
+                                value=255,
+                                interactive=True
+                            )
+                    with gr.Column():
+                        new_object_button = gr.Button(
+                            value="Add new object", 
+                            interactive=True
                         )
+                        reset_button = gr.Button(
+                            value="Reset",
+                            interactive=True,
+                        )
+                        track_for_video = gr.Button(
+                            value="Start Tracking",
+                                interactive=True,
+                                ).style(size="lg")
 
             with gr.Column(scale=0.5):
                 output_video = gr.Video(label='Output video').style(height=550)
@@ -413,18 +455,8 @@ def seg_track_app():
                 input_first_frame, origin_frame, drawing_board
             ]
         )
-
-        extract_button.click(
-            fn=get_meta_from_img_seq,
-            inputs=[
-                input_img_seq
-            ],
-            outputs=[
-                input_first_frame, origin_frame, drawing_board
-            ]
-        )
-
-
+        
+        #-------------- Input compont -------------
         tab_video_input.select(
             fn = clean,
             inputs=[],
@@ -452,6 +484,19 @@ def seg_track_app():
                 click_state,
             ]
         )
+
+        extract_button.click(
+            fn=get_meta_from_img_seq,
+            inputs=[
+                input_img_seq
+            ],
+            outputs=[
+                input_first_frame, origin_frame, drawing_board
+            ]
+        )
+
+
+        # ------------------- Interactive component -----------------
 
         # listen to the tab to init SegTracker
         tab_everything.select(
@@ -496,6 +541,21 @@ def seg_track_app():
             ],
             outputs=[
                 Seg_Tracker, input_first_frame, click_state, drawing_board
+            ],
+            queue=False,
+        )
+
+        tab_text.select(
+            fn=init_SegTracker,
+            inputs=[
+                aot_model,
+                sam_gap,
+                max_obj_num,
+                points_per_side,
+                origin_frame
+            ],
+            outputs=[
+                Seg_Tracker, input_first_frame, click_state
             ],
             queue=False,
         )
@@ -548,6 +608,31 @@ def seg_track_app():
             ]
         )
 
+        # Use grounding-dino to detect object
+        detect_button.click(
+            fn=gd_detect, 
+            inputs=[
+                Seg_Tracker, origin_frame, grounding_caption, box_threshold, text_threshold,
+                aot_model, sam_gap, max_obj_num, points_per_side
+                ], 
+            outputs=[
+                Seg_Tracker, input_first_frame
+                ]
+                )
+
+        # Add new object
+        new_object_button.click(
+            fn=add_new_object,
+            inputs=
+            [
+                Seg_Tracker
+            ],
+            outputs=
+            [
+                Seg_Tracker, click_state
+            ]
+        )
+
         # Track object in video
         track_for_video.click(
             fn=tracking_objects,
@@ -562,12 +647,10 @@ def seg_track_app():
             ]
         )
 
-        ####################
-        # Reset and Undo
-        ####################
+        # ----------------- Reset and Undo ---------------------------
 
         # Rest 
-        every_reset_but.click(
+        reset_button.click(
             fn=init_SegTracker,
             inputs=[
                 aot_model,
@@ -583,37 +666,53 @@ def seg_track_app():
             show_progress=False
         ) 
 
-        click_reset_but.click(
-            fn=init_SegTracker,
-            inputs=[
-                aot_model,
-                sam_gap,
-                max_obj_num,
-                points_per_side,
-                origin_frame
-            ],
-            outputs=[
-                Seg_Tracker, input_first_frame, click_state
-            ],
-            queue=False,
-            show_progress=False
-        ) 
+        # every_reset_but.click(
+        #     fn=init_SegTracker,
+        #     inputs=[
+        #         aot_model,
+        #         sam_gap,
+        #         max_obj_num,
+        #         points_per_side,
+        #         origin_frame
+        #     ],
+        #     outputs=[
+        #         Seg_Tracker, input_first_frame, click_state
+        #     ],
+        #     queue=False,
+        #     show_progress=False
+        # ) 
 
-        stroke_reset_but.click(
-            fn=init_SegTracker_Stroke,
-            inputs=[
-                aot_model,
-                sam_gap,
-                max_obj_num,
-                points_per_side,
-                origin_frame,
-            ],
-            outputs=[
-                Seg_Tracker, input_first_frame, click_state, drawing_board
-            ],
-            queue=False,
-            show_progress=False
-        )
+        # click_reset_but.click(
+        #     fn=init_SegTracker,
+        #     inputs=[
+        #         aot_model,
+        #         sam_gap,
+        #         max_obj_num,
+        #         points_per_side,
+        #         origin_frame
+        #     ],
+        #     outputs=[
+        #         Seg_Tracker, input_first_frame, click_state
+        #     ],
+        #     queue=False,
+        #     show_progress=False
+        # ) 
+
+        # stroke_reset_but.click(
+        #     fn=init_SegTracker_Stroke,
+        #     inputs=[
+        #         aot_model,
+        #         sam_gap,
+        #         max_obj_num,
+        #         points_per_side,
+        #         origin_frame,
+        #     ],
+        #     outputs=[
+        #         Seg_Tracker, input_first_frame, click_state, drawing_board
+        #     ],
+        #     queue=False,
+        #     show_progress=False
+        # )
 
         # Undo click
         click_undo_but.click(

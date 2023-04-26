@@ -200,22 +200,3 @@ if __name__ == '__main__':
 	# contour_width = 5
 	# painted_image_1 = point_painter(input_image, input_points_1, point_color, point_alpha, point_radius, contour_color, contour_width)
 	# painted_image_2 = point_painter(painted_image_1, input_points_2, point_color, point_alpha, point_radius, contour_color, contour_width)
-
-	# # save
-	# painted_image_1 = Image.fromarray(painted_image_1)
-	# painted_image_2 = Image.fromarray(painted_image_2)
-
-	# painted_image_1.save('/data2/cym/Seg_Tra_any/Segment-and-Track-Anything/debug/point_painter_1.png')
-	# painted_image_2.save('/data2/cym/Seg_Tra_any/Segment-and-Track-Anything/debug/point_painter_2.png')
-
-
-	# input_image = np.array(Image.open('images/painter_input_image.jpg').convert('RGB'))
-	# painted_image_2 = point_painter(input_image, input_points, point_color=9, point_radius=20, contour_color=29)
-	# # save
-	# painted_image = Image.fromarray(painted_image_2)
-	# painted_image.save('images/point_painter_2.png')
-
-	# # example of background remover
-	# input_image = np.array(Image.open('images/original.png').convert('RGB'))
-	# image_wo_background = background_remover(input_image, input_mask)	# return PIL.Image
-	# image_wo_background.save('images/image_wo_background.png')

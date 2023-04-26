@@ -60,7 +60,6 @@ aot_model2ckpt = {
 }
 
 
-
 def tracking_objects_in_video(SegTracker, input_video, input_img_seq, fps):
     
     if input_video is not None:
@@ -69,7 +68,6 @@ def tracking_objects_in_video(SegTracker, input_video, input_img_seq, fps):
         return img_seq_type_input_tracking(SegTracker, input_img_seq, fps)
 
     return None, None
-
 
 def video_type_input_tracking(SegTracker, input_video):
     video_name = os.path.basename(input_video).split('.')[0]
@@ -103,7 +101,7 @@ def video_type_input_tracking(SegTracker, input_video):
             frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
             
             if frame_idx == 0:
-                pred_list.append(SegTracker.refined_merged_mask)
+                pred_list.append(SegTracker.first_frame_mask)
                 frame_idx += 1
                 continue
             elif (frame_idx % sam_gap) == 0:
@@ -216,7 +214,7 @@ def img_seq_type_input_tracking(SegTracker, input_img_seq, fps):
             frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
             
             if frame_idx == 0:
-                pred_list.append(SegTracker.refined_merged_mask)
+                pred_list.append(SegTracker.first_frame_mask)
                 frame_idx += 1
                 continue
             elif (frame_idx % sam_gap) == 0:

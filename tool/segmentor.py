@@ -44,12 +44,9 @@ class Segmentor:
 
     @torch.no_grad()
     def set_image(self, image: np.ndarray):
-        # PIL.open(image_path) 3channel: RGB
         # image embedding: avoid encode the same image multiple times
 
-        self.orignal_image = image
         if self.embedded:
-            print('repeat embedding, please reset_image.')
             return
         self.interactive_predictor.set_image(image)
         self.embedded = True
@@ -102,9 +99,6 @@ class Segmentor:
         '''
         self.set_image(origin_frame)
 
-        neg_flag = labels[-1]   # 1 indicates a foreground point and 0 indicates a background point.
-        # if neg_flag == 1:
-        #find positive
         prompts = {
             'point_coords': points,
             'point_labels': labels,
@@ -118,19 +112,9 @@ class Segmentor:
         }
         masks, scores, logits = self.interactive_predict(prompts, 'both', multimask)
         mask, logit = masks[np.argmax(scores)], logits[np.argmax(scores), :, :]
-            
-        # else:
-        #     #find neg
-        #     prompts = {
-        #         'point_coords': points,
-        #         'point_labels': labels,
-        #     }
-        #     masks, scores, logits = self.interactive_predict(prompts, 'point', multimask)
-        #     mask, logit = masks[np.argmax(scores)], logits[np.argmax(scores), :, :]
 
         assert len(points)==len(labels)
         outline = mask_painter(origin_frame.copy(), mask.astype('uint8'), mask_color, mask_alpha, contour_color, contour_width)
-        # painted_image = Image.fromarray(painted_image)
         return mask.astype(np.uint8), logit, outline
 
     def segment_with_box(self, origin_frame, bbox):
@@ -144,29 +128,3 @@ class Segmentor:
         )
         
         return masks
-
-# if __name__ == "__main__":
-#     points = np.array([[500, 375], [1125, 625]])
-#     labels = np.array([1, 1])
-#     image = cv2.imread('/hhd3/gaoshang/truck.jpg')
-#     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    
-#     sam_controler = initialize()
-#     mask, logit, painted_image_full = first_frame_click(sam_controler,image, points, labels, multimask=True)
-#     painted_image = mask_painter2(image, mask.astype('uint8'), background_alpha=0.8)
-#     painted_image = cv2.cvtColor(painted_image, cv2.COLOR_RGB2BGR)  # numpy array (h, w, 3)
-#     cv2.imwrite('/hhd3/gaoshang/truck_point.jpg', painted_image)
-#     cv2.imwrite('/hhd3/gaoshang/truck_change.jpg', image)
-#     painted_image_full.save('/hhd3/gaoshang/truck_point_full.jpg')
-    
-#     mask, logit, painted_image_full = interact_loop(sam_controler,image,True, points, np.array([1, 0]), logit, multimask=True)
-#     painted_image = mask_painter2(image, mask.astype('uint8'), background_alpha=0.8)
-#     painted_image = cv2.cvtColor(painted_image, cv2.COLOR_RGB2BGR)  # numpy array (h, w, 3)
-#     cv2.imwrite('/hhd3/gaoshang/truck_same.jpg', painted_image)
-#     painted_image_full.save('/hhd3/gaoshang/truck_same_full.jpg')
-    
-#     mask, logit, painted_image_full = interact_loop(sam_controler,image, False, points, labels, multimask=True)
-#     painted_image = mask_painter2(image, mask.astype('uint8'), background_alpha=0.8)
-#     painted_image = cv2.cvtColor(painted_image, cv2.COLOR_RGB2BGR)  # numpy array (h, w, 3)
-#     cv2.imwrite('/hhd3/gaoshang/truck_diff.jpg', painted_image)
-#     painted_image_full.save('/hhd3/gaoshang/truck_diff_full.jpg')
