@@ -272,7 +272,7 @@ def seg_track_app():
                     with gr.Row():
                         input_img_seq = gr.File(label='Input Image-Seq').style(height=550)
                         with gr.Column(scale=0.25):
-                            unzip_button = gr.Button(value="unzip")
+                            extract_button = gr.Button(value="extract")
                             fps = gr.Slider(label='fps', minimum=5, maximum=50, value=30, step=1)
 
                 input_first_frame = gr.Image(label='Segment result of first frame',interactive=True).style(height=550)
@@ -330,7 +330,7 @@ def seg_track_app():
                                                 )
 
                 with gr.Row():
-                    with gr.Tab(label="SegTracker Args", scale=0.5):
+                    with gr.Tab(label="SegTracker Args"):
                         with gr.Row():
                             # args for tracking in video do segment-everthing
                             with gr.Column(scale=0.5):
@@ -414,7 +414,7 @@ def seg_track_app():
             ]
         )
 
-        unzip_button.click(
+        extract_button.click(
             fn=get_meta_from_img_seq,
             inputs=[
                 input_img_seq

@@ -1,4 +1,4 @@
-# 1.0-Version WebUI tutorial
+# Tutorial for WebUI 1.0 Version
 
 ## Note: 
 - We recommend reinitializing SegTracker by clicking the `Reset button` after processing each video to avoid encountering bugs.
