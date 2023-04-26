@@ -231,8 +231,8 @@ if __name__ == '__main__':
 	contour_alpha = 1       	# transparency of background, 0: no contour highlighted
 
 	# load input image and mask
-	input_image = np.array(Image.open('./test_img/painter_input_image.jpg').convert('RGB'))
-	input_mask = np.array(Image.open('./test_img/painter_input_mask.jpg').convert('P'))
+	input_image = np.array(Image.open('./debug/painter_input_image.jpg').convert('RGB'))
+	input_mask = np.array(Image.open('./debug/painter_input_mask.jpg').convert('P'))
 	
 	# paint
 	overall_time_1 = 0
@@ -276,13 +276,13 @@ if __name__ == '__main__':
 
 	# save
 	painted_image_00 = Image.fromarray(painted_image_00)
-	painted_image_00.save('./test_img/painter_output_image_00.png')
+	painted_image_00.save('./debug/painter_output_image_00.png')
 
 	painted_image_10 = Image.fromarray(painted_image_10)
-	painted_image_10.save('./test_img/painter_output_image_10.png')
+	painted_image_10.save('./debug/painter_output_image_10.png')
 
 	painted_image_01 = Image.fromarray(painted_image_01)
-	painted_image_01.save('./test_img/painter_output_image_01.png')
+	painted_image_01.save('./debug/painter_output_image_01.png')
 
 	painted_image_11 = Image.fromarray(painted_image_11)
-	painted_image_11.save('./test_img/painter_output_image_11.png')
+	painted_image_11.save('./debug/painter_output_image_11.png')
