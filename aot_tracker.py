@@ -12,7 +12,7 @@ from PIL import Image
 from skimage.morphology.binary import binary_dilation
 
 
-np.random.seed(0)
+np.random.seed(100)
 _palette = ((np.random.random((3*255))*0.7+0.3)*255).astype(np.uint8).tolist()
 _palette = [0,0,0]+_palette
 

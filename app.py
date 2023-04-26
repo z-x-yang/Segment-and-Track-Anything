@@ -240,6 +240,14 @@ def segment_everything(Seg_Tracker, aot_model, origin_frame, sam_gap, max_obj_nu
 
     return Seg_Tracker, masked_frame
 
+def add_new_object(Seg_Tracker):
+
+    prev_mask = Seg_Tracker.first_frame_mask
+    Seg_Tracker.update_origin_merged_mask(prev_mask)
+    print("Ready to add new object!")
+
+    return Seg_Tracker, [[], []]
+
 def tracking_objects(Seg_Tracker, input_video, input_img_seq, fps):
     return tracking_objects_in_video(Seg_Tracker, input_video, input_img_seq, fps)
 
@@ -600,7 +608,7 @@ def seg_track_app():
             ]
         )
 
-        
+        # Use grounding-dino to detect object
         detect_button.click(
             fn=gd_detect, 
             inputs=[
@@ -612,6 +620,18 @@ def seg_track_app():
                 ]
                 )
 
+        # Add new object
+        new_object_button.click(
+            fn=add_new_object,
+            inputs=
+            [
+                Seg_Tracker
+            ],
+            outputs=
+            [
+                Seg_Tracker, click_state
+            ]
+        )
 
         # Track object in video
         track_for_video.click(

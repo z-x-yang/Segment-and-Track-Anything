@@ -42,7 +42,7 @@ class SegTracker():
         self.min_new_obj_iou = segtracker_args['min_new_obj_iou']
         self.reference_objs_list = []
         self.object_idx = 1
-        self.origin_merged_mask = None  # init with 0 or segment-everthing
+        self.origin_merged_mask = None  # init with 0 / segment-everything or update
         self.first_frame_mask = None
 
         # debug
