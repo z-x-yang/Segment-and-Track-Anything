@@ -3,9 +3,11 @@ cd sam; pip install -e .
 cd -
 
 # Install Grounding-Dino
-cd src/GroundingDINO
+cd src
+git clone git@github.com:yamy-cheng/GroundingDINO.git
+cd GroundingDINO
 pip install -e .
-cd -
+cd ../..
 
 # Install other lib
 pip install numpy opencv-python pycocotools matplotlib Pillow scikit-image
