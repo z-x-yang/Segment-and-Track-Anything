@@ -275,7 +275,17 @@ class LongShortTermTransformerBlock(nn.Module):
                                                  use_linear=False,
                                                  dropout=lt_dropout)
 
-        MultiheadLocalAttention = MultiheadLocalAttentionV2 if enable_corr else MultiheadLocalAttentionV3
+        # MultiheadLocalAttention = MultiheadLocalAttentionV2 if enable_corr else MultiheadLocalAttentionV3
+        if enable_corr:
+            try:
+                import spatial_correlation_sampler
+                MultiheadLocalAttention = MultiheadLocalAttentionV2
+            except Exception as inst:
+                print(inst)
+                print("Failed to import PyTorch Correlation, For better efficiency, please install it.")
+                MultiheadLocalAttention = MultiheadLocalAttentionV3
+        else:
+            MultiheadLocalAttention = MultiheadLocalAttentionV3
         self.short_term_attn = MultiheadLocalAttention(d_model,
                                                        att_nhead,
                                                        dilation=local_dilation,
@@ -398,7 +408,17 @@ class LongShortTermTransformerBlockV2(nn.Module):
                                                  use_linear=False,
                                                  dropout=lt_dropout)
 
-        MultiheadLocalAttention = MultiheadLocalAttentionV2 if enable_corr else MultiheadLocalAttentionV3
+        # MultiheadLocalAttention = MultiheadLocalAttentionV2 if enable_corr else MultiheadLocalAttentionV3
+        if enable_corr:
+            try:
+                import spatial_correlation_sampler
+                MultiheadLocalAttention = MultiheadLocalAttentionV2
+            except Exception as inst:
+                print(inst)
+                print("Failed to import PyTorch Correlation, For better efficiency, please install it.")
+                MultiheadLocalAttention = MultiheadLocalAttentionV3
+        else:
+            MultiheadLocalAttention = MultiheadLocalAttentionV3
         self.short_term_attn = MultiheadLocalAttention(d_model,
                                                        att_nhead,
                                                        dilation=local_dilation,
@@ -545,6 +565,7 @@ class GatedPropagationModule(nn.Module):
                                           num_head=att_nhead,
                                           dilation=local_dilation,
                                           use_linear=False,
+                                          enable_corr=enable_corr,
                                           dropout=st_dropout,
                                           d_att=d_att,
                                           max_dis=max_local_dis,
