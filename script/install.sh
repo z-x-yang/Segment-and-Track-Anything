@@ -4,7 +4,7 @@ cd -
 
 # Install Grounding-Dino
 cd src
-git clone git@github.com:yamy-cheng/GroundingDINO.git
+git clone https://github.com/yamy-cheng/GroundingDINO.git
 cd GroundingDINO
 pip install -e .
 cd ../..
