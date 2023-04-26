@@ -92,9 +92,9 @@ class SegTracker():
         self.origin_merged_mask = updated_merged_mask
         self.object_idx += 1
 
-    def reset_origin_merged_mask(self):
-        self.origin_merged_mask = None
-        self.object_idx = 1
+    def reset_origin_merged_mask(self, mask, id):
+        self.origin_merged_mask = mask
+        self.object_idx = id
 
     def add_reference(self,frame,mask,frame_step=0):
         '''
@@ -212,6 +212,10 @@ class SegTracker():
         return refined_merged_mask
     
     def detect_and_seg(self, origin_frame, grounding_caption, box_threshold, text_threshold):
+        
+        # backup id and origin-merged-mask
+        bc_id = self.object_idx
+        bc_mask = self.origin_merged_mask
 
         # get annotated_frame and boxes
         annotated_frame, boxes = self.detector.run_grounding(origin_frame, grounding_caption, box_threshold, text_threshold)
@@ -222,7 +226,7 @@ class SegTracker():
             self.update_origin_merged_mask(refined_merged_mask)
 
         # reset origin_mask
-        self.reset_origin_merged_mask()
+        self.reset_origin_merged_mask(bc_mask, bc_id)
 
         return refined_merged_mask, annotated_frame
 
