@@ -22,6 +22,8 @@
       - Bilibili Video Link:[Tutorial for Interactively modify single-object mask for first frame of video](https://www.bilibili.com/video/BV1tM4115791/?spm_id_from=333.999.0.0)、[Tutorial for Interactively add object by click](https://www.bilibili.com/video/BV1Qs4y1A7d1/)、[Tutorial for Interactively add object by stroke](https://www.bilibili.com/video/BV1Lm4y117J4/?spm_id_from=333.999.0.0).
     - 1.0-Version is a developer version, please feel free to contact us if you encounter any bugs :bug:.
 
+- [2023/4/17] **SAMTrack**: Automatically segment and track anything in video!
+
 ## :fire:Demos
 <div align=center>
 

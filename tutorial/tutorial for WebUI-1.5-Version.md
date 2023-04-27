@@ -5,29 +5,43 @@
 
 
 ## Text-Prompts
-### 1. Switch to Text-Tab by clicking `Text` Tab
+### 1. Clone Grounding-DINO to `./src`
+```
+cd src
+git clone https://github.com/yamy-cheng/GroundingDINO.git
+cd GroundingDINO
+pip install -e .
+cd ../..
+```
+or 
+```
+bash script/install.sh
+```
+
+
+### 2. Switch to Text-Tab by clicking `Text` Tab
 
 <p align="center">
 <img src="./img/switch2textT.jpg" height="400">
 </p>
 
-### 2. Upload video or use example dicectly
+### 3. Upload video or use example dicectly
 
-### 3. Enter text to select the objects you are interested in
+### 4. Enter text to select the objects you are interested in
 - The `.` is used to split text, just like in the original Grounding-Dino setting.
 
 <p align="center">
 <img src="./img/enter_text.jpg" height="400", width="400">
 </p>
 
-### 4. Get mask of selected object by clicking `Detect` button
+### 5. Get mask of selected object by clicking `Detect` button
 - SAMTrack initialization may take some time.
 
 <p align="center">
 <img src="./img/detect_result.jpg" height="400", width="400">
 </p>
 
-### 5. Track in video
+### 6. Track in video
 
 ## Multi-Objects select
 ### 1. Once we interactively add an object mask, we can click the `Add new object button` to prepare to add a new object.
