@@ -16,8 +16,36 @@ def mask2bbox(mask):
 
     return np.array([[x0, y0], [x1, y1]]).astype(np.int64)
 
+def draw_outline(mask, frame):
+    _, binary_mask = cv2.threshold(mask, 0, 255, cv2.THRESH_BINARY)
+
+    contours, _ = cv2.findContours(binary_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    cv2.drawContours(frame, contours, -1, (0, 0, 255), 2)
+
+    return frame
+
+def draw_points(points, modes, frame):
+    neg_points = points[np.argwhere(modes==0)[:, 0]]
+    pos_points = points[np.argwhere(modes==1)[:, 0]]
+
+    for i in range(len(neg_points)):
+        point = neg_points[i]
+        cv2.circle(frame, (point[0], point[1]), 8, (255, 80, 80), -1)
+    
+    for i in range(len(pos_points)):
+        point = pos_points[i]
+        cv2.circle(frame, (point[0], point[1]), 8, (0, 153, 255), -1)
+
+    return frame
+
 if __name__ == '__main__':
-    mask = cv2.imread('./debug/painter_input_mask.jpg', -1)[2:, 2:]
-    bbox = mask2bbox(mask)
-    draw_0 = cv2.rectangle(mask, bbox[0], bbox[1], (0, 0, 255))
-    cv2.imwrite('./debug/rect.png', draw_0)
+    mask = cv2.imread('./debug/mask.jpg', cv2.IMREAD_GRAYSCALE)
+    frame = cv2.imread('./debug/frame.jpg')
+    draw_frame = draw_outline(mask, frame)
+    
+    cv2.imwrite('./debug/outline.jpg', draw_frame)
+
+    # bbox = mask2bbox(mask)
+    # draw_0 = cv2.rectangle(mask, bbox[0], bbox[1], (0, 0, 255))
+    # cv2.imwrite('./debug/rect.png', draw_0)

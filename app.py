@@ -22,35 +22,21 @@ import numpy as np
 import json
 from tool.transfer_tools import mask2bbox
 
-def pause_video(play_state):
-    print("user pause_video")
-    play_state.append(time.time())
-    return play_state
-
-def play_video(play_state):
-    print("user play_video")
-    play_state.append(time.time())
-    return play_state
-
 def clean():
     return None, None, None, None, None, None, [[], []]
 
-# convert points input to prompt state
-def get_prompt(click_state, click_input):
-    inputs = json.loads(click_input)
-    points = click_state[0]
-    labels = click_state[1]
-    for input in inputs:
-        points.append(input[:2])
-        labels.append(input[2])
-    click_state[0] = points
-    click_state[1] = labels
+def get_click_prompt(click_stack, point):
+
+    click_stack[0].append(point["coord"])
+    click_stack[1].append(point["mode"]
+    )
+    
     prompt = {
-        "prompt_type":["click"],
-        "input_point":click_state[0],
-        "input_label":click_state[1],
-        "multimask_output":"True",
+        "points_coord":click_stack[0],
+        "points_mode":click_stack[1],
+        "multimask":"True",
     }
+
     return prompt
 
 def get_meta_from_video(input_video):
@@ -58,8 +44,7 @@ def get_meta_from_video(input_video):
         return None, None, None
     print("get meta information of input video")
     cap = cv2.VideoCapture(input_video)
-    fps = cap.get(cv2.CAP_PROP_FPS)
-    # num_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    
     _, first_frame = cap.read()
     cap.release()
 
@@ -135,72 +120,75 @@ def init_SegTracker_Stroke(aot_model, sam_gap, max_obj_num, points_per_side, ori
     Seg_Tracker.restart_tracker()
     return Seg_Tracker, origin_frame, [[], []], origin_frame
 
-def undo_click_state_and_refine_seg(Seg_Tracker, origin_frame, click_state, aot_model, sam_gap, max_obj_num, points_per_side):
-
+def undo_click_stack_and_refine_seg(Seg_Tracker, origin_frame, click_stack, aot_model, sam_gap, max_obj_num, points_per_side):
+    
     if Seg_Tracker is None:
         return Seg_Tracker, origin_frame, [[], []]
+
+    print("Undo!")
+    if len(click_stack[0]) > 0:
+        click_stack[0] = click_stack[0][: -1]
+        click_stack[1] = click_stack[1][: -1]
     
-    if len(click_state[0]) > 0:
-        click_state[0] = click_state[0][: -1]
-        click_state[1] = click_state[1][: -1]
-    
-    if len(click_state[0]) > 0:
+    if len(click_stack[0]) > 0:
         prompt = {
-        "prompt_type":["click"],
-        "input_point":click_state[0],
-        "input_label":click_state[1],
-        "multimask_output":"True",
+            "points_coord":click_stack[0],
+            "points_mode":click_stack[1],
+            "multimask":"True",
         }
 
-        masked_frame = refine_acc_prompt(Seg_Tracker, prompt, origin_frame)
-        return Seg_Tracker, masked_frame, click_state
+        masked_frame = seg_acc_click(Seg_Tracker, prompt, origin_frame)
+        return Seg_Tracker, masked_frame, click_stack
     else:
         # Seg_Tracker, _, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
         return Seg_Tracker, origin_frame, [[], []]
 
 
-def refine_acc_prompt(Seg_Tracker, prompt, origin_frame):
-    # Refine acc to prompt
-    predicted_mask, masked_frame = Seg_Tracker.refine_first_frame_click( 
+def seg_acc_click(Seg_Tracker, prompt, origin_frame):
+    # seg acc to click
+    predicted_mask, masked_frame = Seg_Tracker.seg_acc_click( 
                                                       origin_frame=origin_frame, 
-                                                      points=np.array(prompt["input_point"]),
-                                                      labels=np.array(prompt["input_label"]),
-                                                      multimask=prompt["multimask_output"],
+                                                      coords=np.array(prompt["points_coord"]),
+                                                      modes=np.array(prompt["points_mode"]),
+                                                      multimask=prompt["multimask"],
                                                     )
 
     Seg_Tracker = SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask)
 
     return masked_frame
 
-def sam_refine(Seg_Tracker, origin_frame, point_prompt, click_state, aot_model, sam_gap, max_obj_num, points_per_side, evt:gr.SelectData):
+def sam_click(Seg_Tracker, origin_frame, point_mode, click_stack, aot_model, sam_gap, max_obj_num, points_per_side, evt:gr.SelectData):
     """
     Args:
-        template_frame: PIL.Image
-        point_prompt: flag for positive or negative button click
-        click_state: [[points], [labels]]
+        origin_frame: nd.array
+        click_stack: [[coordinate], [point_mode]]
     """
-    if point_prompt == "Positive":
-        coordinate = "[[{},{},1]]".format(evt.index[0], evt.index[1])
+
+    print("Click")
+
+    if point_mode == "Positive":
+        point = {"coord": [evt.index[0], evt.index[1]], "mode": 1}
     else:
         # TODO：add everything positive points
-        coordinate = "[[{},{},0]]".format(evt.index[0], evt.index[1])
+        point = {"coord": [evt.index[0], evt.index[1]], "mode": 0}
 
     if Seg_Tracker is None:
         Seg_Tracker, _, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
-    # prompt for sam model
-    prompt = get_prompt(click_state=click_state, click_input=coordinate)
+    # get click prompts for sam to predict mask
+    click_prompt = get_click_prompt(click_stack, point)
 
     # Refine acc to prompt
-    masked_frame =  refine_acc_prompt(Seg_Tracker, prompt, origin_frame)
+    masked_frame = seg_acc_click(Seg_Tracker, click_prompt, origin_frame)
 
-    return Seg_Tracker, masked_frame, click_state
+    return Seg_Tracker, masked_frame, click_stack
 
 def sam_stroke(Seg_Tracker, origin_frame, drawing_board, aot_model, sam_gap, max_obj_num, points_per_side):
 
     if Seg_Tracker is None:
         Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
-
+    
+    print("Stroke")
     mask = drawing_board["mask"]
     bbox = mask2bbox(mask[:, :, 0])  # bbox: [[x0, y0], [x1, y1]]
     predicted_mask, masked_frame = Seg_Tracker.seg_acc_bbox(origin_frame, bbox)
@@ -213,6 +201,7 @@ def gd_detect(Seg_Tracker, origin_frame, grounding_caption, box_threshold, text_
     if Seg_Tracker is None:
         Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
+    print("Detect")
     predicted_mask, annotated_frame= Seg_Tracker.detect_and_seg(origin_frame, grounding_caption, box_threshold, text_threshold)
 
     Seg_Tracker = SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask)
@@ -226,6 +215,8 @@ def segment_everything(Seg_Tracker, aot_model, origin_frame, sam_gap, max_obj_nu
     
     if Seg_Tracker is None:
         Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
+
+    print("Everything")
 
     frame_idx = 0
 
@@ -249,6 +240,7 @@ def add_new_object(Seg_Tracker):
     return Seg_Tracker, [[], []]
 
 def tracking_objects(Seg_Tracker, input_video, input_img_seq, fps):
+    print("Start tracking !")
     return tracking_objects_in_video(Seg_Tracker, input_video, input_img_seq, fps)
 
 def seg_track_app():
@@ -267,11 +259,7 @@ def seg_track_app():
             '''
         )
 
-        """
-        state for 
-        """
-        play_state = gr.State([])
-        click_state = gr.State([[],[]])
+        click_stack = gr.State([[],[]]) # Storage clicks status
         origin_frame = gr.State(None)
         Seg_Tracker = gr.State(None)
 
@@ -287,8 +275,6 @@ def seg_track_app():
                 tab_video_input = gr.Tab(label="Video type input")
                 with tab_video_input:
                     input_video = gr.Video(label='Input video').style(height=550)
-                    input_video.play(fn=play_video, inputs=play_state, outputs=play_state, scroll_to_output=True, show_progress=True)
-                    input_video.pause(fn=pause_video, inputs=play_state, outputs=play_state)
                 
                 tab_img_seq_input = gr.Tab(label="Image-Seq type input")
                 with tab_img_seq_input:
@@ -305,7 +291,7 @@ def seg_track_app():
                 with tab_everything:
                     with gr.Row():
                         seg_every_first_frame = gr.Button(value="Segment everything for first frame", interactive=True)
-                        point_prompt = gr.Radio(
+                        point_mode = gr.Radio(
                             choices=["Positive"],
                             value="Positive",
                             label="Point Prompt",
@@ -324,7 +310,7 @@ def seg_track_app():
                 tab_click = gr.Tab(label="Click")
                 with tab_click:
                     with gr.Row():
-                        point_prompt = gr.Radio(
+                        point_mode = gr.Radio(
                                     choices=["Positive",  "Negative"],
                                     value="Positive",
                                     label="Point Prompt",
@@ -422,12 +408,6 @@ def seg_track_app():
 
             with gr.Column(scale=0.5):
                 output_video = gr.Video(label='Output video').style(height=550)
-
-                # TODO: V2-Interactively correct intermediate frames
-                # image_output = gr.Image(type="pil", interactive=True, elem_id="image_output").style(height=360)
-                # image_selection_slider = gr.Slider(minimum=0, maximum=100, step=0.1, value=0, label="Image Selection", interactive=True)
-                # correct_track_button = gr.Button(value="Interactive Correction")
-
                 output_mask = gr.File(label="Predicted masks")
 
     ##########################################################
@@ -467,7 +447,7 @@ def seg_track_app():
                 input_first_frame,
                 origin_frame,
                 drawing_board,
-                click_state,
+                click_stack,
             ]
         )
 
@@ -481,7 +461,7 @@ def seg_track_app():
                 input_first_frame,
                 origin_frame,
                 drawing_board,
-                click_state,
+                click_stack,
             ]
         )
 
@@ -509,7 +489,7 @@ def seg_track_app():
                 origin_frame
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_state
+                Seg_Tracker, input_first_frame, click_stack
             ],
             queue=False,
             
@@ -525,7 +505,7 @@ def seg_track_app():
                 origin_frame
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_state
+                Seg_Tracker, input_first_frame, click_stack
             ],
             queue=False,
         )
@@ -540,7 +520,7 @@ def seg_track_app():
                 origin_frame,
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_state, drawing_board
+                Seg_Tracker, input_first_frame, click_stack, drawing_board
             ],
             queue=False,
         )
@@ -555,7 +535,7 @@ def seg_track_app():
                 origin_frame
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_state
+                Seg_Tracker, input_first_frame, click_stack
             ],
             queue=False,
         )
@@ -580,16 +560,16 @@ def seg_track_app():
         
         # Interactively modify the mask acc click
         input_first_frame.select(
-            fn=sam_refine,
+            fn=sam_click,
             inputs=[
-                Seg_Tracker, origin_frame, point_prompt, click_state,
+                Seg_Tracker, origin_frame, point_mode, click_stack,
                 aot_model,
                 sam_gap,
                 max_obj_num,
                 points_per_side,
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_state
+                Seg_Tracker, input_first_frame, click_stack
             ]
         )
 
@@ -629,7 +609,7 @@ def seg_track_app():
             ],
             outputs=
             [
-                Seg_Tracker, click_state
+                Seg_Tracker, click_stack
             ]
         )
 
@@ -660,7 +640,7 @@ def seg_track_app():
                 origin_frame
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_state
+                Seg_Tracker, input_first_frame, click_stack
             ],
             queue=False,
             show_progress=False
@@ -676,7 +656,7 @@ def seg_track_app():
         #         origin_frame
         #     ],
         #     outputs=[
-        #         Seg_Tracker, input_first_frame, click_state
+        #         Seg_Tracker, input_first_frame, click_stack
         #     ],
         #     queue=False,
         #     show_progress=False
@@ -692,7 +672,7 @@ def seg_track_app():
         #         origin_frame
         #     ],
         #     outputs=[
-        #         Seg_Tracker, input_first_frame, click_state
+        #         Seg_Tracker, input_first_frame, click_stack
         #     ],
         #     queue=False,
         #     show_progress=False
@@ -708,7 +688,7 @@ def seg_track_app():
         #         origin_frame,
         #     ],
         #     outputs=[
-        #         Seg_Tracker, input_first_frame, click_state, drawing_board
+        #         Seg_Tracker, input_first_frame, click_stack, drawing_board
         #     ],
         #     queue=False,
         #     show_progress=False
@@ -716,30 +696,30 @@ def seg_track_app():
 
         # Undo click
         click_undo_but.click(
-            fn = undo_click_state_and_refine_seg,
+            fn = undo_click_stack_and_refine_seg,
             inputs=[
-                Seg_Tracker, origin_frame, click_state,
+                Seg_Tracker, origin_frame, click_stack,
                 aot_model,
                 sam_gap,
                 max_obj_num,
                 points_per_side,
             ],
             outputs=[
-               Seg_Tracker, input_first_frame, click_state
+               Seg_Tracker, input_first_frame, click_stack
             ]
         )
 
         every_undo_but.click(
-            fn = undo_click_state_and_refine_seg,
+            fn = undo_click_stack_and_refine_seg,
             inputs=[
-                Seg_Tracker, origin_frame, click_state,
+                Seg_Tracker, origin_frame, click_stack,
                 aot_model,
                 sam_gap,
                 max_obj_num,
                 points_per_side,
             ],
             outputs=[
-               Seg_Tracker, input_first_frame, click_state
+               Seg_Tracker, input_first_frame, click_stack
             ]
         )
         

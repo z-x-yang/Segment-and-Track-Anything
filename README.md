@@ -37,7 +37,7 @@ This video showcases the segmentation and tracking capabilities of SAM-Track in 
 ## :calendar:TODO
  - [x] Colab notebook: Completed on April 25th, 2023.
  - [x] 1.0-Version Interactive WebUI: Completed on April 23rd, 2023.
-    - We will create a feature that enables users to interactively modify the mask for the initial video frame according to their needs. The interactive segmentation capabilities of Segment-and-Track-Anything is demonstrated in [Demo1](https://www.youtube.com/watch?v=ctnD03w-5VA) and [Demo2](https://www.youtube.com/watch?v=DfCUGUxALYo).
+    - We will create a feature that enables users to interactively modify the mask for the initial video frame according to their needs. The interactive segmentation capabilities of Segment-and-Track-Anything is demonstrated in [Demo1](https://www.youtube.com/watch?v=Xyd54AngvV8&feature=youtu.be) and [Demo2](https://www.youtube.com/watch?v=eZrdna8JkoQ).
     - Bilibili Video Link: [Demo1](https://www.bilibili.com/video/BV1JL411v7uE/), [Demo2](https://www.bilibili.com/video/BV1Qs4y1w763/).
  - [x] 1.5-Version Interactive WebUI: Completed on April 26th, 2023.
     - We will develop a function that allows interactive modification of multi-object masks for the first frame of a video. This function will be based on Version 1.0.

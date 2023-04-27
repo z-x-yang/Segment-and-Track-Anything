@@ -4,28 +4,11 @@ sys.path.append("./sam")
 from sam.segment_anything import sam_model_registry, SamAutomaticMaskGenerator
 from aot_tracker import get_aot
 import numpy as np
-import torch
 from tool.segmentor import Segmentor
 from tool.detector import Detector
-
+from tool.transfer_tools import draw_outline, draw_points
 import cv2
-import os
-from PIL import Image
-import gc
-from aot_tracker import _palette
 from seg_track_anything import draw_mask
-from tool.painter import  point_painter
-
-mask_color = 3
-mask_alpha = 0.7
-contour_color = 1
-contour_width = 5
-point_color_ne = 8
-point_color_ps = 50
-point_alpha = 0.9
-point_radius = 15
-contour_color = 2
-contour_width = 5
 
 
 class SegTracker():
@@ -48,7 +31,8 @@ class SegTracker():
         # debug
         self.everything_points = []
         self.everything_labels = []
-       
+        print("SegTracker has been initialized")
+
     def seg(self,frame):
         '''
         Arguments:
@@ -159,11 +143,10 @@ class SegTracker():
 
     def seg_acc_bbox(self, origin_frame: np.ndarray, bbox: np.ndarray,):
         ''''
-        parameters:
-            origin_frame: H, W, C
-            bbox: [[x0, y0], [x1, y1]]
+            parameters:
+                origin_frame: H, W, C
+                bbox: [[x0, y0], [x1, y1]]
         '''
-
         # get interactive_mask
         interactive_mask = self.sam.segment_with_box(origin_frame, bbox)[0]
         refined_merged_mask = self.add_mask(interactive_mask)
@@ -176,13 +159,15 @@ class SegTracker():
 
         return refined_merged_mask, masked_frame
 
-    def refine_first_frame_click(self, origin_frame: np.ndarray, points:np.ndarray, labels: np.ndarray, multimask=True):
+    def seg_acc_click(self, origin_frame, coords, modes, multimask=True):
         '''
-        it is used in first frame in video
-        return: mask, logit, painted image(mask+point)
+            parameters:
+                origin_frame: H, W, C
+                coords: nd.array [[x, y]]
+                modes: nd.array [[1]]
         '''
         # get interactive_mask
-        interactive_mask, logit, outline = self.sam.segment_with_click(origin_frame, points, labels, multimask)
+        interactive_mask = self.sam.segment_with_click(origin_frame, coords, modes, multimask)
 
         refined_merged_mask = self.add_mask(interactive_mask)
 
@@ -192,12 +177,11 @@ class SegTracker():
         # draw points
         # self.everything_labels = np.array(self.everything_labels).astype(np.int64)
         # self.everything_points = np.array(self.everything_points).astype(np.int64)
-        # masked_frame = point_painter(masked_frame, np.squeeze(self.everything_points[np.argwhere(self.everything_labels==1)], axis = 1), point_color_ps, point_alpha, point_radius, contour_color, contour_width)
 
-        masked_frame = point_painter(masked_frame, np.squeeze(points[np.argwhere(labels==0)], axis = 1), point_color_ne, point_alpha, point_radius, contour_color, contour_width)
-        masked_frame = point_painter(masked_frame, np.squeeze(points[np.argwhere(labels==1)], axis = 1), point_color_ps, point_alpha, point_radius, contour_color, contour_width)
+        masked_frame = draw_points(coords, modes, masked_frame)
+
         # draw outline
-        masked_frame = np.where(outline > 0, outline, masked_frame)
+        masked_frame = draw_outline(interactive_mask, masked_frame)
 
         return refined_merged_mask, masked_frame
 
@@ -233,37 +217,8 @@ class SegTracker():
 if __name__ == '__main__':
     from model_args import segtracker_args,sam_args,aot_args
 
-    # ------------ draw point test --------------------------
     Seg_Tracker = SegTracker(segtracker_args, sam_args, aot_args)
-    # Seg_Tracker.restart_tracker()
-
-    # origin_frame = cv2.imread('/data2/cym/Seg_Tra_any/Segment-and-Track-Anything/debug/point.png')
-    # origin_frame = cv2.cvtColor(origin_frame, cv2.COLOR_BGR2RGB)
-
-    # merged_mask = Seg_Tracker.seg(origin_frame)
-    # cv2.imwrite('./debug/merged_mask.png', -1)
-
-    # # two positive point
-    # point = np.array([[250, 370], [300, 420], [480, 150]])
-    # label = np.array([1, 0, 1])
-
-    # prompt = {
-    #     "prompt_type":["click"],
-    #     "input_point":point,
-    #     "input_label":label,
-    #     "multimask_output":"True",
-    # }
-
-    # predicted_mask, masked_frame = Seg_Tracker.refine_first_frame_click( 
-    #     origin_frame=origin_frame, 
-    #     points=np.array(prompt["input_point"]),
-    #     labels=np.array(prompt["input_label"]),
-    #     multimask=prompt["multimask_output"],
-    # )
     
-    # masked_frame = Image.fromarray(masked_frame)
-    # masked_frame.save('./debug/masked_frame.png')
-
     # ------------------ detect test ----------------------
     
     Seg_Tracker.init_detector()
