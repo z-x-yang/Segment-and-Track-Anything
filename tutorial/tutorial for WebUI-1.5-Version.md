@@ -7,17 +7,8 @@
 ## Text-Prompts
 ### 1. Clone Grounding-DINO to `./src`
 ```
-cd src
-git clone https://github.com/IDEA-Research/GroundingDINO.git
-cd GroundingDINO
-pip install -e .
-cd ../..
+pip install -e git+https://github.com/IDEA-Research/GroundingDINO.git@main#egg=GroundingDINO
 ```
-or 
-```
-bash script/install.sh
-```
-
 
 ### 2. Switch to Text-Tab by clicking `Text` Tab
 
