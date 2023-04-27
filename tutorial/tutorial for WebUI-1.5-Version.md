@@ -8,7 +8,7 @@
 ### 1. Clone Grounding-DINO to `./src`
 ```
 cd src
-git clone https://github.com/yamy-cheng/GroundingDINO.git
+git clone https://github.com/IDEA-Research/GroundingDINO.git
 cd GroundingDINO
 pip install -e .
 cd ../..
