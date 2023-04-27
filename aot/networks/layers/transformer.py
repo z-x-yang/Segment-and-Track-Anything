@@ -560,6 +560,13 @@ class GatedPropagationModule(nn.Module):
                                     top_k=-1,
                                     expand_ratio=expand_ratio)
 
+        if enable_corr:
+            try:
+                import spatial_correlation_sampler
+            except Exception as inst:
+                print(inst)
+                print("Failed to import PyTorch Correlation, For better efficiency, please install it.")
+                enable_corr = False
         self.short_term_attn = LocalGatedPropagation(d_qk=self.d_model,
                                           d_vu=self.d_model * 2,
                                           num_head=att_nhead,

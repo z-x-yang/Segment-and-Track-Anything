@@ -821,7 +821,7 @@ class LocalGatedPropagation(nn.Module):
                 n, self.num_head, self.window_size * self.window_size, h * w)
         else:
             unfolded_k = self.pad_and_unfold(k).view(
-                n * self.num_head, hidden_dim,
+                n * self.num_head, self.d_att,
                 self.window_size * self.window_size, h, w)
             qk = (q.unsqueeze(2) * unfolded_k).sum(dim=1).view(
                 n, self.num_head, self.window_size * self.window_size, h * w)
