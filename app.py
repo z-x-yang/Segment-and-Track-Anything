@@ -41,7 +41,8 @@ def get_click_prompt(click_stack, point):
 
 def get_meta_from_video(input_video):
     if input_video is None:
-        return None, None, None
+        return None, None, None, ""
+        
     print("get meta information of input video")
     cap = cv2.VideoCapture(input_video)
     
@@ -50,11 +51,11 @@ def get_meta_from_video(input_video):
 
     first_frame = cv2.cvtColor(first_frame, cv2.COLOR_BGR2RGB)
 
-    return first_frame, first_frame, first_frame
+    return first_frame, first_frame, first_frame, ""
 
 def get_meta_from_img_seq(input_img_seq):
     if input_img_seq is None:
-        return None, None, None
+        return None, None, None, ""
 
     print("get meta information of img seq")
     # Create dir
@@ -86,7 +87,7 @@ def SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask):
 def init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame):
     
     if origin_frame is None:
-        return None, origin_frame, [[], []]
+        return None, origin_frame, [[], []], ""
 
     # reset aot args
     aot_args["model"] = aot_model
@@ -100,7 +101,7 @@ def init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_fra
     Seg_Tracker = SegTracker(segtracker_args, sam_args, aot_args)
     Seg_Tracker.restart_tracker()
 
-    return Seg_Tracker, origin_frame, [[], []]
+    return Seg_Tracker, origin_frame, [[], []], ""
 
 def init_SegTracker_Stroke(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame):
     
@@ -173,7 +174,7 @@ def sam_click(Seg_Tracker, origin_frame, point_mode, click_stack, aot_model, sam
         point = {"coord": [evt.index[0], evt.index[1]], "mode": 0}
 
     if Seg_Tracker is None:
-        Seg_Tracker, _, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
+        Seg_Tracker, _, _, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
     # get click prompts for sam to predict mask
     click_prompt = get_click_prompt(click_stack, point)
@@ -186,7 +187,7 @@ def sam_click(Seg_Tracker, origin_frame, point_mode, click_stack, aot_model, sam
 def sam_stroke(Seg_Tracker, origin_frame, drawing_board, aot_model, sam_gap, max_obj_num, points_per_side):
 
     if Seg_Tracker is None:
-        Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
+        Seg_Tracker, _ , _, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
     
     print("Stroke")
     mask = drawing_board["mask"]
@@ -199,7 +200,7 @@ def sam_stroke(Seg_Tracker, origin_frame, drawing_board, aot_model, sam_gap, max
 
 def gd_detect(Seg_Tracker, origin_frame, grounding_caption, box_threshold, text_threshold, aot_model, sam_gap, max_obj_num, points_per_side):
     if Seg_Tracker is None:
-        Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
+        Seg_Tracker, _ , _, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
     print("Detect")
     predicted_mask, annotated_frame= Seg_Tracker.detect_and_seg(origin_frame, grounding_caption, box_threshold, text_threshold)
@@ -214,7 +215,7 @@ def gd_detect(Seg_Tracker, origin_frame, grounding_caption, box_threshold, text_
 def segment_everything(Seg_Tracker, aot_model, origin_frame, sam_gap, max_obj_num, points_per_side):
     
     if Seg_Tracker is None:
-        Seg_Tracker, _ , _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
+        Seg_Tracker, _ , _, _ = init_SegTracker(aot_model, sam_gap, max_obj_num, points_per_side, origin_frame)
 
     print("Everything")
 
@@ -421,7 +422,7 @@ def seg_track_app():
                 input_video
             ],
             outputs=[
-                input_first_frame, origin_frame, drawing_board
+                input_first_frame, origin_frame, drawing_board, grounding_caption
             ]
         )
 
@@ -432,7 +433,7 @@ def seg_track_app():
                 input_img_seq
             ],
             outputs=[
-                input_first_frame, origin_frame, drawing_board
+                input_first_frame, origin_frame, drawing_board, grounding_caption
             ]
         )
         
@@ -489,7 +490,7 @@ def seg_track_app():
                 origin_frame
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_stack
+                Seg_Tracker, input_first_frame, click_stack, grounding_caption
             ],
             queue=False,
             
@@ -505,7 +506,7 @@ def seg_track_app():
                 origin_frame
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_stack
+                Seg_Tracker, input_first_frame, click_stack, grounding_caption
             ],
             queue=False,
         )
@@ -535,7 +536,7 @@ def seg_track_app():
                 origin_frame
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_stack
+                Seg_Tracker, input_first_frame, click_stack, grounding_caption
             ],
             queue=False,
         )
@@ -640,7 +641,7 @@ def seg_track_app():
                 origin_frame
             ],
             outputs=[
-                Seg_Tracker, input_first_frame, click_stack
+                Seg_Tracker, input_first_frame, click_stack, grounding_caption
             ],
             queue=False,
             show_progress=False
@@ -656,7 +657,7 @@ def seg_track_app():
         #         origin_frame
         #     ],
         #     outputs=[
-        #         Seg_Tracker, input_first_frame, click_stack
+        #         Seg_Tracker, input_first_frame, click_stack, grounding_caption
         #     ],
         #     queue=False,
         #     show_progress=False
@@ -672,7 +673,7 @@ def seg_track_app():
         #         origin_frame
         #     ],
         #     outputs=[
-        #         Seg_Tracker, input_first_frame, click_stack
+        #         Seg_Tracker, input_first_frame, click_stack, grounding_caption
         #     ],
         #     queue=False,
         #     show_progress=False
