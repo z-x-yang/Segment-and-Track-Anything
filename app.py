@@ -42,7 +42,7 @@ def get_click_prompt(click_stack, point):
 def get_meta_from_video(input_video):
     if input_video is None:
         return None, None, None, ""
-        
+
     print("get meta information of input video")
     cap = cv2.VideoCapture(input_video)
     
@@ -283,7 +283,7 @@ def seg_track_app():
                         input_img_seq = gr.File(label='Input Image-Seq').style(height=550)
                         with gr.Column(scale=0.25):
                             extract_button = gr.Button(value="extract")
-                            fps = gr.Slider(label='fps', minimum=5, maximum=50, value=30, step=1)
+                            fps = gr.Slider(label='fps', minimum=5, maximum=50, value=8, step=1)
 
                 input_first_frame = gr.Image(label='Segment result of first frame',interactive=True).style(height=550)
 

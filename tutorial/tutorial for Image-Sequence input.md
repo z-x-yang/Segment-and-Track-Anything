@@ -4,13 +4,14 @@
 **The structure of test-data-seq.zip must be like this. Please confirm that the image names are in ascending order.**
 ```
 - test-data-seq
-    - 0.png
-    - 1.png
-    - 2.png
-    - 3.png
+    - 000000.png
+    - 000001.png
+    - 000002.png
+    - 000003.png
     ....
-    - x.png
+    - 0000xx.png
 ```
+**Note: Please ensure that the image naming method is in ascending alphabetical order.**
 
 ## Use WebUI get test Image-Sequence data
 ### 1. Switch to the `Image-Seq type input` tab.
