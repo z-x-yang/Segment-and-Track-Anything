@@ -180,7 +180,7 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name):
         frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
         pred_mask = pred_list[frame_idx]
         masked_frame = draw_mask(frame, pred_mask)
-        cv2.imwrite(f"{io_args['output_masked_frame_dir']}/{frame_idx}.png", masked_frame[:, :, ::-1])
+        cv2.imwrite(f"{io_args['output_masked_frame_dir']}/{str(frame_idx).zfill(5)}.png", masked_frame[:, :, ::-1])
 
         masked_pred_list.append(masked_frame)
         masked_frame = cv2.cvtColor(masked_frame,cv2.COLOR_RGB2BGR)
@@ -267,17 +267,18 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps)
 
     frame_idx = 0
     for img_path in imgs_path:
+        frame_name = os.path.basename(img_path).split('.')[0]
         frame = cv2.imread(img_path)
         frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
 
         pred_mask = pred_list[frame_idx]
         masked_frame = draw_mask(frame, pred_mask)
         masked_pred_list.append(masked_frame)
-        cv2.imwrite(f"{io_args['output_masked_frame_dir']}/{frame_idx}.png", masked_frame[:, :, ::-1])
+        cv2.imwrite(f"{io_args['output_masked_frame_dir']}/{frame_name}.png", masked_frame[:, :, ::-1])
 
         masked_frame = cv2.cvtColor(masked_frame,cv2.COLOR_RGB2BGR)
         out.write(masked_frame)
-        print('frame {} writed'.format(frame_idx),end='\r')
+        print('frame {} writed'.format(frame_name),end='\r')
         frame_idx += 1
     out.release()
     print("\n{} saved".format(io_args['output_video']))
