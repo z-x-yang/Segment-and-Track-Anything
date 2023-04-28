@@ -2,7 +2,7 @@
 ckpt/*
 assets/*masks
 assets/*mp4
-assets/*zip
+# assets/*zip
 assets/*gif
 *.pyc
 debug

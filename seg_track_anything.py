@@ -123,9 +123,9 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name):
             frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
             
             if frame_idx == 0:
-                pred_list.append(SegTracker.first_frame_mask)
-                frame_idx += 1
-                continue
+                pred_mask = SegTracker.first_frame_mask
+                torch.cuda.empty_cache()
+                gc.collect()
             elif (frame_idx % sam_gap) == 0:
                 seg_mask = SegTracker.seg(frame)
                 torch.cuda.empty_cache()
@@ -229,9 +229,9 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps)
             frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
             
             if frame_idx == 0:
-                pred_list.append(SegTracker.first_frame_mask)
-                frame_idx += 1
-                continue
+                pred_mask = SegTracker.first_frame_mask
+                torch.cuda.empty_cache()
+                gc.collect()
             elif (frame_idx % sam_gap) == 0:
                 seg_mask = SegTracker.seg(frame)
                 torch.cuda.empty_cache()
