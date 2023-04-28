@@ -25,7 +25,7 @@ class SegTracker():
         self.min_new_obj_iou = segtracker_args['min_new_obj_iou']
         self.reference_objs_list = []
         self.object_idx = 1
-        self.origin_merged_mask = None  # init with 0 / segment-everything or update
+        self.origin_merged_mask = None  # init by segment-everything or update
         self.first_frame_mask = None
 
         # debug
@@ -116,7 +116,7 @@ class SegTracker():
     
     def find_new_objs(self, track_mask, seg_mask):
         '''
-        Compare tracked results from AOT nad segmented results from SAM. Select objects from background if they are not tracked.
+        Compare tracked results from AOT with segmented results from SAM. Select objects from background if they are not tracked.
         Arguments:
             track_mask: numpy array (h,w)
             seg_mask: numpy array (h,w)
@@ -143,9 +143,13 @@ class SegTracker():
 
     def seg_acc_bbox(self, origin_frame: np.ndarray, bbox: np.ndarray,):
         ''''
-            parameters:
-                origin_frame: H, W, C
-                bbox: [[x0, y0], [x1, y1]]
+        Use bbox-prompt to get mask
+        Parameters:
+            origin_frame: H, W, C
+            bbox: [[x0, y0], [x1, y1]]
+        Return:
+            refined_merged_mask: numpy array (h, w)
+            masked_frame: numpy array (h, w, c)
         '''
         # get interactive_mask
         interactive_mask = self.sam.segment_with_box(origin_frame, bbox)[0]
@@ -159,12 +163,16 @@ class SegTracker():
 
         return refined_merged_mask, masked_frame
 
-    def seg_acc_click(self, origin_frame, coords, modes, multimask=True):
+    def seg_acc_click(self, origin_frame: np.ndarray, coords: np.ndarray, modes: np.ndarray, multimask=True):
         '''
-            parameters:
-                origin_frame: H, W, C
-                coords: nd.array [[x, y]]
-                modes: nd.array [[1]]
+        Use point-prompt to get mask
+        Parameters:
+            origin_frame: H, W, C
+            coords: nd.array [[x, y]]
+            modes: nd.array [[1]]
+        Return:
+            refined_merged_mask: numpy array (h, w)
+            masked_frame: numpy array (h, w, c)
         '''
         # get interactive_mask
         interactive_mask = self.sam.segment_with_click(origin_frame, coords, modes, multimask)
@@ -185,8 +193,14 @@ class SegTracker():
 
         return refined_merged_mask, masked_frame
 
-    def add_mask(self, interactive_mask):
-
+    def add_mask(self, interactive_mask: np.ndarray):
+        '''
+        Merge interactive mask with self.origin_merged_mask
+        Parameters:
+            interactive_mask: numpy array (h, w)
+        Return:
+            refined_merged_mask: numpy array (h, w)
+        '''
         if self.origin_merged_mask is None:
             self.origin_merged_mask = np.zeros(interactive_mask.shape,dtype=np.uint8)
 
@@ -195,8 +209,13 @@ class SegTracker():
 
         return refined_merged_mask
     
-    def detect_and_seg(self, origin_frame, grounding_caption, box_threshold, text_threshold):
-        
+    def detect_and_seg(self, origin_frame: np.ndarray, grounding_caption, box_threshold, text_threshold):
+        '''
+        Using Grounding-DINO to detect object acc Text-prompts
+        Retrun:
+            refined_merged_mask: numpy array (h, w)
+            annotated_frame: numpy array (h, w, 3)
+        '''
         # backup id and origin-merged-mask
         bc_id = self.object_idx
         bc_mask = self.origin_merged_mask

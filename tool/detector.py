@@ -53,7 +53,8 @@ class Detector:
         
         transfered_boxes = np.array(transfered_boxes)
         return transfered_boxes
-
+        
+    @torch.no_grad()
     def run_grounding(self, origin_frame, grounding_caption, box_threshold, text_threshold):
         '''
             return:

@@ -24,7 +24,7 @@ class Segmentor:
         if not self.have_embedded:
             self.interactive_predictor.set_image(image)
             self.have_embedded = True
-
+    @torch.no_grad()
     def interactive_predict(self, prompts, mode, multimask=True):
         assert self.have_embedded, 'image embedding for sam need be set before predict.'        
         
@@ -42,7 +42,8 @@ class Segmentor:
                                 multimask_output=multimask)
                                 
         return masks, scores, logits
-    
+        
+    @torch.no_grad()
     def segment_with_click(self, origin_frame, coords, modes, multimask=True):
         '''
             return: 
