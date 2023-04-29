@@ -136,7 +136,7 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name):
                 save_prediction(new_obj_mask, output_mask_dir, str(frame_idx).zfill(5) + '_new.png')
                 pred_mask = track_mask + new_obj_mask
                 # segtracker.restart_tracker()
-                SegTracker.add_reference(frame, pred_mask, frame_idx)
+                SegTracker.add_reference(frame, pred_mask)
             else:
                 pred_mask = SegTracker.track(frame,update_memory=True)
             torch.cuda.empty_cache()
@@ -242,7 +242,7 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps)
                 save_prediction(new_obj_mask, output_mask_dir, f'{frame_name}_new.png')
                 pred_mask = track_mask + new_obj_mask
                 # segtracker.restart_tracker()
-                SegTracker.add_reference(frame, pred_mask, frame_idx)
+                SegTracker.add_reference(frame, pred_mask)
             else:
                 pred_mask = SegTracker.track(frame,update_memory=True)
             torch.cuda.empty_cache()

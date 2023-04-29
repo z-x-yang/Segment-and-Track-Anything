@@ -37,7 +37,8 @@ class AOTTracker(object):
                                    aot_model=self.model,
                                    gpu_id=gpu_id,
                                    short_term_mem_skip=1,
-                                   long_term_mem_gap=cfg.TEST_LONG_TERM_MEM_GAP)
+                                   long_term_mem_gap=cfg.TEST_LONG_TERM_MEM_GAP,
+                                   max_len_long_term=cfg.MAX_LEN_LONG_TERM)
        
         self.transform = transforms.Compose([
             tr.MultiRestrictSize(cfg.TEST_MAX_SHORT_EDGE,
@@ -179,7 +180,7 @@ def get_aot(args):
     cfg = engine_config.EngineConfig(args['phase'], args['model'])
     cfg.TEST_CKPT_PATH = args['model_path']
     cfg.TEST_LONG_TERM_MEM_GAP = args['long_term_mem_gap']
-
+    cfg.MAX_LEN_LONG_TERM = args['max_len_long_term']
     # init AOTTracker
     tracker = AOTTracker(cfg, args['gpu_id'])
     return tracker

@@ -17,6 +17,7 @@ aot_args = {
     'model': 'r50_deaotl',
     'model_path': 'ckpt/R50_DeAOTL_PRE_YTB_DAV.pth',
     'long_term_mem_gap': 9999,
+    'max_len_long_term': 9999,
     'gpu_id': 0,
 }
 segtracker_args = {

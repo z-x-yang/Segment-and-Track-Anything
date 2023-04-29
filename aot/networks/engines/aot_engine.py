@@ -15,7 +15,8 @@ class AOTEngine(nn.Module):
                  aot_model,
                  gpu_id=0,
                  long_term_mem_gap=9999,
-                 short_term_mem_skip=1):
+                 short_term_mem_skip=1,
+                 max_len_long_term=9999):
         super().__init__()
 
         self.cfg = aot_model.cfg
@@ -26,6 +27,7 @@ class AOTEngine(nn.Module):
         self.gpu_id = gpu_id
         self.long_term_mem_gap = long_term_mem_gap
         self.short_term_mem_skip = short_term_mem_skip
+        self.max_len_long_term = max_len_long_term
         self.losses = None
 
         self.restart_engine()
@@ -289,6 +291,7 @@ class AOTEngine(nn.Module):
         self.short_term_memories = lstt_short_memories
 
     def update_long_term_memory(self, new_long_term_memories):
+        TOKEN_NUM = new_long_term_memories[0][0].shape[0]
         if self.long_term_memories is None:
             self.long_term_memories = new_long_term_memories
         updated_long_term_memories = []
@@ -300,6 +303,8 @@ class AOTEngine(nn.Module):
                 if new_e is None or last_e is None:
                     updated_e.append(None)
                 else:
+                    if last_e.shape[0] >= self.max_len_long_term * TOKEN_NUM:
+                        last_e = last_e[:(self.max_len_long_term - 1) * TOKEN_NUM]
                     updated_e.append(torch.cat([new_e, last_e], dim=0))
             updated_long_term_memories.append(updated_e)
         self.long_term_memories = updated_long_term_memories
@@ -488,7 +493,8 @@ class AOTInferEngine(nn.Module):
                  gpu_id=0,
                  long_term_mem_gap=9999,
                  short_term_mem_skip=1,
-                 max_aot_obj_num=None):
+                 max_aot_obj_num=None,
+                 max_len_long_term=9999,):
         super().__init__()
 
         self.cfg = aot_model.cfg
@@ -502,11 +508,10 @@ class AOTInferEngine(nn.Module):
         self.gpu_id = gpu_id
         self.long_term_mem_gap = long_term_mem_gap
         self.short_term_mem_skip = short_term_mem_skip
-
+        self.max_len_long_term = max_len_long_term
         self.aot_engines = []
 
         self.restart_engine()
-
     def restart_engine(self):
         del (self.aot_engines)
         self.aot_engines = []
@@ -589,7 +594,8 @@ class AOTInferEngine(nn.Module):
         while (aot_num > len(self.aot_engines)):
             new_engine = AOTEngine(self.AOT, self.gpu_id,
                                    self.long_term_mem_gap,
-                                   self.short_term_mem_skip)
+                                   self.short_term_mem_skip,
+                                   self.max_len_long_term,)
             new_engine.eval()
             self.aot_engines.append(new_engine)
 
