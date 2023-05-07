@@ -239,7 +239,9 @@ def segment_everything(Seg_Tracker, aot_model, long_term_mem, max_len_long_term,
 def add_new_object(Seg_Tracker):
 
     prev_mask = Seg_Tracker.first_frame_mask
-    Seg_Tracker.update_origin_merged_mask(prev_mask)
+    Seg_Tracker.update_origin_merged_mask(prev_mask)    
+    Seg_Tracker.curr_idx += 1
+
     print("Ready to add new object!")
 
     return Seg_Tracker, [[], []]
@@ -412,7 +414,7 @@ def seg_track_app():
                         track_for_video = gr.Button(
                             value="Start Tracking",
                                 interactive=True,
-                                ).style(size="lg")
+                                )
 
             with gr.Column(scale=0.5):
                 output_video = gr.Video(label='Output video').style(height=550)
@@ -756,7 +758,6 @@ def seg_track_app():
                 examples=[
                     # os.path.join(os.path.dirname(__file__), "assets", "840_iSXIa0hE8Ek.mp4"),
                     os.path.join(os.path.dirname(__file__), "assets", "blackswan.mp4"),
-                    # os.path.join(os.path.dirname(__file__), "assets", "Resized_cxk.mp4"),
                     # os.path.join(os.path.dirname(__file__), "assets", "bear.mp4"),
                     # os.path.join(os.path.dirname(__file__), "assets", "camel.mp4"),
                     # os.path.join(os.path.dirname(__file__), "assets", "skate-park.mp4"),

@@ -46,6 +46,7 @@ class Segmentor:
     @torch.no_grad()
     def segment_with_click(self, origin_frame, coords, modes, multimask=True):
         '''
+            
             return: 
                 mask: one-hot 
         '''
@@ -67,14 +68,29 @@ class Segmentor:
 
         return mask.astype(np.uint8)
 
-    def segment_with_box(self, origin_frame, bbox):
-        self.set_image(origin_frame)
+    def segment_with_box(self, origin_frame, bbox, reset_image=False):
+        if reset_image:
+            self.interactive_predictor.set_image(origin_frame)
+        else:
+            self.set_image(origin_frame)
+        # coord = np.array([[int((bbox[1][0] - bbox[0][0]) / 2.),  int((bbox[1][1] - bbox[0][1]) / 2)]])
+        # point_label = np.array([1])
 
-        masks , _, _ = self.interactive_predictor.predict(
+        masks, scores, logits = self.interactive_predictor.predict(
+            point_coords=None,
+            point_labels=None,
+            box=np.array([bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]]),
+            multimask_output=True
+        )
+        mask, logit = masks[np.argmax(scores)], logits[np.argmax(scores), :, :]
+
+        masks, scores, logits = self.interactive_predictor.predict(
             point_coords=None,
             point_labels=None,
             box=np.array([[bbox[0][0], bbox[0][1], bbox[1][0], bbox[1][1]]]),
-            multimask_output=False
+            mask_input=logit[None, :, :],
+            multimask_output=True
         )
+        mask = masks[np.argmax(scores)]
         
-        return masks
+        return [mask]

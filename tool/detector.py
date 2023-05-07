@@ -80,7 +80,7 @@ if __name__ == "__main__":
     detector = Detector("cuda")
     origin_frame = cv2.imread('./debug/point.png')
     origin_frame = cv2.cvtColor(origin_frame, cv2.COLOR_BGR2RGB)
-    grounding_caption = "swan, water"
+    grounding_caption = "swan.water"
     box_threshold = 0.25
     text_threshold = 0.25
 
