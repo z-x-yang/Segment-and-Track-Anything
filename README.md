@@ -1,5 +1,6 @@
 # Segment and Track Anything (SAM-Track)
-**Online Demo:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1R10N70AJaslzADFqb-a5OihYkllWEVxB?usp=sharing) 
+**Online Demo:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1R10N70AJaslzADFqb-a5OihYkllWEVxB?usp=sharing)
+**Technical Report**: [![](https://img.shields.io/badge/Report-arXiv:2305.06558-green)](https://champyin.com)
 
 **Tutorial:** [tutorial-v1.5 (Text)](./tutorial/tutorial%20for%20WebUI-1.5-Version.md), [tutorial-v1.0 (Click & Brush)](./tutorial/tutorial%20for%20WebUI-1.0-Version.md)
 
@@ -10,6 +11,7 @@
 **Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
 ## :loudspeaker:New Features
+- [2023/5/12] We have authored a technical report for SAM-Track.
 - [2023/5/7] We have added `demo_instseg.ipynb`, which uses Grounding-DINO to detect new objects in the key frames of a video. It can be applied in the fields of smart cities and autonomous driving.
 - [2023/4/29] We have added advanced arguments for AOT-L: `long_term_memory_gap` and `max_len_long_term`.
    - `long_term_memory_gap` controls the frequency at which the AOT model adds new reference frames to its long-term memory. During mask propagation, AOT matches the current frame with the reference frames stored in the long-term memory. 

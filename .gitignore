@@ -9,3 +9,6 @@ debug
 cym_utils
 /src
 /tracking_results
+/aot/results
+/aot/pretrain_models
+/aot/datasets

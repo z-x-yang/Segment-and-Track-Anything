@@ -5,7 +5,7 @@ model="aott"
 # model="aots"
 # model="aotb"
 # model="aotl"
-# model="r50_aotl"
+# model="r50_deaotl"
 # model="swinb_aotl"
 
 ## Training ##
