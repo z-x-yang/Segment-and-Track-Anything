@@ -91,8 +91,8 @@ class SegTracker():
             mask: numpy array (h,w)
         '''
         self.reference_objs_list.append(np.unique(mask))
-        self.curr_idx = self.get_obj_num() + 1
-        self.tracker.add_reference_frame(frame,mask, self.curr_idx - 1, frame_step)
+        self.curr_idx = self.get_obj_num()
+        self.tracker.add_reference_frame(frame,mask, self.curr_idx, frame_step)
 
     def track(self,frame,update_memory=False):
         '''
