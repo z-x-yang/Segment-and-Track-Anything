@@ -120,6 +120,11 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
 
     
     # create dir to save predicted mask and masked frame
+    if frame_num == 0:
+        if os.path.isdir(io_args['output_mask_dir']):
+            os.system(f"rm -r {io_args['output_mask_dir']}")
+        if os.path.isdir(io_args['output_masked_frame_dir']):
+            os.system(f"rm -r {io_args['output_masked_frame_dir']}")
     output_mask_dir = io_args['output_mask_dir']
     create_dir(io_args['output_mask_dir'])
     create_dir(io_args['output_masked_frame_dir'])
@@ -197,12 +202,12 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
         frame = cv2.cvtColor(frame,cv2.COLOR_BGR2RGB)
         pred_mask = pred_list[frame_idx]
         masked_frame = draw_mask(frame, pred_mask)
-        cv2.imwrite(f"{io_args['output_masked_frame_dir']}/{str(frame_idx+frame_num).zfill(5)}.png", masked_frame[:, :, ::-1])
+        cv2.imwrite(f"{io_args['output_masked_frame_dir']}/{str(frame_idx).zfill(5)}.png", masked_frame[:, :, ::-1])
 
         masked_pred_list.append(masked_frame)
         masked_frame = cv2.cvtColor(masked_frame,cv2.COLOR_RGB2BGR)
         out.write(masked_frame)
-        print('frame {} writed'.format(frame_idx+frame_num),end='\r')
+        print('frame {} writed'.format(frame_idx),end='\r')
         frame_idx += 1
     out.release()
     cap.release()
@@ -237,6 +242,12 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps,
             masked_pred_list.append(cv2.imread(os.path.join(io_args['output_masked_frame_dir'], output_masked_frame_name[i])))
 
     # create dir to save predicted mask and masked frame
+    if frame_num == 0:
+        if os.path.isdir(io_args['output_mask_dir']):
+            os.system(f"rm -r {io_args['output_mask_dir']}")
+        if os.path.isdir(io_args['output_masked_frame_dir']):
+            os.system(f"rm -r {io_args['output_masked_frame_dir']}")
+
     output_mask_dir = io_args['output_mask_dir']
     create_dir(io_args['output_mask_dir'])
     create_dir(io_args['output_masked_frame_dir'])

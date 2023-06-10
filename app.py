@@ -418,19 +418,30 @@ def choose_obj_to_refine(input_video, input_img_seq, Seg_Tracker, frame_num, evt
 
 def show_chosen_idx_to_refine(aot_model, long_term_mem, max_len_long_term, sam_gap, max_obj_num, points_per_side, input_video, input_img_seq, Seg_Tracker, frame_num, idx):
     chosen_frame_show, curr_mask, ori_frame = res_by_num(input_video, input_img_seq, frame_num)
-
-    # reset aot args
-    aot_args["model"] = aot_model
-    aot_args["model_path"] = aot_model2ckpt[aot_model]
-    aot_args["long_term_mem_gap"] = long_term_mem
-    aot_args["max_len_long_term"] = max_len_long_term
-    # reset sam args
-    segtracker_args["sam_gap"] = sam_gap
-    segtracker_args["max_obj_num"] = max_obj_num
-    sam_args["generator_args"]["points_per_side"] = points_per_side
+    if Seg_Tracker is None:
+        print("reset aot args, new SegTracker")
+        Seg_Tracker, _ , _, _ = init_SegTracker(aot_model, long_term_mem, max_len_long_term, sam_gap, max_obj_num, points_per_side, ori_frame)
+    # # reset aot args
+    # aot_args["model"] = aot_model
+    # aot_args["model_path"] = aot_model2ckpt[aot_model]
+    # aot_args["long_term_mem_gap"] = long_term_mem
+    # aot_args["max_len_long_term"] = max_len_long_term
+    # # reset sam args
+    # segtracker_args["sam_gap"] = sam_gap
+    # segtracker_args["max_obj_num"] = max_obj_num
+    # sam_args["generator_args"]["points_per_side"] = points_per_side
     
-    Seg_Tracker = SegTracker(segtracker_args, sam_args, aot_args)
+    # Seg_Tracker = SegTracker(segtracker_args, sam_args, aot_args)
     Seg_Tracker.restart_tracker()
+    Seg_Tracker.curr_idx = 1
+    Seg_Tracker.object_idx = 1
+    Seg_Tracker.origin_merged_mask = None
+    Seg_Tracker.first_frame_mask = None
+    Seg_Tracker.reference_objs_list=[]
+    Seg_Tracker.everything_points = []
+    Seg_Tracker.everything_labels = []
+    Seg_Tracker.sam.have_embedded = False
+    Seg_Tracker.sam.interactive_predictor.features = None
     return ori_frame, Seg_Tracker, ori_frame, [[], []], ""
     
 
