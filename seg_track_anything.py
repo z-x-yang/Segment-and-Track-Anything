@@ -215,7 +215,7 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
     print('\nfinished')
 
     # save colorized masks as a gif
-    imageio.mimsave(io_args['output_gif'], masked_pred_list, fps=fps)
+    imageio.mimsave(io_args['output_gif'], masked_pred_list, duration=1000/fps)
     print("{} saved".format(io_args['output_gif']))
 
     # zip predicted mask
@@ -331,7 +331,7 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps,
     print('\nfinished')
 
     # save colorized masks as a gif
-    imageio.mimsave(io_args['output_gif'], masked_pred_list, fps=fps)
+    imageio.mimsave(io_args['output_gif'], masked_pred_list, duration=1000/fps) 
     print("{} saved".format(io_args['output_gif']))
 
     # zip predicted mask
