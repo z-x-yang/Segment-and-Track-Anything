@@ -8,9 +8,9 @@ class Segmentor:
         sam_args:
             sam_checkpoint: path of SAM checkpoint
             generator_args: args for everything_generator
-            gpu_id: device
+            device: device
         """
-        self.device = sam_args["gpu_id"]
+        self.device = sam_args["device"]
         self.sam = sam_model_registry[sam_args["model_type"]](checkpoint=sam_args["sam_checkpoint"])
         self.sam.to(device=self.device)
         self.everything_generator = SamAutomaticMaskGenerator(model=self.sam, **sam_args['generator_args'])

@@ -13,7 +13,7 @@ from ..layers.basic import seq_to_2d
 class AOTEngine(nn.Module):
     def __init__(self,
                  aot_model,
-                 gpu_id='cpu',
+                 device,
                  long_term_mem_gap=9999,
                  short_term_mem_skip=1,
                  max_len_long_term=9999):
@@ -24,7 +24,7 @@ class AOTEngine(nn.Module):
         self.AOT = aot_model
 
         self.max_obj_num = aot_model.max_obj_num
-        self.gpu_id = gpu_id
+        self.device = device
         self.long_term_mem_gap = long_term_mem_gap
         self.short_term_mem_skip = short_term_mem_skip
         self.max_len_long_term = max_len_long_term
@@ -477,7 +477,7 @@ class AOTEngine(nn.Module):
 
         if enable_id_shuffle:
             self.id_shuffle_matrix = generate_permute_matrix(
-                self.max_obj_num + 1, batch_size, gpu_id=self.gpu_id)
+                self.max_obj_num + 1, batch_size, device=self.device)
         else:
             self.id_shuffle_matrix = None
 
@@ -490,7 +490,7 @@ class AOTEngine(nn.Module):
 class AOTInferEngine(nn.Module):
     def __init__(self,
                  aot_model,
-                 gpu_id='cpu',
+                 device,
                  long_term_mem_gap=9999,
                  short_term_mem_skip=1,
                  max_aot_obj_num=None,
@@ -505,7 +505,7 @@ class AOTInferEngine(nn.Module):
         else:
             self.max_aot_obj_num = max_aot_obj_num
 
-        self.gpu_id = gpu_id
+        self.device = device
         self.long_term_mem_gap = long_term_mem_gap
         self.short_term_mem_skip = short_term_mem_skip
         self.max_len_long_term = max_len_long_term
@@ -592,7 +592,7 @@ class AOTInferEngine(nn.Module):
         self.obj_nums = obj_nums
         aot_num = max(np.ceil(obj_nums / self.max_aot_obj_num), 1)
         while (aot_num > len(self.aot_engines)):
-            new_engine = AOTEngine(self.AOT, self.gpu_id,
+            new_engine = AOTEngine(self.AOT, self.device,
                                    self.long_term_mem_gap,
                                    self.short_term_mem_skip,
                                    self.max_len_long_term,)

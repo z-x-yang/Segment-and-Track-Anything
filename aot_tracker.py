@@ -21,14 +21,14 @@ from aot.networks.engines import build_engine
 from torchvision import transforms
 
 class AOTTracker(object):
-    def __init__(self, cfg, gpu_id='cpu'):
-        self.gpu_id = gpu_id
+    def __init__(self, cfg, device):
+        self.device = device
         self.model = build_vos_model(cfg.MODEL_VOS, cfg)
-        self.model, _ = load_network(self.model, cfg.TEST_CKPT_PATH, gpu_id)
+        self.model, _ = load_network(self.model, cfg.TEST_CKPT_PATH, device)
         self.engine = build_engine(cfg.MODEL_ENGINE,
                                    phase='eval',
                                    aot_model=self.model,
-                                   gpu_id=gpu_id,
+                                   device=device,
                                    short_term_mem_skip=1,
                                    long_term_mem_gap=cfg.TEST_LONG_TERM_MEM_GAP,
                                    max_len_long_term=cfg.MAX_LEN_LONG_TERM)
@@ -41,6 +41,7 @@ class AOTTracker(object):
         ])
 
         self.model.eval()
+        print("AOTTracker Device:", self.device)
 
     @torch.no_grad()
     def add_reference_frame(self, frame, mask, obj_nums, frame_step, incremental=False):
@@ -52,8 +53,8 @@ class AOTTracker(object):
         }
     
         sample = self.transform(sample)
-        frame = sample[0]['current_img'].unsqueeze(0).float().to(self.gpu_id)
-        mask = sample[0]['current_label'].unsqueeze(0).float().to(self.gpu_id)
+        frame = sample[0]['current_img'].unsqueeze(0).float().to(self.device)
+        mask = sample[0]['current_label'].unsqueeze(0).float().to(self.device)
         _mask = F.interpolate(mask,size=frame.shape[-2:],mode='nearest')
 
         if incremental:
@@ -68,7 +69,7 @@ class AOTTracker(object):
         output_height, output_width = image.shape[0], image.shape[1]
         sample = {'current_img': image}
         sample = self.transform(sample)
-        image = sample[0]['current_img'].unsqueeze(0).float().to(self.gpu_id)
+        image = sample[0]['current_img'].unsqueeze(0).float().to(self.device)
         self.engine.match_propogate_one_frame(image)
         pred_logit = self.engine.decode_current_logits((output_height, output_width))
 
@@ -97,15 +98,15 @@ class AOTTracker(object):
 
 
 class AOTTrackerInferEngine(AOTInferEngine):
-    def __init__(self, aot_model, gpu_id=0, long_term_mem_gap=9999, short_term_mem_skip=1, max_aot_obj_num=None):
-        super().__init__(aot_model, gpu_id, long_term_mem_gap, short_term_mem_skip, max_aot_obj_num)
+    def __init__(self, aot_model, device, long_term_mem_gap=9999, short_term_mem_skip=1, max_aot_obj_num=None):
+        super().__init__(aot_model, device, long_term_mem_gap, short_term_mem_skip, max_aot_obj_num)
     def add_reference_frame_incremental(self, img, mask, obj_nums, frame_step=-1):
         if isinstance(obj_nums, list):
             obj_nums = obj_nums[0]
         self.obj_nums = obj_nums
         aot_num = max(np.ceil(obj_nums / self.max_aot_obj_num), 1)
         while (aot_num > len(self.aot_engines)):
-            new_engine = AOTEngine(self.AOT, self.gpu_id,
+            new_engine = AOTEngine(self.AOT, self.device,
                                    self.long_term_mem_gap,
                                    self.short_term_mem_skip)
             new_engine.eval()
@@ -133,15 +134,15 @@ class AOTTrackerInferEngine(AOTInferEngine):
 
 
 class DeAOTTrackerInferEngine(DeAOTInferEngine):
-    def __init__(self, aot_model, gpu_id=0, long_term_mem_gap=9999, short_term_mem_skip=1, max_aot_obj_num=None):
-        super().__init__(aot_model, gpu_id, long_term_mem_gap, short_term_mem_skip, max_aot_obj_num)
+    def __init__(self, aot_model, device, long_term_mem_gap=9999, short_term_mem_skip=1, max_aot_obj_num=None):
+        super().__init__(aot_model, device, long_term_mem_gap, short_term_mem_skip, max_aot_obj_num)
     def add_reference_frame_incremental(self, img, mask, obj_nums, frame_step=-1):
         if isinstance(obj_nums, list):
             obj_nums = obj_nums[0]
         self.obj_nums = obj_nums
         aot_num = max(np.ceil(obj_nums / self.max_aot_obj_num), 1)
         while (aot_num > len(self.aot_engines)):
-            new_engine = DeAOTEngine(self.AOT, self.gpu_id,
+            new_engine = DeAOTEngine(self.AOT, self.device,
                                    self.long_term_mem_gap,
                                    self.short_term_mem_skip)
             new_engine.eval()
@@ -175,5 +176,5 @@ def get_aot(args):
     cfg.TEST_LONG_TERM_MEM_GAP = args['long_term_mem_gap']
     cfg.MAX_LEN_LONG_TERM = args['max_len_long_term']
     # init AOTTracker
-    tracker = AOTTracker(cfg, args['gpu_id'])
+    tracker = AOTTracker(cfg, args['device'])
     return tracker

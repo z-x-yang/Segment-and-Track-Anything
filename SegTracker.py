@@ -15,7 +15,6 @@ class SegTracker():
         """
         self.sam = Segmentor(sam_args)
         self.tracker = get_aot(aot_args)
-        # self.detector = Detector(self.sam.device)
         self.sam_gap = segtracker_args['sam_gap']
         self.min_area = segtracker_args['min_area']
         self.max_obj_num = segtracker_args['max_obj_num']
