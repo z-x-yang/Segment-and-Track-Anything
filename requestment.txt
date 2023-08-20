@@ -1,0 +1,14 @@
+opencv_python
+numpy
+imageio
+Pillow
+tqdm
+matplotlib
+scipy
+torch 
+torchvision 
+torchaudio
+scikit-image
+gradio
+ffmpeg
+gdown

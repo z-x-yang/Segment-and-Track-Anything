@@ -1,4 +1,5 @@
 .vscode
+__pycache__
 ckpt/*
 assets/*masks
 assets/*mp4
@@ -12,3 +13,5 @@ cym_utils
 /aot/results
 /aot/pretrain_models
 /aot/datasets
+
+.venv

@@ -23,15 +23,10 @@ from aot.networks.engines import build_engine
 from torchvision import transforms
 
 class AOTTracker(object):
-    def __init__(self, cfg, gpu_id=0):
+    def __init__(self, cfg, gpu_id='cpu'):
         self.gpu_id = gpu_id
-        self.model = build_vos_model(cfg.MODEL_VOS, cfg).cuda(gpu_id)
+        self.model = build_vos_model(cfg.MODEL_VOS, cfg)
         self.model, _ = load_network(self.model, cfg.TEST_CKPT_PATH, gpu_id)
-        # self.engine = self.build_tracker_engine(cfg.MODEL_ENGINE,
-        #                            aot_model=self.model,
-        #                            gpu_id=gpu_id,
-        #                            short_term_mem_skip=4,
-        #                            long_term_mem_gap=cfg.TEST_LONG_TERM_MEM_GAP)
         self.engine = build_engine(cfg.MODEL_ENGINE,
                                    phase='eval',
                                    aot_model=self.model,
@@ -59,8 +54,8 @@ class AOTTracker(object):
         }
     
         sample = self.transform(sample)
-        frame = sample[0]['current_img'].unsqueeze(0).float().cuda(self.gpu_id)
-        mask = sample[0]['current_label'].unsqueeze(0).float().cuda(self.gpu_id)
+        frame = sample[0]['current_img'].unsqueeze(0).float().to(self.gpu_id)
+        mask = sample[0]['current_label'].unsqueeze(0).float().to(self.gpu_id)
         _mask = F.interpolate(mask,size=frame.shape[-2:],mode='nearest')
 
         if incremental:
@@ -75,7 +70,7 @@ class AOTTracker(object):
         output_height, output_width = image.shape[0], image.shape[1]
         sample = {'current_img': image}
         sample = self.transform(sample)
-        image = sample[0]['current_img'].unsqueeze(0).float().cuda(self.gpu_id)
+        image = sample[0]['current_img'].unsqueeze(0).float().to(self.gpu_id)
         self.engine.match_propogate_one_frame(image)
         pred_logit = self.engine.decode_current_logits((output_height, output_width))
 

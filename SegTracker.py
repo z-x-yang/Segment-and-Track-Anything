@@ -5,7 +5,7 @@ from sam.segment_anything import sam_model_registry, SamAutomaticMaskGenerator
 from aot_tracker import get_aot
 import numpy as np
 from tool.segmentor import Segmentor
-from tool.detector import Detector
+# from tool.detector import Detector
 from tool.transfer_tools import draw_outline, draw_points
 import cv2
 from seg_track_anything import draw_mask
@@ -18,7 +18,7 @@ class SegTracker():
         """
         self.sam = Segmentor(sam_args)
         self.tracker = get_aot(aot_args)
-        self.detector = Detector(self.sam.device)
+        # self.detector = Detector(self.sam.device)
         self.sam_gap = segtracker_args['sam_gap']
         self.min_area = segtracker_args['min_area']
         self.max_obj_num = segtracker_args['max_obj_num']
@@ -216,32 +216,32 @@ class SegTracker():
 
         return refined_merged_mask
     
-    def detect_and_seg(self, origin_frame: np.ndarray, grounding_caption, box_threshold, text_threshold, box_size_threshold=1, reset_image=False):
-        '''
-        Using Grounding-DINO to detect object acc Text-prompts
-        Retrun:
-            refined_merged_mask: numpy array (h, w)
-            annotated_frame: numpy array (h, w, 3)
-        '''
-        # backup id and origin-merged-mask
-        bc_id = self.curr_idx
-        bc_mask = self.origin_merged_mask
+    # def detect_and_seg(self, origin_frame: np.ndarray, grounding_caption, box_threshold, text_threshold, box_size_threshold=1, reset_image=False):
+    #     '''
+    #     Using Grounding-DINO to detect object acc Text-prompts
+    #     Retrun:
+    #         refined_merged_mask: numpy array (h, w)
+    #         annotated_frame: numpy array (h, w, 3)
+    #     '''
+    #     # backup id and origin-merged-mask
+    #     bc_id = self.curr_idx
+    #     bc_mask = self.origin_merged_mask
 
-        # get annotated_frame and boxes
-        annotated_frame, boxes = self.detector.run_grounding(origin_frame, grounding_caption, box_threshold, text_threshold)
-        for i in range(len(boxes)):
-            bbox = boxes[i]
-            if (bbox[1][0] - bbox[0][0]) * (bbox[1][1] - bbox[0][1]) > annotated_frame.shape[0] * annotated_frame.shape[1] * box_size_threshold:
-                continue
-            interactive_mask = self.sam.segment_with_box(origin_frame, bbox, reset_image)[0]
-            refined_merged_mask = self.add_mask(interactive_mask)
-            self.update_origin_merged_mask(refined_merged_mask)
-            self.curr_idx += 1
+    #     # get annotated_frame and boxes
+    #     annotated_frame, boxes = self.detector.run_grounding(origin_frame, grounding_caption, box_threshold, text_threshold)
+    #     for i in range(len(boxes)):
+    #         bbox = boxes[i]
+    #         if (bbox[1][0] - bbox[0][0]) * (bbox[1][1] - bbox[0][1]) > annotated_frame.shape[0] * annotated_frame.shape[1] * box_size_threshold:
+    #             continue
+    #         interactive_mask = self.sam.segment_with_box(origin_frame, bbox, reset_image)[0]
+    #         refined_merged_mask = self.add_mask(interactive_mask)
+    #         self.update_origin_merged_mask(refined_merged_mask)
+    #         self.curr_idx += 1
 
-        # reset origin_mask
-        self.reset_origin_merged_mask(bc_mask, bc_id)
+    #     # reset origin_mask
+    #     self.reset_origin_merged_mask(bc_mask, bc_id)
 
-        return refined_merged_mask, annotated_frame
+    #     return refined_merged_mask, annotated_frame
 
 if __name__ == '__main__':
     from model_args import segtracker_args,sam_args,aot_args

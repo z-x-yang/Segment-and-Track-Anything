@@ -13,7 +13,7 @@ from networks.layers.basic import seq_to_2d
 class AOTEngine(nn.Module):
     def __init__(self,
                  aot_model,
-                 gpu_id=0,
+                 gpu_id='cpu',
                  long_term_mem_gap=9999,
                  short_term_mem_skip=1,
                  max_len_long_term=9999):
@@ -490,7 +490,7 @@ class AOTEngine(nn.Module):
 class AOTInferEngine(nn.Module):
     def __init__(self,
                  aot_model,
-                 gpu_id=0,
+                 gpu_id='cpu',
                  long_term_mem_gap=9999,
                  short_term_mem_skip=1,
                  max_aot_obj_num=None,
