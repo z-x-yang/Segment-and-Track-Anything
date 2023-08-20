@@ -6,10 +6,11 @@ HEADER = """
 import gradio as gr
 
 
-def show_edit_page():
-    print("off")
-    return gr.update(visible=True)
+def swap_page():
+    return gr.update(visible=False), gr.update(visible=True)
 
+def show_page():
+    return gr.update(visible=True)
 
 app = gr.Blocks()
 with app:
@@ -17,7 +18,7 @@ with app:
     gr.Markdown(HEADER)
 
     # Front-end
-    with gr.Row():
+    with gr.Row(visible=True) as file_page:
         with gr.Column(scale=0.8):
             input_video = gr.File(label='Input video')
         with gr.Column(scale=0.2):
@@ -59,12 +60,23 @@ with app:
                     choices=["1", "5", "10", "100", "1000", "10000"],
                     label="Frame step number", value="1",
                     interactive=True)
+    
+    with gr.Row(visible=False) as output_page:
+        generate_output_btm = gr.Button("Output Video", interactive=True)
+        mask_video = gr.File(label='Mask Video',interactive=False)
+        mix_video = gr.File(label='Mask & Frame Video',interactive=False)
+
+
 
     obj_setting_done_btm.click(
-        fn=show_edit_page,
-        outputs=edit_page,
+        fn=swap_page,
+        outputs=[file_page, edit_page],
     )
 
+    tracking_btm.click(
+        fn=show_page,
+        outputs=[output_page],
+    )
 
 if __name__ == "__main__":
     app.queue(concurrency_count=5)
