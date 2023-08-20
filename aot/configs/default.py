@@ -103,7 +103,7 @@ class DefaultEngineConfig():
         # GPU distribution
         self.DIST_ENABLE = True
         self.DIST_BACKEND = "nccl"  # "gloo"
-        self.DIST_URL = "tcp://127.0.0.1:13241"
+        # self.DIST_URL = "tcp://127.0.0.1:13241"
         self.DIST_START_GPU = 0
 
     def init_dir(self):
@@ -120,19 +120,19 @@ class DefaultEngineConfig():
         self.DIR_EMA_CKPT = os.path.join(self.DIR_RESULT, 'ema_ckpt')
         self.DIR_LOG = os.path.join(self.DIR_RESULT, 'log')
         self.DIR_TB_LOG = os.path.join(self.DIR_RESULT, 'log', 'tensorboard')
-        # self.DIR_IMG_LOG = os.path.join(self.DIR_RESULT, 'log', 'img')
-        # self.DIR_EVALUATION = os.path.join(self.DIR_RESULT, 'eval')
+        self.DIR_IMG_LOG = os.path.join(self.DIR_RESULT, 'log', 'img')
+        self.DIR_EVALUATION = os.path.join(self.DIR_RESULT, 'eval')
         self.DIR_IMG_LOG = './img_logs'
         self.DIR_EVALUATION = './results'
 
-        for path in [
-                self.DIR_RESULT, self.DIR_CKPT, self.DIR_EMA_CKPT,
-                self.DIR_LOG, self.DIR_EVALUATION, self.DIR_IMG_LOG,
-                self.DIR_TB_LOG
-        ]:
-            if not os.path.isdir(path):
-                try:
-                    os.makedirs(path)
-                except Exception as inst:
-                    print(inst)
-                    print('Failed to make dir: {}.'.format(path))
+        # for path in [
+        #         self.DIR_RESULT, self.DIR_CKPT, self.DIR_EMA_CKPT,
+        #         self.DIR_LOG, self.DIR_EVALUATION, self.DIR_IMG_LOG,
+        #         self.DIR_TB_LOG
+        # ]:
+        #     if not os.path.isdir(path):
+        #         try:
+        #             os.makedirs(path)
+        #         except Exception as inst:
+        #             print(inst)
+        #             print('Failed to make dir: {}.'.format(path))

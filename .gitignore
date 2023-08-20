@@ -1,17 +1,10 @@
 .vscode
 __pycache__
 ckpt/*
-assets/*masks
-assets/*mp4
-# assets/*zip
-assets/*gif
+assets
 *.pyc
 debug
 cym_utils
 /src
 /tracking_results
-/aot/results
-/aot/pretrain_models
-/aot/datasets
-
 .venv

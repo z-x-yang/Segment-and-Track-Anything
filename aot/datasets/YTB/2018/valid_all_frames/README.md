@@ -1,1 +1,0 @@
-Put the all-frame validation split of YouTube-VOS 2018 here.

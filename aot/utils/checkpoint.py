@@ -99,41 +99,41 @@ def load_network(net, pretrained_dir, gpu):
     return net.to(gpu), pretrained_dict_remove
 
 
-def save_network(net,
-                 opt,
-                 step,
-                 save_path,
-                 max_keep=8,
-                 backup_dir='./saved_models',
-                 scaler=None):
-    ckpt = {'state_dict': net.state_dict(), 'optimizer': opt.state_dict()}
-    if scaler is not None:
-        ckpt['scaler'] = scaler.state_dict()
+# def save_network(net,
+#                  opt,
+#                  step,
+#                  save_path,
+#                  max_keep=8,
+#                  backup_dir='./saved_models',
+#                  scaler=None):
+#     ckpt = {'state_dict': net.state_dict(), 'optimizer': opt.state_dict()}
+#     if scaler is not None:
+#         ckpt['scaler'] = scaler.state_dict()
 
-    try:
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        save_file = 'save_step_%s.pth' % (step)
-        save_dir = os.path.join(save_path, save_file)
-        torch.save(ckpt, save_dir)
-    except:
-        save_path = backup_dir
-        if not os.path.exists(save_path):
-            os.makedirs(save_path)
-        save_file = 'save_step_%s.pth' % (step)
-        save_dir = os.path.join(save_path, save_file)
-        torch.save(ckpt, save_dir)
+#     try:
+#         if not os.path.exists(save_path):
+#             os.makedirs(save_path)
+#         save_file = 'save_step_%s.pth' % (step)
+#         save_dir = os.path.join(save_path, save_file)
+#         torch.save(ckpt, save_dir)
+#     except:
+#         save_path = backup_dir
+#         if not os.path.exists(save_path):
+#             os.makedirs(save_path)
+#         save_file = 'save_step_%s.pth' % (step)
+#         save_dir = os.path.join(save_path, save_file)
+#         torch.save(ckpt, save_dir)
 
-    all_ckpt = os.listdir(save_path)
-    if len(all_ckpt) > max_keep:
-        all_step = []
-        for ckpt_name in all_ckpt:
-            step = int(ckpt_name.split('_')[-1].split('.')[0])
-            all_step.append(step)
-        all_step = list(np.sort(all_step))[:-max_keep]
-        for step in all_step:
-            ckpt_path = os.path.join(save_path, 'save_step_%s.pth' % (step))
-            os.system('rm {}'.format(ckpt_path))
+#     all_ckpt = os.listdir(save_path)
+#     if len(all_ckpt) > max_keep:
+#         all_step = []
+#         for ckpt_name in all_ckpt:
+#             step = int(ckpt_name.split('_')[-1].split('.')[0])
+#             all_step.append(step)
+#         all_step = list(np.sort(all_step))[:-max_keep]
+#         for step in all_step:
+#             ckpt_path = os.path.join(save_path, 'save_step_%s.pth' % (step))
+#             os.system('rm {}'.format(ckpt_path))
 
 
 def cp_ckpt(remote_dir="data_wd/youtube_vos_jobs/result", curr_dir="backup"):

@@ -1,1 +1,0 @@
-Put the validation split of YouTube-VOS 2018 here.
