@@ -1,15 +1,13 @@
 from statistics import mode
 import torch
 import torch.nn.functional as F
-import os
-import sys
-sys.path.append("./aot")
 from aot.networks.engines.aot_engine import AOTEngine,AOTInferEngine
 from aot.networks.engines.deaot_engine import DeAOTEngine,DeAOTInferEngine
 import importlib
 import numpy as np
-from PIL import Image
-from skimage.morphology.binary import binary_dilation
+import sys
+
+sys.path.append("aot")
 
 
 np.random.seed(200)

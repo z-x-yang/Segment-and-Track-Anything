@@ -5,7 +5,7 @@ from PIL import Image
 
 import torch
 import torchvision.transforms as TF
-import dataloaders.image_transforms as IT
+# import image_transforms as IT
 
 cv2.setNumThreads(0)
 
@@ -492,7 +492,7 @@ class RandomVerticalFlip(object):
 
 class RandomGaussianBlur(object):
     def __init__(self, prob=0.3, sigma=[0.1, 2.]):
-        self.aug = TF.RandomApply([IT.GaussianBlur(sigma)], p=prob)
+        self.aug = TF.RandomApply([TF.GaussianBlur(sigma)], p=prob)
 
     def __call__(self, sample):
         for elem in sample.keys():

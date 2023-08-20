@@ -1,7 +1,6 @@
 import torch
-import cv2
 import numpy as np
-from sam.segment_anything import sam_model_registry, SamPredictor, SamAutomaticMaskGenerator
+from sam.segment_anything import sam_model_registry, SamAutomaticMaskGenerator
 
 class Segmentor:
     def __init__(self, sam_args):
@@ -13,7 +12,7 @@ class Segmentor:
         """
         self.device = sam_args["gpu_id"]
         self.sam = sam_model_registry[sam_args["model_type"]](checkpoint=sam_args["sam_checkpoint"])
-        # self.sam.to(device=self.device)
+        self.sam.to(device=self.device)
         self.everything_generator = SamAutomaticMaskGenerator(model=self.sam, **sam_args['generator_args'])
         self.interactive_predictor = self.everything_generator.predictor
         self.have_embedded = False
