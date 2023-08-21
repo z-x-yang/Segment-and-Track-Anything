@@ -10,6 +10,10 @@ import cv2
 import datetime
 import gradio as gr
 import os
+import gc
+import torch
+
+
 DEVICE = 'cuda'
 HEADER = """
 <div style="text-align:center;">
@@ -204,6 +208,8 @@ class Tracker:
             mix = cv2.cvtColor(mix,cv2.COLOR_RGB2BGR)
             cv2.imwrite(f'{v.mix_dir}{i:06d}.png', mix)
         
+        torch.cuda.empty_cache()
+        gc.collect()
         return "Track Finish"
 
 
