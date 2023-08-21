@@ -218,6 +218,7 @@ class Tracker:
         
         torch.cuda.empty_cache()
         gc.collect()
+        self.segtracker.restart_tracker()
         return "Track Finish"
 
 
