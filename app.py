@@ -72,7 +72,8 @@ class Video_obj:
 
     def write_video(self, mode):
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        name = f'{self.folder}{mode}.mp4'
+        basename = os.path.basename(v.video).split('.')[0]
+        name = f'{self.folder}{basename}{mode}.mp4'
         video = cv2.VideoWriter(name, fourcc, self.fps, (self.width, self.height))
         if mode == 'mask':
             li = sorted(glob.glob(os.path.join(self.mask_dir, '*.png')))
@@ -195,8 +196,8 @@ class Tracker:
             
 
             mix = draw_mask(frame.copy(), mask)
-            mask = build_putpalette(mask).convert(mode='RGB') # type: PIL.Image.Image
-            mask = np.array(mask) # type: numpy.ndarray
+            mask = build_putpalette(mask).convert(mode='RGB') # type: Image.Image
+            mask = np.array(mask) # type: np.ndarray
             mask = cv2.cvtColor(mask,cv2.COLOR_RGB2BGR)
             cv2.imwrite(f'{v.mask_dir}{i:06d}.png', mask)
             
