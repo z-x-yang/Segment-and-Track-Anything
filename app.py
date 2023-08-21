@@ -35,6 +35,10 @@ def build_putpalette(pred_mask):
     save_mask.putpalette(_palette)
     return save_mask
 
+
+def clean_fn():
+    return None, None
+
 class Video_obj:
     def __init__(self, file, progress) -> None:
         torch.cuda.empty_cache()
@@ -385,6 +389,8 @@ with app:
         mix_video = gr.File(label='Mask & Frame Video', interactive=False)
         object_config = gr.File(label='Object Config', interactive=False)
 
+    reset_btm = gr.Button("Reset", interactive=True)
+
     # Function
 
     input_video.change(
@@ -484,7 +490,11 @@ with app:
         outputs=[display_txt, mask_video, mix_video, object_config]
     )
 
+    reset_btm.click(
+        fn=clean_fn,
+        outputs=[video_obj, tracker_obj]
+    )
+
 if __name__ == "__main__":
     app.queue(concurrency_count=5)
-    app.launch(debug=True, share=False,
-               server_name="0.0.0.0").queue()
+    app.launch(share=True,server_name="0.0.0.0").queue()
