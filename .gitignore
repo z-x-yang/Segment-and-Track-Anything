@@ -6,5 +6,6 @@ assets
 debug
 cym_utils
 /src
-/tracking_results
+tracking_results
 .venv
+result/*

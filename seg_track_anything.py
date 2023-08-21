@@ -26,10 +26,10 @@ def draw_mask(img, mask, alpha=0.5, id_countour=False):
     img_mask = img
 
     binary_mask = (mask!=0)
-    countours = binary_dilation(binary_mask,iterations=1) ^ binary_mask
+    # countours = binary_dilation(binary_mask,iterations=1) ^ binary_mask
     foreground = img*(1-alpha)+colorize_mask(mask)*alpha
     img_mask[binary_mask] = foreground[binary_mask]
-    img_mask[countours,:] = 0
+    # img_mask[countours,:] = 0
         
     return img_mask.astype(img.dtype)
 
