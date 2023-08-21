@@ -72,7 +72,7 @@ class Video_obj:
 
     def write_video(self, mode):
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        basename = os.path.basename(v.video).split('.')[0]
+        basename = os.path.basename(self.video).split('.')[0]
         name = f'{self.folder}{basename}{mode}.mp4'
         video = cv2.VideoWriter(name, fourcc, self.fps, (self.width, self.height))
         if mode == 'mask':
@@ -477,4 +477,4 @@ with app:
 if __name__ == "__main__":
     app.queue(concurrency_count=5)
     app.launch(debug=True, share=False,
-               server_name="0.0.0.0", server_port=10010).queue()
+               server_name="0.0.0.0").queue()
