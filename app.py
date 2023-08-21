@@ -272,7 +272,7 @@ def track_click_next_fn(tk):
 
 def tracking_btm_fn(tk, v, progress=gr.Progress()):
     tk.tracking(v, progress)
-    return tk, "Tracking Done"
+    return tk, f"Tracking Done, from {tk.start} to {tk.stop}."
 
 
 def undo_btm_fn(tk):
@@ -285,8 +285,8 @@ def device_setting(device):
     return f"Device: {device}."
 
 def generate_output_btm_fn(v):
-    n_mask = glob.glob(f'{v.mask_dir}*.png')
-    n_mix = glob.glob(f'{v.mix_dir}*.png')
+    n_mask = len(glob.glob(f'{v.mask_dir}*.png'))
+    n_mix = len(glob.glob(f'{v.mix_dir}*.png'))
 
     print(n_mask, n_mix)
     if n_mask != v.n_frame or n_mix != v.n_frame:
@@ -475,4 +475,4 @@ with app:
 if __name__ == "__main__":
     app.queue(concurrency_count=5)
     app.launch(debug=True, share=False,
-               server_name="0.0.0.0", server_port=10001).queue()
+               server_name="0.0.0.0", server_port=10010).queue()
