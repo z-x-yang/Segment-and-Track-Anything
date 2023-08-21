@@ -10,7 +10,7 @@ import cv2
 import datetime
 import gradio as gr
 import os
-DEVICE = 'mps'
+DEVICE = 'cuda'
 HEADER = """
 <div style="text-align:center;">
     <span style="font-size:3em; font-weight:bold;">Tracking Gold Apple</span>
@@ -42,7 +42,8 @@ class Video_obj:
     def build_folder(self) -> None:
         now = datetime.datetime.today()
         now = str(now).split('.')[0].replace(':', '-').replace(' ', '-')
-        self.folder = f'result/{now}/'
+        basename = os.path.basename(self.video).split('.')[0]
+        self.folder = f'result/{now}-{basename}/'
         self.frame_dir = f'{self.folder}frame/'
         self.mask_dir = f'{self.folder}mask/'
         self.mix_dir = f'{self.folder}mix/'
@@ -71,7 +72,7 @@ class Video_obj:
 
     def write_video(self, mode):
         fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        name = f'{self.folder}mode.mp4'
+        name = f'{self.folder}{mode}.mp4'
         video = cv2.VideoWriter(name, fourcc, self.fps, (self.width, self.height))
         if mode == 'mask':
             li = sorted(glob.glob(os.path.join(self.mask_dir, '*.png')))
