@@ -37,6 +37,8 @@ def build_putpalette(pred_mask):
 
 class Video_obj:
     def __init__(self, file, progress) -> None:
+        torch.cuda.empty_cache()
+        gc.collect()
         self.video = file.name
         self.build_folder()
         self.read_video(progress)
@@ -122,6 +124,8 @@ class Video_obj:
 
 class Tracker:
     def __init__(self, img, start, stop, device=DEVICE) -> None:
+        torch.cuda.empty_cache()
+        gc.collect()
         sam_args = {
             'sam_checkpoint': "ckpt/sam_vit_b_01ec64.pth",
             'model_type': "vit_b",
