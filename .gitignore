@@ -9,3 +9,4 @@ cym_utils
 tracking_results
 .venv
 result/*
+.DS_Store
