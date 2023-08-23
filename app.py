@@ -226,7 +226,7 @@ class Tracker:
 
 def init_video(obj, input, progress=gr.Progress()):
     obj = Video_obj(input, progress)
-    return obj, "video load ....ok", gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(visible=True)
+    return obj, "video load ....ok", gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1, value=obj.n_frame-1), gr.update(visible=True), obj.display(0, "Image")
 
 # return obj, gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(visible=False), gr.update(visible=True)
 
@@ -336,25 +336,15 @@ with app:
     gr.Markdown(HEADER)
     reset_btm = gr.Button("Reset", interactive=True)
     with gr.Row(visible=True) as file_page:
-        with gr.Column(scale=0.2):
             input_video = gr.File(label='Input video')
             device_drop = gr.Dropdown(
                     choices=["cuda", "cpu", "mps"],
                     label="Device", value="mps" if os_sys == 'Darwin' else "cuda",
                     interactive=True)
-        with gr.Column(scale=0.8):
-            display_txt = gr.Textbox(label="Log")
-        #     with gr.Column():
-        #         object_name_txt = gr.Textbox(label="Enter Object Name",
-        #                                      interactive=True)
-        #         add_object_btm = gr.Button("Add New Object",
-        #                                    interactive=True)
-        #         obj_setting_done_btm = gr.Button("Objects Setting Done",
-        #                                          interactive=True)
+            
 
-    with gr.Row(visible=False) as edit_page:
+    with gr.Row(visible=True) as edit_page:
         with gr.Column(scale=0.8):
-
             display_img = gr.Image(label='Display', interactive=False)
             frame_index_slide = gr.Slider(label="Frame Index",
                                           minimum=0, step=1, maximum=10,
@@ -366,9 +356,10 @@ with app:
 
             select_stop_frame_slide = gr.Slider(
                 label="Enter Stop Frame Index",
-                minimum=0, step=1, maximum=10, value=0, interactive=True, visible=False)
+                minimum=0, step=1, maximum=10, value=10, interactive=True, visible=False)
 
         with gr.Column(scale=0.2):
+            display_txt = gr.Textbox(label="Log")
             with gr.Tab(label="View") as view_tab:
                 display_mode_drop = gr.Dropdown(
                     choices=["Image", "Image & Mask", "Mask"],
@@ -407,23 +398,8 @@ with app:
         fn=init_video,
         inputs=[video_obj, input_video],
         outputs=[video_obj, display_txt, frame_index_slide, select_start_frame_slide,
-                 select_stop_frame_slide, edit_page],
+                 select_stop_frame_slide, edit_page, display_img],
     )
-
-     # obj_setting_done_btm.click(
-    #     fn=obj_setting_done_fn,
-    #     inputs=[video_obj],
-    #     outputs=[video_obj, frame_index_slide, select_start_frame_slide,
-    #              select_stop_frame_slide, file_page, edit_page],
-    # )
-
-    # add_object_btm.click(
-    #     fn=add_object_fn,
-    #     inputs=[video_obj, object_name_txt],
-    #     outputs=[video_obj, object_name_txt, display_txt],
-    # )
-
-   
 
     edit_tab.select(
         fn=edit_tab_fn,
@@ -453,18 +429,6 @@ with app:
                 select_start_frame_slide, select_stop_frame_slide, device_drop],
         outputs=[display_img, tracker_obj],
     )
-
-    # select_stop_frame_slide.change(
-    #     fn=select_stop_frame_slide_fn,
-    #     inputs=[tracker_obj, select_stop_frame_slide],
-    #     outputs=[tracker_obj, display_txt],
-    # )
-
-    # device_drop.change(
-    #     fn=device_setting,
-    #     inputs=[device_drop],
-    #     outputs=[display_txt],
-    # )
 
     display_img.select(
         fn=track_click_fn,
