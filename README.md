@@ -25,6 +25,6 @@ python app.py
 
 # Demo
 
-[https://youtu.be/tDOfGbpDMwE](https://youtu.be/tDOfGbpDMwE))
+[https://youtu.be/tDOfGbpDMwE](https://youtu.be/tDOfGbpDMwE)
 
 [![IMAGE ALT TEXT HERE](image.png)](https://youtu.be/tDOfGbpDMwE)
