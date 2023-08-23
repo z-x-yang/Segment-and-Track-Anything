@@ -12,9 +12,9 @@
 # Installation
 
 ```
-git clone <this Project>
+git clone https://github.com/RaisoLiu/Tracking-Golden-Apple
 pip install -r requestment.txt
-bash script/download.sh
+bash script/download_ckpt.sh
 ```
 
 # Start 
