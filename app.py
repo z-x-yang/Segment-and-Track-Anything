@@ -71,7 +71,7 @@ class Video_obj:
             assert ok, "[E] Read Frame Error"
 
             name = f'{self.frame_dir}{i:06d}.png'
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
             cv2.imwrite(name, frame)
 
         cap.release()
