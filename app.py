@@ -423,7 +423,7 @@ with app:
         outputs=[display_img],
     )
 
-    select_start_frame_slide.change(
+    select_start_frame_slide.release(
         fn=select_start_frame_slide_fn,
         inputs=[video_obj, tracker_obj,
                 select_start_frame_slide, select_stop_frame_slide, device_drop],

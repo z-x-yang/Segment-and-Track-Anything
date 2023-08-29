@@ -7,7 +7,7 @@
 
 在使用 i7-13700 & RTX 3070 的環境下，針對 200x300 的 video，推論速度約 60 fps。
 
-在 Mac Air M1 的環境下，針對 200x300 的 video，推論速度約 3 fps。 (如果有人贊助我 Mac Studio 192G ，我可以嘗試 8k 分辨率的 video)
+在 Mac Air M1 的環境下，針對 200x300 的 video，推論速度約 3 fps。 
 
 # Installation
 

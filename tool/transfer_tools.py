@@ -30,15 +30,22 @@ def draw_outline(mask, frame):
 
 
 def draw_points(points, modes, frame):
+    # 創建一個與原始圖片大小相同的透明畫布
+    overlay = frame.copy()
+    
     neg_points = points[np.argwhere(modes == 0)[:, 0]]
     pos_points = points[np.argwhere(modes == 1)[:, 0]]
 
+    # 在透明畫布上畫圓
     for i in range(len(neg_points)):
         point = neg_points[i]
-        cv2.circle(frame, (point[0], point[1]), 8, (255, 80, 80), -1)
+        cv2.circle(overlay, (point[0], point[1]), 2, (255, 80, 80), -1)
 
     for i in range(len(pos_points)):
         point = pos_points[i]
-        cv2.circle(frame, (point[0], point[1]), 8, (0, 153, 255), -1)
+        cv2.circle(overlay, (point[0], point[1]), 2, (0, 153, 255), -1)
 
+    # 使用cv2.addWeighted混合原始圖片和透明畫布
+    cv2.addWeighted(overlay, 0.5, frame, 0.5, 0, frame)
+    
     return frame
