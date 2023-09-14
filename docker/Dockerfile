@@ -3,13 +3,15 @@ FROM pytorch/pytorch:1.10.0-cuda11.3-cudnn8-devel
 # Use the full arch list may take more time to build
 # ARG TORCH_CUDA_ARCH_LIST="Turing"
 ARG TORCH_CUDA_ARCH_LIST="Kepler;Kepler+Tesla;Maxwell;Maxwell+Tegra;Pascal;Volta;Turing"
-ENV TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST}"
-
 # Set environment variables.
+## CUDA architectures
+ENV TORCH_CUDA_ARCH_LIST="${TORCH_CUDA_ARCH_LIST}"
 ## Set non-interactive to prevent asking for user inputs blocking image creation.
 ENV DEBIAN_FRONTEND=noninteractive
 ## CUDA Home, required to find CUDA in some packages.
 ENV CUDA_HOME="/usr/local/cuda"
+## User ID
+ENV USER_ID=1000
 
 # Install required apt packages and clear cache afterwards.
 RUN rm /etc/apt/sources.list.d/cuda.list
@@ -32,7 +34,6 @@ RUN apt-get update && \
 RUN ln -sv /usr/bin/python3 /usr/bin/python
 
 # Create non root user and setup environment.
-ENV USER_ID=1000
 RUN useradd -m -d /home/user -g root -G sudo -u ${USER_ID} user
 RUN usermod -aG sudo user
 # Set user password
@@ -40,7 +41,7 @@ RUN echo "user:user" | chpasswd
 # Ensure sudo group users are not asked for a password when using sudo command by ammending sudoers file
 RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
-# Switch to new uer and workdir.
+# Switch to new user and workdir.
 USER ${USER_ID}
 WORKDIR /home/user
 
