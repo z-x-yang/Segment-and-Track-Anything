@@ -398,7 +398,9 @@ def show_res_by_slider(input_video, input_img_seq, frame_per):
         return None, None
     else:
         frame_num = math.floor(total_frames_num * frame_per / 100)
+        #frame_num = frame_per
         if frame_per == 100:
+        #if frame_per == total_frames_num:
             frame_num = frame_num -1
         chosen_frame_show, _, _ = res_by_num(input_video, input_img_seq, frame_num)
         return chosen_frame_show, frame_num
@@ -633,7 +635,9 @@ def seg_track_app():
                                 label = "Percentage of Frames Viewed",
                                 minimum= 0.0,
                                 maximum= 100.0,
+                                #maximum = total_frames_num
                                 step=0.01,
+                                #step = 1,
                                 value=0.0,
                             )
                             frame_per.release(show_res_by_slider, inputs=[input_video, input_img_seq, frame_per], outputs=[output_res, frame_num])
