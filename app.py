@@ -577,7 +577,7 @@ def seg_track_app():
                                 minimum = 1,
                                 step=1,
                                 maximum = 9999,
-                                value=100,
+                                value=500, #for some reason, this values does not apply to all masks when changed
                                 interactive=True,
                             )
 
