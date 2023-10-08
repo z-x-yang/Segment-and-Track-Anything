@@ -1,234 +1,34 @@
 import glob
-from matplotlib import pyplot as plt
-from SegTracker import SegTracker
 from seg_track_anything import draw_mask
 from aot_tracker import _palette
-from tqdm import tqdm
-from PIL import Image
-import numpy as np
-import cv2
-import datetime
+
 import gradio as gr
-import os
-import gc
-import torch
 import platform
- 
+from gui.video_obj import Video_obj
+from gui.tracker import Tracker
+
 os_sys = platform.uname().system
 
 
-HEADER = """
-<div style="text-align:center;">
-    <span style="font-size:3em; font-weight:bold;">Tracking Golden Apple</span>
-</div>
-"""
 
 
 def show_page():
     return gr.update(visible=True)
 
 
-def build_putpalette(pred_mask):
-    save_mask = Image.fromarray(pred_mask.astype(np.uint8))
-    save_mask = save_mask.convert(mode='P')
-    save_mask.putpalette(_palette)
-    return save_mask
+
 
 
 def clean_fn():
     return None, None
 
 
-class Video_obj:
-    def __init__(self, file, progress) -> None:
-        torch.cuda.empty_cache()
-        gc.collect()
-        self.video = file.name
-        self.build_folder()
-        self.read_video(progress)
-
-    def build_folder(self) -> None:
-        now = datetime.datetime.today()
-        now = str(now).split('.')[0].replace(':', '-').replace(' ', '-')
-        basename = os.path.basename(self.video).split('.')[0]
-        self.folder = f'result/{now}-{basename}/'
-        self.frame_dir = f'{self.folder}frame/'
-        self.mask_dir = f'{self.folder}mask/'
-        self.mix_dir = f'{self.folder}mix/'
-        self.obj_li = []
-        for it in [self.folder, self.frame_dir, self.mask_dir, self.mix_dir]:
-            os.makedirs(it, exist_ok=True)
-
-    def read_video(self, progress):
-        cap = cv2.VideoCapture(self.video)
-        self.fps = cap.get(cv2.CAP_PROP_FPS)
-        self.width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.n_frame = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-
-        for i in progress.tqdm(range(self.n_frame)):
-            ok, frame = cap.read()
-            assert ok, "[E] Read Frame Error"
-
-            name = f'{self.frame_dir}{i:06d}.png'
-            # frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            cv2.imwrite(name, frame)
-
-        cap.release()
-
-    def write_video(self, mode):
-        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
-        basename = os.path.basename(self.video).split('.')[0]
-        name = f'{self.folder}{basename}{mode}.mp4'
-        video = cv2.VideoWriter(name, fourcc, self.fps,
-                                (self.width, self.height))
-        if mode == 'mask':
-            li = sorted(glob.glob(os.path.join(self.mask_dir, '*.png')))
-        else:
-            li = sorted(glob.glob(os.path.join(self.mix_dir, '*.png')))
-
-        for img_file in li:
-            img = cv2.imread(img_file)
-            video.write(img)
-
-        video.release()
-
-        return name
-
-    def add_object(self, name):
-        self.obj_li.append(name)
-        return len(self.obj_li)
-
-    def display(self, i, mode):
-        if i < 0 or i >= self.n_frame:
-            return None
-
-        if mode == 'Image':
-            try:
-                return np.array(Image.open(f'{self.frame_dir}{i:06d}.png'))
-            except:
-                return None
-
-        if mode == 'Image & Mask':
-            try:
-                return np.array(Image.open(f'{self.mix_dir}{i:06d}.png'))
-            except:
-                return None
-
-        if mode == 'Mask':
-            try:
-                return np.array(Image.open(f'{self.mask_dir}{i:06d}.png'))
-            except:
-                return None
-
-
-class Tracker:
-    def __init__(self, img, start, stop, device) -> None:
-        
-        torch.cuda.empty_cache()
-        gc.collect()
-        self.device = device
-        print('Tracker:', device, self.device)
-        sam_args = {
-            'sam_checkpoint': "ckpt/sam_vit_b_01ec64.pth",
-            'model_type': "vit_b",
-            'generator_args': {
-                'points_per_side': 16,
-                'pred_iou_thresh': 0.8,
-                'stability_score_thresh': 0.9,
-                'crop_n_layers': 1,
-                'crop_n_points_downscale_factor': 2,
-                'min_mask_region_area': 200,
-            },
-            'device': self.device,
-        }
-        aot_args = {
-            'phase': 'PRE_YTB_DAV',
-            'model': 'r50_deaotl',
-            'model_path': 'ckpt/R50_DeAOTL_PRE_YTB_DAV.pth',
-            'long_term_mem_gap': 30,
-            'max_len_long_term': 50,
-            'device': self.device,
-        }
-        segtracker_args = {
-            # the interval to run sam to segment new objects
-            'sam_gap': int(1e7),
-            'min_area': 200,  # minimal mask area to add a new mask as a new object
-            'max_obj_num': 10,  # maximal object number to track in a video
-            # the background area ratio of a new object should > 80%
-            'min_new_obj_iou': 0.8,
-        }
-        self.first_frame = img
-        self.start = start
-        self.stop = stop
-        self.segtracker = SegTracker(segtracker_args, sam_args, aot_args)
-        self.segtracker.restart_tracker()
-        self.coords = []
-        self.modes = []
-        
-
-    def click(self, point, mode):
-        self.coords.append(point)
-        self.modes.append(mode)
-
-        return self.inference()
-
-    def inference(self):
-        if len(self.coords) == 0:
-            return None, None
-        mask, mix = self.segtracker.seg_acc_click(
-            self.first_frame, np.array(self.coords), np.array(self.modes))
-        self.mask = mask
-        return mask, mix
-
-    def undo(self):
-        self.coords = []
-        self.modes = []
-
-        return self.inference()
-
-    def next_obj(self):
-        if len(self.coords) == 0:
-            return
-        self.coords = []
-        self.modes = []
-        self.segtracker.update_origin_merged_mask(self.mask)
-        self.segtracker.curr_idx += 1
-
-    def tracking(self, v, progress):
-        self.segtracker.add_reference(self.first_frame, self.mask, 0)
-        self.segtracker.first_frame_mask = self.mask
-        delta = 1 if self.start < self.stop else -1
-        print(self.start, self.stop + delta, delta)
-        for i in progress.tqdm(range(self.start, self.stop + delta, delta)):
-            frame = np.array(Image.open(f'{v.frame_dir}{i:06d}.png'))
-
-            if i == self.start:
-                mask = self.segtracker.first_frame_mask
-            else:
-                mask = self.segtracker.track(frame, update_memory=True)
-
-            mix = draw_mask(frame.copy(), mask)
-            mask = build_putpalette(mask).convert(
-                mode='RGB')  # type: Image.Image
-            mask = np.array(mask)  # type: np.ndarray
-            mask = cv2.cvtColor(mask, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(f'{v.mask_dir}{i:06d}.png', mask)
-
-            mix = cv2.cvtColor(mix, cv2.COLOR_RGB2BGR)
-            cv2.imwrite(f'{v.mix_dir}{i:06d}.png', mix)
-
-        torch.cuda.empty_cache()
-        gc.collect()
-        self.segtracker.restart_tracker()
-        return "Track Finish"
 
 
 def init_video(obj, input, progress=gr.Progress()):
     obj = Video_obj(input, progress)
-    return obj, "video load ....ok", gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1, value=obj.n_frame-1), gr.update(visible=True), obj.display(0, "Image")
-
-# return obj, gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(visible=False), gr.update(visible=True)
+    gr.Info("video load ....ok")
+    return obj, gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1, value=obj.n_frame-1), gr.update(visible=True), obj.display(0, "Image")
 
 def add_object_fn(obj, name):
     if len(name) == 0:
@@ -238,23 +38,17 @@ def add_object_fn(obj, name):
     return obj, "", f"Add Object, number of Object: {n}"
 
 
-# def obj_setting_done_fn(obj):
-    # return obj, gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(maximum=obj.n_frame-1), gr.update(visible=False), gr.update(visible=True)
-
 
 def edit_tab_fn(v, tk, start, stop, device):
     txt = """
     Select Start & Stop Frame. 
     Label on start frame and track until stop frame."
     """
+    gr.Info(txt)
     ff = frame_index_slide_fn(v, start, "Image")  # ff: First Frame
     tk = Tracker(ff, start, stop, device)
-    return ff, tk, gr.update(visible=False), gr.update(visible=True), gr.update(visible=True), txt, True
+    return ff, tk, gr.update(visible=False), gr.update(visible=True), gr.update(visible=True), True
 
-# def select_start_frame_slide_fn(v, tk, start, stop):  # [l, r]
-#     ff = frame_index_slide_fn(v, start, "Image")  # ff: First Frame
-#     tk = Tracker(ff, start, stop)
-#     return ff, tk
 
 
 def view_tab_fn():
@@ -268,10 +62,19 @@ def frame_index_slide_fn(obj, index, mode):
     return out
 
 
-def select_start_frame_slide_fn(v, tk, start, stop, device):  # [l, r]
-    ff = frame_index_slide_fn(v, start, "Image")  # ff: First Frame
-    tk = Tracker(ff, start, stop, device)
-    return ff, tk
+def select_start_frame_slide_fn(tk_cfg, start):  # [l, r]
+    tk_cfg["begin"] = start
+    return tk_cfg
+
+def long_term_mem_gap_fn(tk_cfg, gap):
+    tk_cfg["gap"] = int(gap)
+
+    return tk_cfg
+
+def max_len_long_term_fn(tk_cfg, max_len):
+    tk_cfg["max_len"] = int(max_len)
+
+    return tk_cfg
 
 
 def select_stop_frame_slide_fn(tk, stop):
@@ -281,33 +84,47 @@ def select_stop_frame_slide_fn(tk, stop):
     return tk, "Stop frame Set"
 
 
+def apply_btm_click_fn(v, tk, tk_cfg):
+    print(tk_cfg)
+    ff = frame_index_slide_fn(v, tk_cfg["begin"], "Image")  # ff: First Frame
+    tk = Tracker(ff, tk_cfg["begin"], tk_cfg["end"],tk_cfg["device"],tk_cfg["gap"], tk_cfg["max_len"])
+    return ff, tk
+
 def track_click_fn(tk, click_type_drop, ok, evt: gr.SelectData):
     if ok != True:
-        return tk, None, "Not Edit Mode!"
+        gr.Info("Not Edit Mode!")
+        return tk, None
 
     mode = 1 if click_type_drop == "Positive" else 0
     point = (evt.index[0], evt.index[1])  # (y, x)
 
     _, mix = tk.click(point, mode)
 
-    return tk, mix, "click!"
+    gr.Info("click!")
+    return tk, mix
 
 
 def track_click_next_fn(tk):
     tk.next_obj()
-    return tk, "Label next object."
+    gr.Info("Label next object.")
+    return tk
 
 
 def tracking_btm_fn(tk, v, stop, progress=gr.Progress()):
+    gr.Info(f"Tracking start, from {tk.start} to {tk.stop}.")
     tk.stop = stop
     tk.tracking(v, progress)
-    return tk, f"Tracking Done, from {tk.start} to {tk.stop}.", gr.update(visible=True)
+    gr.Info(f"Tracking Done, from {tk.start} to {tk.stop}.")
+    tk.sam.sam.to('cpu')
+    del tk
+    return None, gr.update(visible=True), "Done"
 
 
 def undo_btm_fn(tk):
     _, mix = tk.undo()
+    gr.Info("Relabel this object")
 
-    return tk, mix, "Relabel this object"
+    return tk, mix
 
 
 
@@ -317,11 +134,13 @@ def generate_output_btm_fn(v):
 
     print(n_mask, n_mix)
     if n_mask != v.n_frame or n_mix != v.n_frame:
-        return "Error", None, None, None
+        gr.Info("Error")
+        return None, None, None
 
     mask_video = v.write_video('mask')
     mix_video = v.write_video('mix')
-    return "OK", mask_video, mix_video, None
+    gr.Info("OK")
+    return mask_video, mix_video, None
 
 
 app = gr.Blocks()
@@ -331,16 +150,16 @@ with app:
     video_obj = gr.State(None)
     tracker_obj = gr.State(None)
     is_click = gr.State(None)
+    tk_cfg = gr.State({"begin": 0, "end": 10, "max_len": 50, "gap": 30, "device": "mps" if os_sys == 'Darwin' else "cuda"})
 
     # Front-end
-    gr.Markdown(HEADER)
-    reset_btm = gr.Button("Reset", interactive=True)
+
+    reset_btm = gr.Button("Reset", interactive=True, visible=False)
     with gr.Row(visible=True) as file_page:
             input_video = gr.File(label='Input video')
-            device_drop = gr.Dropdown(
-                    choices=["cuda", "cpu", "mps"],
-                    label="Device", value="mps" if os_sys == 'Darwin' else "cuda",
-                    interactive=True)
+
+                
+                
             
 
     with gr.Row(visible=True) as edit_page:
@@ -350,16 +169,10 @@ with app:
                                           minimum=0, step=1, maximum=10,
                                           value=0, interactive=True)
 
-            select_start_frame_slide = gr.Slider(
-                label="Enter Start Frame Index",
-                minimum=0, step=1, maximum=10, value=0, interactive=True, visible=False)
-
-            select_stop_frame_slide = gr.Slider(
-                label="Enter Stop Frame Index",
-                minimum=0, step=1, maximum=10, value=10, interactive=True, visible=False)
+            
 
         with gr.Column(scale=0.2):
-            display_txt = gr.Textbox(label="Log")
+            # display_txt = gr.Textbox(label="Log")
             with gr.Tab(label="View") as view_tab:
                 display_mode_drop = gr.Dropdown(
                     choices=["Image", "Image & Mask", "Mask"],
@@ -372,14 +185,30 @@ with app:
                     interactive=True)
 
             with gr.Tab(label="Edit") as edit_tab:
+                device_drop = gr.Dropdown(
+                    choices=["cuda", "cpu", "mps"],
+                    label="Device", value="mps" if os_sys == 'Darwin' else "cuda",
+                    interactive=True)
+                long_term_mem_gap =  gr.Number(label="long_term_mem_gap", value=30, interactive=True)
+                max_len_long_term =  gr.Number(label="max_len_long_term", value=50, interactive=True)
+                select_start_frame_slide = gr.Slider(
+                label="Enter Start Frame Index",
+                    minimum=0, step=1, maximum=10, value=0, interactive=True, visible=False)
+
+                select_stop_frame_slide = gr.Slider(
+                label="Enter Stop Frame Index",
+                    minimum=0, step=1, maximum=10, value=10, interactive=True, visible=False)
+
+                apply_btm =  gr.Button("Apply Setting", interactive=True)
                 click_type_drop = gr.Dropdown(
                     choices=["Positive", "Negative"],
                     label="Click Type", value="Positive",
                     interactive=True)
-                undo_btm = gr.Button("Undo", interactive=True)
-                click_done_btm = gr.Button("Done", interactive=True)
+                undo_btm = gr.Button("Undo", interactive=True, visible=False)
+                click_done_btm = gr.Button("Next Object", interactive=True)
 
                 tracking_btm = gr.Button("Tracking", interactive=True)
+                progress_bar = gr.Textbox(label="Progress")
                 output_page_btm = gr.Button(
                     "Open Output Setting Page", interactive=True, visible=False)
 
@@ -397,7 +226,7 @@ with app:
     input_video.change(
         fn=init_video,
         inputs=[video_obj, input_video],
-        outputs=[video_obj, display_txt, frame_index_slide, select_start_frame_slide,
+        outputs=[video_obj, frame_index_slide, select_start_frame_slide,
                  select_stop_frame_slide, edit_page, display_img],
     )
 
@@ -406,7 +235,7 @@ with app:
         inputs=[video_obj, tracker_obj,
                 select_start_frame_slide, select_stop_frame_slide, device_drop],
         outputs=[display_img, tracker_obj, frame_index_slide, select_start_frame_slide,
-                 select_stop_frame_slide, display_txt, is_click],
+                 select_stop_frame_slide, is_click],
 
     )
 
@@ -425,33 +254,47 @@ with app:
 
     select_start_frame_slide.release(
         fn=select_start_frame_slide_fn,
-        inputs=[video_obj, tracker_obj,
-                select_start_frame_slide, select_stop_frame_slide, device_drop],
-        outputs=[display_img, tracker_obj],
+        inputs=[tk_cfg, select_start_frame_slide],
+        outputs=[tk_cfg],
+    )
+    long_term_mem_gap.blur(
+        fn=long_term_mem_gap_fn,
+        inputs=[tk_cfg, long_term_mem_gap],
+        outputs=[tk_cfg],
+    )
+    max_len_long_term.blur(
+        fn=max_len_long_term_fn,
+        inputs=[tk_cfg, max_len_long_term],
+        outputs=[tk_cfg],
     )
 
     display_img.select(
         fn=track_click_fn,
         inputs=[tracker_obj, click_type_drop, is_click],
-        outputs=[tracker_obj, display_img, display_txt],
+        outputs=[tracker_obj, display_img],
     )
 
     click_done_btm.click(
         fn=track_click_next_fn,
         inputs=[tracker_obj],
-        outputs=[tracker_obj, display_txt],
+        outputs=[tracker_obj],
+    )
+    apply_btm.click(
+        fn=apply_btm_click_fn,
+        inputs=[video_obj, tracker_obj,tk_cfg],
+        outputs=[display_img, tracker_obj],
     )
 
     undo_btm.click(
         fn=undo_btm_fn,
         inputs=[tracker_obj],
-        outputs=[tracker_obj, display_img, display_txt],
+        outputs=[tracker_obj, display_img],
     )
 
     tracking_btm.click(
         fn=tracking_btm_fn,
         inputs=[tracker_obj, video_obj, select_stop_frame_slide],
-        outputs=[tracker_obj, display_txt, output_page],
+        outputs=[tracker_obj, output_page, progress_bar],
     )
 
     output_page_btm.click(
@@ -462,7 +305,7 @@ with app:
     generate_output_btm.click(
         fn=generate_output_btm_fn,
         inputs=[video_obj],
-        outputs=[display_txt, mask_video, mix_video, object_config]
+        outputs=[mask_video, mix_video, object_config]
     )
 
     reset_btm.click(
@@ -472,4 +315,4 @@ with app:
 
 if __name__ == "__main__":
     app.queue(concurrency_count=5)
-    app.launch(share=True, server_name="0.0.0.0").queue()
+    app.launch(server_name="0.0.0.0").queue()
