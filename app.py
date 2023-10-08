@@ -146,13 +146,13 @@ class Tracker:
             'phase': 'PRE_YTB_DAV',
             'model': 'r50_deaotl',
             'model_path': 'ckpt/R50_DeAOTL_PRE_YTB_DAV.pth',
-            'long_term_mem_gap': 250,
-            'max_len_long_term': 250,
+            'long_term_mem_gap': 30,
+            'max_len_long_term': 50,
             'device': self.device,
         }
         segtracker_args = {
             # the interval to run sam to segment new objects
-            'sam_gap': int(1e6),
+            'sam_gap': int(1e7),
             'min_area': 200,  # minimal mask area to add a new mask as a new object
             'max_obj_num': 10,  # maximal object number to track in a video
             # the background area ratio of a new object should > 80%
