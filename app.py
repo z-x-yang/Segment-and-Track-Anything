@@ -68,20 +68,16 @@ def select_start_frame_slide_fn(tk_cfg, start):  # [l, r]
 
 def long_term_mem_gap_fn(tk_cfg, gap):
     tk_cfg["gap"] = int(gap)
-
     return tk_cfg
 
 def max_len_long_term_fn(tk_cfg, max_len):
     tk_cfg["max_len"] = int(max_len)
-
     return tk_cfg
 
+def select_stop_frame_slide_fn(tk_cfg, stop):
+    tk_cfg["end"] = int(stop)
+    return tk_cfg
 
-def select_stop_frame_slide_fn(tk, stop):
-    if tk == None:
-        return None, "Select Start frame first."
-    tk.stop = stop
-    return tk, "Stop frame Set"
 
 
 def apply_btm_click_fn(v, tk, tk_cfg):
@@ -115,7 +111,7 @@ def tracking_btm_fn(tk, v, stop, progress=gr.Progress()):
     tk.stop = stop
     tk.tracking(v, progress)
     gr.Info(f"Tracking Done, from {tk.start} to {tk.stop}.")
-    tk.sam.sam.to('cpu')
+    tk.segtracker.sam.sam.to('cpu')
     del tk
     return None, gr.update(visible=True), "Done"
 
@@ -257,6 +253,13 @@ with app:
         inputs=[tk_cfg, select_start_frame_slide],
         outputs=[tk_cfg],
     )
+
+    select_stop_frame_slide.release(
+        fn=select_stop_frame_slide_fn,
+        inputs=[tk_cfg, select_stop_frame_slide],
+        outputs=[tk_cfg],
+    )
+
     long_term_mem_gap.blur(
         fn=long_term_mem_gap_fn,
         inputs=[tk_cfg, long_term_mem_gap],
