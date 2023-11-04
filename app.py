@@ -74,7 +74,7 @@ def get_meta_from_img_seq(input_img_seq):
     first_frame = cv2.imread(first_frame)
     first_frame = cv2.cvtColor(first_frame, cv2.COLOR_BGR2RGB)
 
-    return first_frame, first_frame, first_frame
+    return first_frame, first_frame, first_frame, ""
 
 def SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask):
     with torch.cuda.amp.autocast():
@@ -721,7 +721,7 @@ def seg_track_app():
                 input_img_seq
             ],
             outputs=[
-                input_first_frame, origin_frame, drawing_board
+                input_first_frame, origin_frame, drawing_board, grounding_caption
             ]
         )
 
