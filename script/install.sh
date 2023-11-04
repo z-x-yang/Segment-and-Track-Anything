@@ -7,7 +7,7 @@ pip install -e git+https://github.com/IDEA-Research/GroundingDINO.git@main#egg=G
 
 # Install other lib
 pip install numpy opencv-python pycocotools matplotlib Pillow==9.2.0 scikit-image
-pip install gradio==3.28.1 zip gdown ffmpeg==1.4
+pip install gradio==3.39.0 zip gdown ffmpeg==1.4
 
 # Install Pytorch Correlation
 git clone https://github.com/ClementPinard/Pytorch-Correlation-extension.git
