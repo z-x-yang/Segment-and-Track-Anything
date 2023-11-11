@@ -141,8 +141,9 @@ class SegTracker():
                 or obj_num > self.max_obj_num:
                 new_obj_mask[new_obj_mask==idx] = 0
             else:
-                new_obj_mask[new_obj_mask==idx] = obj_num
                 obj_num += 1
+                new_obj_mask[new_obj_mask==idx] = obj_num
+
         return new_obj_mask
         
     def restart_tracker(self):
