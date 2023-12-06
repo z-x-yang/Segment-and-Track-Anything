@@ -2,7 +2,7 @@
 ckpt/*
 assets/*masks
 assets/*mp4
-# assets/*zip
+assets/*zip
 assets/*gif
 *.pyc
 debug
@@ -12,4 +12,4 @@ cym_utils
 /aot/results
 /aot/pretrain_models
 /aot/datasets
-Pytorch-Correlation-extension/*
+Pytorch-Correlation-extension/build/*
