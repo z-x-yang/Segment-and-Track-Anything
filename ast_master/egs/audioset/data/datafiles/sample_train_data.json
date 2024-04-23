@@ -1,0 +1,35 @@
+ # this is just an sample, if you only use audio, 'video_id' and 'image' entries are not necessary.
+ {
+    "data": [
+        {
+            "video_id": "--4gqARaEJE",
+            "wav": "/data/sls/audioset/data/audio/eval/_/_/--4gqARaEJE_0.000.flac",
+            "image": "/data/sls/audioset/data/images/eval/_/_/--4gqARaEJE_5.000.jpg",
+            "labels": "/m/068hy,/m/07q6cd_,/m/0bt9lr,/m/0jbk"
+        },
+        {
+            "video_id": "--BfvyPmVMo",
+            "wav": "/data/sls/audioset/data/audio/eval/_/_/--BfvyPmVMo_20.000.flac",
+            "image": "/data/sls/audioset/data/images/eval/_/_/--BfvyPmVMo_25.000.jpg",
+            "labels": "/m/03l9g"
+        },
+        {
+            "video_id": "--U7joUcTCo",
+            "wav": "/data/sls/audioset/data/audio/eval/_/_/--U7joUcTCo_0.000.flac",
+            "image": "/data/sls/audioset/data/images/eval/_/_/--U7joUcTCo_5.000.jpg",
+            "labels": "/m/01b_21"
+        },
+        {
+            "video_id": "--i-y1v8Hy8",
+            "wav": "/data/sls/audioset/data/audio/eval/_/_/--i-y1v8Hy8_0.000.flac",
+            "image": "/data/sls/audioset/data/images/eval/_/_/--i-y1v8Hy8_4.500.jpg",
+            "labels": "/m/04rlf,/m/09x0r,/t/dd00004,/t/dd00005"
+        },
+        {
+            "video_id": "-0BIyqJj9ZU",
+            "wav": "/data/sls/audioset/data/audio/eval/_/0/-0BIyqJj9ZU_30.000.flac",
+            "image": "/data/sls/audioset/data/images/eval/_/0/-0BIyqJj9ZU_35.000.jpg",
+            "labels": "/m/07rgt08,/m/07sq110,/t/dd00001"
+        }
+    ]
+}

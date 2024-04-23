@@ -1,0 +1,32 @@
+---------------the evaluation dataloader---------------
+now using following mask: 0 freq, 0 time
+now using mix-up with rate 0.000000
+now process audioset
+use dataset mean -4.268 and std 4.569 to normalize the input
+number of classes is 527
+-----------------------
+now loading model 0: /data/sls/scratch/yuangong/ast/pretrained_models/ensemble/audioset_10_10_0.4495.pth
+---------------AST Model Summary---------------
+ImageNet pretraining: True, AudioSet pretraining: False
+frequncey stride=10, time stride=10
+number of patches=1212
+Model 0 /data/sls/scratch/yuangong/ast/pretrained_models/ensemble/audioset_10_10_0.4495.pth mAP: 0.449469, AUC: 0.974766, d-prime: 2.766179
+-----------------------
+now loading model 1: /data/sls/scratch/yuangong/ast/pretrained_models/ensemble/audioset_10_10_0.4483.pth
+---------------AST Model Summary---------------
+ImageNet pretraining: True, AudioSet pretraining: False
+frequncey stride=10, time stride=10
+number of patches=1212
+Model 1 /data/sls/scratch/yuangong/ast/pretrained_models/ensemble/audioset_10_10_0.4483.pth mAP: 0.448287, AUC: 0.974311, d-prime: 2.755320
+-----------------------
+now loading model 2: /data/sls/scratch/yuangong/ast/pretrained_models/ensemble/audioset_10_10_0.4475.pth
+---------------AST Model Summary---------------
+ImageNet pretraining: True, AudioSet pretraining: False
+frequncey stride=10, time stride=10
+number of patches=1212
+Model 2 /data/sls/scratch/yuangong/ast/pretrained_models/ensemble/audioset_10_10_0.4475.pth mAP: 0.447474, AUC: 0.973878, d-prime: 2.745149
+---------------Ensemble Result Summary---------------
+Model 0 /data/sls/scratch/yuangong/ast/pretrained_models/ensemble/audioset_10_10_0.4495.pth mAP: 0.449469, AUC: 0.974766, d-prime: 2.766179
+Model 1 /data/sls/scratch/yuangong/ast/pretrained_models/ensemble/audioset_10_10_0.4483.pth mAP: 0.448287, AUC: 0.974311, d-prime: 2.755320
+Model 2 /data/sls/scratch/yuangong/ast/pretrained_models/ensemble/audioset_10_10_0.4475.pth mAP: 0.447474, AUC: 0.973878, d-prime: 2.745149
+Ensemble 3 Models mAP: 0.475056, AUC: 0.979441, d-prime: 2.888303

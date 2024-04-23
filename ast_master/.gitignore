@@ -1,0 +1,14 @@
+*.pth
+*.zip
+*.pyc
+*.DS_Store
+pretrained_models/ensemble/*
+pretrained_models/load_pretrained_model_internal.py
+pretrained_models/legal_pretrained_mdl/*
+src/convert_model.py
+src/convert_model2.py
+egs/speechcommands/gen_weight_file_sc.py
+src/gen_weight_file.py
+src/test.py
+src/test_wget.py
+.idea
