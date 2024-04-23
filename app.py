@@ -4,6 +4,7 @@ import importlib
 import sys
 import os
 import pdb
+import json
 from matplotlib.pyplot import step
 
 from model_args import segtracker_args,sam_args,aot_args
@@ -37,15 +38,18 @@ def audio_to_text(input_video, label_num, threshold):
     video_without_audio.write_videofile("video_without_audio.mp4")        
     audio.write_audiofile("audio.flac", codec="flac") 
     top_labels,top_labels_probs = ASTpredict()
-    top_labels_and_probs = ""  
+    top_labels_and_probs = "{"  
     predicted_texts = ""
     for k in range(10):
         if(k<label_num and top_labels_probs[k]>threshold):
-                top_labels_and_probs += f"- {top_labels[k]}: {top_labels_probs[k]:.4f}\n"
+                top_labels_and_probs += f"\"{top_labels[k]}\": {top_labels_probs[k]:.4f},"
                 predicted_texts +=top_labels[k]+ ' '
         k+=1
-            
-    return predicted_texts, top_labels_and_probs
+    top_labels_and_probs = top_labels_and_probs[:-1]
+    top_labels_and_probs += "}"
+    top_labels_and_probs_dic = json.loads(top_labels_and_probs)
+    print(top_labels_and_probs_dic) 
+    return predicted_texts, top_labels_and_probs_dic
 
 def get_click_prompt(click_stack, point):
 
@@ -580,10 +584,10 @@ def seg_track_app():
                                 )
                 tab_audio_grounding = gr.Tab(label="Audio Grounding")
                 with tab_audio_grounding:
-                    label_num = gr.Slider(label="Number of Labels", minimum=1, maximum=10, value=1, step=1)
-                    threshold = gr.Slider(label="Threshold", minimum=0.0, maximum=1.0, value=0.2, step=0.01)
+                    label_num = gr.Slider(label="Number of Labels", minimum=1, maximum=10, value=6, step=1)
+                    threshold = gr.Slider(label="Threshold", minimum=0.0, maximum=1.0, value=0.05, step=0.01)
                     audio_to_text_button = gr.Button(value="detect the label of the sound-making object", interactive=True)
-                    top_labels_and_probs = gr.outputs.Textbox(label="Top 10 Labels and Probabilities") 
+                    top_labels_and_probs_dic = gr.Label(label="Top Labels and Probabilities")
                     predicted_texts = gr.outputs.Textbox(label="Predicted Text")
                     audio_grounding_button = gr.Button(value="ground the sound-making object", interactive=True)
 
@@ -849,7 +853,7 @@ def seg_track_app():
                 input_video,label_num,threshold
             ],
             outputs=[
-                predicted_texts, top_labels_and_probs
+                predicted_texts, top_labels_and_probs_dic
             ]
         )
 
