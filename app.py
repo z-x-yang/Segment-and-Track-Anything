@@ -10,7 +10,7 @@ from matplotlib.pyplot import step
 from model_args import segtracker_args,sam_args,aot_args
 from SegTracker import SegTracker
 from tool.transfer_tools import draw_outline, draw_points
-# sys.path.append('.')
+# sys.path.append('.') 
 # sys.path.append('..')
 
 
