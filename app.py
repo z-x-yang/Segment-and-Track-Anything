@@ -4,6 +4,7 @@ import importlib
 import sys
 import os
 import pdb
+import json
 from matplotlib.pyplot import step
 
 from model_args import segtracker_args,sam_args,aot_args
@@ -11,6 +12,7 @@ from SegTracker import SegTracker
 from tool.transfer_tools import draw_outline, draw_points
 # sys.path.append('.')
 # sys.path.append('..')
+
 
 import cv2
 from PIL import Image
@@ -24,8 +26,30 @@ import numpy as np
 import json
 from tool.transfer_tools import mask2bbox
 
+from ast_master.prepare import ASTpredict
+from moviepy.editor import VideoFileClip 
 def clean():
     return None, None, None, None, None, None, [[], []]
+
+def audio_to_text(input_video, label_num, threshold):
+    video = VideoFileClip(input_video)      
+    audio = video.audio      
+    video_without_audio = video.set_audio(None)      
+    video_without_audio.write_videofile("video_without_audio.mp4")        
+    audio.write_audiofile("audio.flac", codec="flac") 
+    top_labels,top_labels_probs = ASTpredict()
+    top_labels_and_probs = "{"  
+    predicted_texts = ""
+    for k in range(10):
+        if(k<label_num and top_labels_probs[k]>threshold):
+                top_labels_and_probs += f"\"{top_labels[k]}\": {top_labels_probs[k]:.4f},"
+                predicted_texts +=top_labels[k]+ ' '
+        k+=1
+    top_labels_and_probs = top_labels_and_probs[:-1]
+    top_labels_and_probs += "}"
+    top_labels_and_probs_dic = json.loads(top_labels_and_probs)
+    print(top_labels_and_probs_dic) 
+    return predicted_texts, top_labels_and_probs_dic
 
 def get_click_prompt(click_stack, point):
 
@@ -558,6 +582,14 @@ def seg_track_app():
                                 text_threshold = gr.Slider(
                                     label="Text Threshold", minimum=0.0, maximum=1.0, value=0.25, step=0.001
                                 )
+                tab_audio_grounding = gr.Tab(label="Audio Grounding")
+                with tab_audio_grounding:
+                    label_num = gr.Slider(label="Number of Labels", minimum=1, maximum=10, value=6, step=1)
+                    threshold = gr.Slider(label="Threshold", minimum=0.0, maximum=1.0, value=0.05, step=0.01)
+                    audio_to_text_button = gr.Button(value="detect the label of the sound-making object", interactive=True)
+                    top_labels_and_probs_dic = gr.Label(label="Top Labels and Probabilities")
+                    predicted_texts = gr.outputs.Textbox(label="Predicted Text")
+                    audio_grounding_button = gr.Button(value="ground the sound-making object", interactive=True)
 
                 with gr.Row():
                     with gr.Column(scale=0.5):
@@ -797,6 +829,46 @@ def seg_track_app():
             ],
             queue=False,
         )
+
+        tab_audio_grounding.select(
+            fn=init_SegTracker,
+            inputs=[
+                aot_model,
+                long_term_mem,
+                max_len_long_term,
+                sam_gap,
+                max_obj_num,
+                points_per_side,
+                origin_frame
+            ],
+            outputs=[
+                Seg_Tracker, input_first_frame, click_stack, grounding_caption
+            ],
+            queue=False,
+        )
+
+        audio_to_text_button.click(
+            fn=audio_to_text,
+            inputs=[
+                input_video,label_num,threshold
+            ],
+            outputs=[
+                predicted_texts, top_labels_and_probs_dic
+            ]
+        )
+
+        audio_grounding_button.click(
+            fn=gd_detect,
+            inputs=[
+                Seg_Tracker, origin_frame, predicted_texts, box_threshold, text_threshold,
+                aot_model, long_term_mem, max_len_long_term, sam_gap, max_obj_num, points_per_side
+            ],
+            outputs=[
+                Seg_Tracker, input_first_frame
+            ]
+
+        )
+
 
         # Use SAM to segment everything for the first frame of video
         seg_every_first_frame.click(

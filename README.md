@@ -171,6 +171,7 @@ Licenses for borrowed code can be found in [licenses.md](https://github.com/z-x-
 * SAM - [https://github.com/facebookresearch/segment-anything](https://github.com/facebookresearch/segment-anything)
 * Gradio (for building WebUI) - [https://github.com/gradio-app/gradio](https://github.com/gradio-app/gradio)
 * Grounding-Dino - [https://github.com/yamy-cheng/GroundingDINO](https://github.com/yamy-cheng/GroundingDINO)
+* AST - [https://github.com/YuanGongND/ast](https://github.com/YuanGongND/ast)
 
 ### License
 The project is licensed under the [AGPL-3.0 license](https://github.com/z-x-yang/Segment-and-Track-Anything/blob/main/LICENSE.txt). To utilize or further develop this project for commercial purposes through proprietary means, permission must be granted by us (as well as the owners of any borrowed code).
@@ -207,5 +208,13 @@ Please consider citing the related paper(s) in your publications if it helps you
   author={Liu, Shilong and Zeng, Zhaoyang and Ren, Tianhe and Li, Feng and Zhang, Hao and Yang, Jie and Li, Chunyuan and Yang, Jianwei and Su, Hang and Zhu, Jun and others},
   journal={arXiv preprint arXiv:2303.05499},
   year={2023}
+}
+@inproceedings{gong21b_interspeech,
+  author={Yuan Gong and Yu-An Chung and James Glass},
+  title={AST: Audio Spectrogram Transformer},
+  booktitle={Proc. Interspeech 2021},
+  pages={571--575},
+  doi={10.21437/Interspeech.2021-698}
+  year={2021} 
 }
 ```
