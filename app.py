@@ -592,7 +592,7 @@ def seg_track_app():
                     audio_grounding_button = gr.Button(value="ground the sound-making object", interactive=True)
 
                 with gr.Row():
-                    with gr.Column(scale=0.5):
+                    with gr.Column(scale=0.5): 
                         with gr.Tab(label="SegTracker Args"):
                             # args for tracking in video do segment-everthing
                             points_per_side = gr.Slider(
