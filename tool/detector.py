@@ -62,7 +62,14 @@ class Detector:
                 transfered_boxes: nd.array [N, 4]: [[x0, y0], [x1, y1]]
         '''
         height, width, _ = origin_frame.shape
-        img_pil = PIL.Image.fromarray(origin_frame)
+        # width, height = origin_frame.size
+        # If origin_frame is already a PIL Image object, you don't need to do anything
+        if isinstance(origin_frame, PIL.Image.Image):
+            img_pil = origin_frame
+        else:
+            # Convert origin_frame to a NumPy array and then to a PIL Image
+            origin_frame = np.array(origin_frame)
+            img_pil = PIL.Image.fromarray(origin_frame)
         re_width, re_height = img_pil.size
         _, image_tensor = self.image_transform_grounding(img_pil)
         # img_pil = self.image_transform_grounding_for_vis(img_pil)
