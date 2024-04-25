@@ -17,6 +17,4 @@ cd -
 
 # Install AST
 git clone https://github.com/YuanGongND/ast.git ast_master
-cd ast_master
-cd -
 
