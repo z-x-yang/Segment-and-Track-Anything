@@ -15,3 +15,7 @@ cd Pytorch-Correlation-extension
 python setup.py install
 cd -
 
+# Install AST
+git clone https://github.com/YuanGongND/ast.git ast_master
+cp ./prepare.py ./ast_master
+

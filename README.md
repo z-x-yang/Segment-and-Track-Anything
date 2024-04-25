@@ -2,7 +2,7 @@
 **Online Demo:** [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1R10N70AJaslzADFqb-a5OihYkllWEVxB?usp=sharing)
 **Technical Report**: [![](https://img.shields.io/badge/Report-arXiv:2305.06558-green)](https://arxiv.org/abs/2305.06558)
 
-**Tutorial:** [tutorial-v1.5 (Text)](./tutorial/tutorial%20for%20WebUI-1.5-Version.md), [tutorial-v1.0 (Click & Brush)](./tutorial/tutorial%20for%20WebUI-1.0-Version.md)
+**Tutorial:** [tutorial-v1.6(audio)](./tutorial/tutorial%20for%20WebUI-1.6-Version.md),[tutorial-v1.5 (Text)](./tutorial/tutorial%20for%20WebUI-1.5-Version.md), [tutorial-v1.0 (Click & Brush)](./tutorial/tutorial%20for%20WebUI-1.0-Version.md)
 
 <p align="center">
 <img src="./assets/top.gif" width="880">
@@ -11,6 +11,7 @@
 **Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
 ## :loudspeaker:New Features
+- [2024/4/23] We have added an audio-grounding feature that tracks the sound-making object within the video's soundtrack.
 - [2023/5/12] We have authored a technical report for SAM-Track.
 - [2023/5/7] We have added `demo_instseg.ipynb`, which uses Grounding-DINO to detect new objects in the key frames of a video. It can be applied in the fields of smart cities and autonomous driving.
 - [2023/4/29] We have added advanced arguments for AOT-L: `long_term_memory_gap` and `max_len_long_term`.
@@ -130,6 +131,8 @@ Download SAM model to ckpt, the default model is SAM-VIT-B ([sam_vit_b_01ec64.pt
 Download DeAOT/AOT model to ckpt, the default model is R50-DeAOT-L ([R50_DeAOTL_PRE_YTB_DAV.pth](https://drive.google.com/file/d/1QoChMkTVxdYZ_eBlZhK2acq9KMQZccPJ/view)).
 
 Download Grounding-Dino model to ckpt, the default model is GroundingDINO-T ([groundingdino_swint_ogc](https://huggingface.co/ShilongLiu/GroundingDINO/resolve/main/groundingdino_swint_ogc.pth)).
+
+Download AST model to ast_master/pretrained_models, the default model is audioset_0.4593 ([audioset_0.4593.pth]( https://www.dropbox.com/s/cv4knew8mvbrnvq/audioset_0.4593.pth?dl=1)).
 
 You can download the default weights using the command line as shown below.
 ```
