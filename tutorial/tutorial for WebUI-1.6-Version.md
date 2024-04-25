@@ -12,7 +12,9 @@ wget -O ./ast_master/pretrained_models/audio_mdl.pth https://www.dropbox.com/s/c
 
 ### 2. Switch to Audio-Tab by clicking the `audio-grounding` Tab
 
-![image-20240425110504645](./img/audio_tab.jpg)
+<p align="center">
+<img src="./img/audio_tab.jpg" height="600">
+</p>
 
 ### 3. Upload video or use example directly
 
@@ -22,7 +24,9 @@ step 1: detect the label of the sound making object
 
 step 2: ground the sound making object
 
-![image-20240425110442398](./img/grounding-tab.jpg)
+<p align="center">
+<img src="./img/grounding-tab.jpg" height="400">
+</p>
 
 ### 5. Get mask of selected object by clicking `Detect` button
 
