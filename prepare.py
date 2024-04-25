@@ -1,4 +1,4 @@
-import os, csv, argparse, wget
+import os, csv, argparse
 import sys
 import torch, torchaudio, timm
 import numpy as np
