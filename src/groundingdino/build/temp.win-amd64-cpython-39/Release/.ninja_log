@@ -1,0 +1,5 @@
+# ninja log v5
+0	7834	7195082183680331	F:/work/src/groundingdino/build/temp.win-amd64-cpython-39/Release/work/src/groundingdino/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cpu.obj	88a0e916d43cda1b
+162	7859	7195082184049361	F:/work/src/groundingdino/build/temp.win-amd64-cpython-39/Release/work/src/groundingdino/groundingdino/models/GroundingDINO/csrc/cuda_version.obj	a25623d970b8b2be
+208	15981	7195082265312362	F:/work/src/groundingdino/build/temp.win-amd64-cpython-39/Release/work/src/groundingdino/groundingdino/models/GroundingDINO/csrc/vision.obj	806485ea8187497d
+122	21703	7195082322299075	F:/work/src/groundingdino/build/temp.win-amd64-cpython-39/Release/work/src/groundingdino/groundingdino/models/GroundingDINO/csrc/MsDeformAttn/ms_deform_attn_cuda.obj	7b6ddc5ff5d2f78c
