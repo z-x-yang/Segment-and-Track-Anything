@@ -206,6 +206,16 @@ Please consider citing the related paper(s) in your publications if it helps you
   booktitle={Advances in Neural Information Processing Systems (NeurIPS)},
   year={2021}
 }
+@article{yang2024scalable,
+  title={Scalable video object segmentation with identification mechanism},
+  author={Yang, Zongxin and Miao, Jiaxu and Wei, Yunchao and Wang, Wenguan and Wang, Xiaohan and Yang, Yi},
+  journal={IEEE Transactions on Pattern Analysis and Machine Intelligence},
+  volume={46},
+  number={9},
+  pages={6247--6262},
+  year={2024},
+  publisher={IEEE}
+}
 @article{liu2023grounding,
   title={Grounding dino: Marrying dino with grounded pre-training for open-set object detection},
   author={Liu, Shilong and Zeng, Zhaoyang and Ren, Tianhe and Li, Feng and Zhang, Hao and Yang, Jie and Li, Chunyuan and Yang, Jianwei and Su, Hang and Zhu, Jun and others},
