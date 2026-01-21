@@ -53,43 +53,43 @@ This video showcases the segmentation and tracking capabilities of SAM-Track in 
     - In version 2.x, the segmentation model will offer two options: SAM and SEEM.
     - We will develop a new function where the fixed-category object detection result can be displayed as a prompt.
     - We will enable SAM-Track to add and modify objects during tracking. YouTube: [Demo6](https://www.youtube.com/watch?v=l7hXM1a3nEA&feature=youtu.be
-), [Demo7](https://www.youtube.com/watch?v=hPjw28Ul4cw&feature=youtu.be); Bilibili: [Demo6](https://www.bilibili.com/video/BV1nk4y1j7Am), [Demo7](https://www.bilibili.com/video/BV1mk4y1E78s/?vd_source=fe3b5c0215d05cc44c8eb3d94abae3ca)
+    ), [Demo7](https://www.youtube.com/watch?v=hPjw28Ul4cw&feature=youtu.be); Bilibili: [Demo6](https://www.bilibili.com/video/BV1nk4y1j7Am), [Demo7](https://www.bilibili.com/video/BV1mk4y1E78s/?vd_source=fe3b5c0215d05cc44c8eb3d94abae3ca)
 
 **Demo1** showcases SAM-Track's ability to take the class of objects as prompt. The user gives the category text 'panda' to enable instance-level segmentation and tracking of all objects belonging to this category.
 <div align=center>
- 
+
 [![demo1](https://res.cloudinary.com/marcomontalbano/image/upload/v1683347297/video_to_markdown/images/youtube--5oieHqFIJPc-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=5oieHqFIJPc&feature=youtu.be "demo1")
 </div>
 
 **Demo2** showcases SAM-Track's ability to take the text description as prompt. SAM-Track could segment and track target objects given the input that 'panda on the far left'.
 <div align=center>
- 
+
 [![demo1](https://res.cloudinary.com/marcomontalbano/image/upload/v1683347643/video_to_markdown/images/youtube--nXfq17X6ohk-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=nXfq17X6ohk "demo1")
 </div>
 
 
 **Demo3** showcases SAM-Track's ability to track numerous objects at the same time. SAM-Track is capable of automatically detecting newly appearing objects.
 <div align=center>
- 
+
 [![demo1](https://res.cloudinary.com/marcomontalbano/image/upload/v1683347961/video_to_markdown/images/youtube--jMqFMq0tRP0-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=jMqFMq0tRP0 "demo1")
 </div>
 
 **Demo4** showcases SAM-Track's ability to take multiple modes of interactions as prompt. The user specified human and skateboard with click and brushstroke, respectively.  
 <div align=center>
- 
+
 [![demo1](https://res.cloudinary.com/marcomontalbano/image/upload/v1683348115/video_to_markdown/images/youtube--UFtwFaOfx2I-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=UFtwFaOfx2I&feature=youtu.be "demo1")
 </div>
 
 
 **Demo5** showcases SAM-Track's ability to refine the results of segment-everything. The user merges the tram as a whole with a single click.
 <div align=center>
- 
+
 [![demo1](https://res.cloudinary.com/marcomontalbano/image/upload/v1683348276/video_to_markdown/images/youtube--cK5MPFdJdSY-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=cK5MPFdJdSY&feature=youtu.be "demo1")
 </div>
 
 **Demo6** showcases SAM-Track's ability to add new objects during tracking. The user annotates another car by rolling back to an intermediate frame.
 <div align=center>
- 
+
 [![demo1](https://res.cloudinary.com/marcomontalbano/image/upload/v1683348411/video_to_markdown/images/youtube--l7hXM1a3nEA-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=l7hXM1a3nEA "demo1")
 </div>
 
@@ -107,7 +107,7 @@ This video showcases the segmentation and tracking capabilities of SAM-Track in 
 
 **Demo9** showcases SAM-Track's ability to interactively add specified objects for tracking.The user customized the addition of objects to be tracked on top of the segmentation of everything in the scene using SAM-Track.
 <div align=center>
- 
+
 [![Interactive Segment-and-Track-Anything Demo2](https://res.cloudinary.com/marcomontalbano/image/upload/v1681712071/video_to_markdown/images/youtube--eZrdna8JkoQ-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=eZrdna8JkoQ "Interactive Segment-and-Track-Anything Demo2")
 </div>
 
@@ -139,7 +139,14 @@ You can download the default weights using the command line as shown below.
 bash script/download_ckpt.sh
 ```
 
-### :heart:Run Demo
+Create a ckpt folder in the root directory and put the downloaded model up into ckpt
+
+
+
+
+
+### video
+
 - The video to be processed can be put in ./assets. 
 - Then run **demo.ipynb** step by step to generate results. 
 - The results will be saved as masks for each frame and a gif file for visualization.
