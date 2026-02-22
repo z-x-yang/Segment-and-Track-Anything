@@ -1,0 +1,40 @@
+# --- Git ---
+.git
+.gitignore
+
+# --- Python cache ---
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# --- Virtual environments (any common name) ---
+venv/
+.venv/
+env/
+.env/
+myvenv/
+ENV/
+
+# --- Model weights / checkpoints ---
+ckpt/
+*.pt
+*.pth
+
+*.ipynb_checkpoints/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Binaries
+*.exe
+*.dll
+*.so
+
+# Editor
+.vscode/
+.idea/
+
+# Cache
+.cache/
