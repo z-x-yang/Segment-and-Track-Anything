@@ -172,6 +172,10 @@ $$
 bash script/download_ckpt.sh
 $$
 
+### Running docker file
+
+1. docker build -f docker/Dockerfile -t myimage .
+2. docker run myimage
 
 ### :heart:Run Demo
 - The video to be processed can be put in ./assets. 
