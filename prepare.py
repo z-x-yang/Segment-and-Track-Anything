@@ -8,6 +8,9 @@ current_directory = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_directory)  
 from src.models import ASTModel
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print(f'[*INFO] Using device: {device}')
+
 # Create a new class that inherits the original ASTModel class
 class ASTModelVis(ASTModel):
     def get_att_map(self, block, x):
@@ -16,7 +19,7 @@ class ASTModelVis(ASTModel):
         scale = block.attn.scale
         B, N, C = x.shape
         qkv = qkv(x).reshape(B, N, 3, num_heads, C // num_heads).permute(2, 0, 3, 1, 4)
-        q, k, v = qkv[0], qkv[1], qkv[2]  # make torchscript happy (cannot use tensor as tuple)
+        q, k, v = qkv[0], qkv[1], qkv[2]
         attn = (q @ k.transpose(-2, -1)) * scale
         attn = attn.softmax(dim=-1)
         return attn
@@ -67,7 +70,7 @@ def load_label(label_csv):
         reader = csv.reader(f, delimiter=',')
         lines = list(reader)
     labels = []
-    ids = []  # Each label has a unique id such as "/m/068hy"
+    ids = []
     for i1 in range(1, len(lines)):
         id = lines[i1][1]
         label = lines[i1][2]
@@ -79,34 +82,39 @@ def ASTpredict():
     # Assume each input spectrogram has 1024 time frames
     input_tdim = 1024
     checkpoint_path = './ast_master/pretrained_models/audio_mdl.pth'
-    # now load the visualization model
+
     ast_mdl = ASTModelVis(label_dim=527, input_tdim=input_tdim, imagenet_pretrain=False, audioset_pretrain=False)
     print(f'[*INFO] load checkpoint: {checkpoint_path}')
-    checkpoint = torch.load(checkpoint_path, map_location='cuda')
-    audio_model = torch.nn.DataParallel(ast_mdl, device_ids=[0])
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+
+    if torch.cuda.is_available():
+        audio_model = torch.nn.DataParallel(ast_mdl, device_ids=[0])
+    else:
+        audio_model = ast_mdl
+
     audio_model.load_state_dict(checkpoint)
-    audio_model = audio_model.to(torch.device("cuda:0"))
+    audio_model = audio_model.to(device)
     audio_model.eval()          
 
-    # Load the AudioSet label set
-    label_csv = './ast_master/egs/audioset/data/class_labels_indices.csv'       # label and indices for audioset data
+    label_csv = './ast_master/egs/audioset/data/class_labels_indices.csv'
     labels = load_label(label_csv)
 
-    feats = make_features("./audio.flac", mel_bins=128)           # shape(1024, 128)
-    feats_data = feats.expand(1, input_tdim, 128)           # reshape the feature
-    feats_data = feats_data.to(torch.device("cuda:0"))
-    # do some masking of the input
-    #feats_data[:, :512, :] = 0.
+    feats = make_features("./audio.flac", mel_bins=128)
+    feats_data = feats.expand(1, input_tdim, 128)
+    feats_data = feats_data.to(device)
 
-    # Make the prediction
     with torch.no_grad():
-        with autocast():
+        # autocast only benefits CUDA; skip it on CPU
+        if torch.cuda.is_available():
+            with autocast():
+                output = audio_model.forward(feats_data)
+        else:
             output = audio_model.forward(feats_data)
-            output = torch.sigmoid(output)
+        output = torch.sigmoid(output)
+
     result_output = output.data.cpu().numpy()[0]
     sorted_indexes = np.argsort(result_output)[::-1]
 
-    # Print audio tagging top probabilities
     print('Predice results:')
     for k in range(10):
         print('- {}: {:.4f}'.format(np.array(labels)[sorted_indexes[k]], result_output[sorted_indexes[k]]))
