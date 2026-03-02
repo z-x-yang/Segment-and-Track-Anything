@@ -7,7 +7,11 @@ import numpy as np
 import torch
 import gc
 import imageio
+from contextlib import nullcontext
 from scipy.ndimage import binary_dilation
+
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+USE_CUDA = DEVICE.type == "cuda"
 
 def save_gif(path, frames, fps):
     try:
@@ -138,12 +142,13 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
     create_dir(io_args['output_mask_dir'])
     create_dir(io_args['output_masked_frame_dir'])
 
-    torch.cuda.empty_cache()
+    if USE_CUDA: torch.cuda.empty_cache()
     gc.collect()
     sam_gap = SegTracker.sam_gap
     frame_idx = 0
 
-    with torch.cuda.amp.autocast():
+    amp_ctx = torch.cuda.amp.autocast if USE_CUDA else nullcontext
+    with amp_ctx():
         while cap.isOpened():
             ret, frame  = cap.read()  
             if not ret:
@@ -152,11 +157,11 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
             
             if frame_idx == 0:
                 pred_mask = SegTracker.first_frame_mask
-                torch.cuda.empty_cache()
+                if USE_CUDA: torch.cuda.empty_cache()
                 gc.collect()
             elif (frame_idx % sam_gap) == 0:
                 seg_mask = SegTracker.seg(frame)
-                torch.cuda.empty_cache()
+                if USE_CUDA: torch.cuda.empty_cache()
                 gc.collect()
                 track_mask = SegTracker.track(frame)
                 # find new objects, and update tracker with new objects
@@ -167,7 +172,7 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
                 SegTracker.add_reference(frame, pred_mask)
             else:
                 pred_mask = SegTracker.track(frame,update_memory=True)
-            torch.cuda.empty_cache()
+            if USE_CUDA: torch.cuda.empty_cache()
             gc.collect()
             
             save_prediction(pred_mask, output_mask_dir, str(frame_idx + frame_num).zfill(5) + '.png')
@@ -232,7 +237,7 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
 
     # manually release memory (after cuda out of memory)
     del SegTracker
-    torch.cuda.empty_cache()
+    if USE_CUDA: torch.cuda.empty_cache()
     gc.collect()
 
     return io_args['output_video'], f"{io_args['tracking_result_dir']}/{video_name}_pred_mask.zip"
@@ -264,12 +269,13 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps,
 
     i_frame_num = frame_num
 
-    torch.cuda.empty_cache()
+    if USE_CUDA: torch.cuda.empty_cache()
     gc.collect()
     sam_gap = SegTracker.sam_gap
     frame_idx = 0
 
-    with torch.cuda.amp.autocast():
+    amp_ctx = torch.cuda.amp.autocast if USE_CUDA else nullcontext
+    with amp_ctx():
         for img_path in imgs_path:
             if i_frame_num > 0:
                 i_frame_num = i_frame_num - 1
@@ -281,11 +287,11 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps,
             
             if frame_idx == 0:
                 pred_mask = SegTracker.first_frame_mask
-                torch.cuda.empty_cache()
+                if USE_CUDA:   torch.cuda.empty_cache()
                 gc.collect()
             elif (frame_idx % sam_gap) == 0:
                 seg_mask = SegTracker.seg(frame)
-                torch.cuda.empty_cache()
+                if USE_CUDA: torch.cuda.empty_cache()
                 gc.collect()
                 track_mask = SegTracker.track(frame)
                 # find new objects, and update tracker with new objects
@@ -296,7 +302,7 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps,
                 SegTracker.add_reference(frame, pred_mask)
             else:
                 pred_mask = SegTracker.track(frame,update_memory=True)
-            torch.cuda.empty_cache()
+            if USE_CUDA: torch.cuda.empty_cache()
             gc.collect()
             
             save_prediction(pred_mask, output_mask_dir, f'{frame_name}.png')
@@ -348,7 +354,7 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps,
 
     # manually release memory (after cuda out of memory)
     del SegTracker
-    torch.cuda.empty_cache()
+    if USE_CUDA: torch.cuda.empty_cache()
     gc.collect()
 
 
