@@ -64,7 +64,7 @@ def draw_mask(img, mask, alpha=0.5, id_countour=False):
         foreground = img*(1-alpha)+colorize_mask(mask)*alpha
         img_mask[binary_mask] = foreground[binary_mask]
         img_mask[countours,:] = 0
-        return img_mask.astype(img.dtype)    
+    return img_mask.astype(img.dtype)    
 
 
 aot_model2ckpt = {
