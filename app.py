@@ -4,6 +4,8 @@ import importlib
 import sys
 import os
 import pdb
+import shutil
+import zipfile
 import json
 from matplotlib.pyplot import step
 
@@ -84,18 +86,27 @@ def get_meta_from_img_seq(input_img_seq):
         return None, None, None, ""
 
     print("get meta information of img seq")
-    # Create dir
-    file_name = input_img_seq.name.split('/')[-1].split('.')[0]
-    file_path = f'./assets/{file_name}'
+
+    file_name = os.path.basename(input_img_seq.name).split('.')[0]
+    file_path = os.path.join('./assets', file_name)
+
+    # remove existing directory safely
     if os.path.isdir(file_path):
-        os.system(f'rm -r {file_path}')
-    os.makedirs(file_path)
-    # Unzip file
-    os.system(f'unzip {input_img_seq.name} -d ./assets ')
-    
-    imgs_path = sorted([os.path.join(file_path, img_name) for img_name in os.listdir(file_path)])
-    first_frame = imgs_path[0]
-    first_frame = cv2.imread(first_frame)
+        shutil.rmtree(file_path)
+
+    os.makedirs(file_path, exist_ok=True)
+
+    # unzip safely
+    with zipfile.ZipFile(input_img_seq.name, 'r') as zip_ref:
+        zip_ref.extractall('./assets')
+
+    imgs_path = sorted(
+        os.path.join(file_path, img_name)
+        for img_name in os.listdir(file_path)
+        if img_name.lower().endswith((".png", ".jpg", ".jpeg"))
+    )
+
+    first_frame = cv2.imread(imgs_path[0])
     first_frame = cv2.cvtColor(first_frame, cv2.COLOR_BGR2RGB)
 
     return first_frame, first_frame, first_frame, ""
