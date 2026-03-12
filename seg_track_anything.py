@@ -6,7 +6,9 @@ from aot_tracker import _palette
 import numpy as np
 import torch
 import gc
+import zipfile
 import imageio
+import shutil
 from contextlib import nullcontext
 from scipy.ndimage import binary_dilation
 
@@ -64,16 +66,7 @@ def draw_mask(img, mask, alpha=0.5, id_countour=False):
         img_mask[binary_mask] = foreground[binary_mask]
         img_mask[countours,:] = 0
         
-    return img_mask.astype(img.dtype)
-
-def create_dir(dir_path):
-    # if os.path.isdir(dir_path):
-    #     os.system(f"rm -r {dir_path}")
-    
-    # os.makedirs(dir_path)
-    if not os.path.isdir(dir_path):
-        os.makedirs(dir_path)
-    
+    return img_mask.astype(img.dtype)    
 
 
 aot_model2ckpt = {
@@ -97,7 +90,7 @@ def tracking_objects_in_video(SegTracker, input_video, input_img_seq, fps, frame
 
     # create dir to save result 
     tracking_result_dir = f'{os.path.join(os.path.dirname(__file__), "tracking_results", f"{video_name}")}'
-    create_dir(tracking_result_dir)
+    os.makedirs(tracking_result_dir,exist_ok=True)
     
     io_args = {
         'tracking_result_dir': tracking_result_dir,
@@ -135,12 +128,12 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
     # create dir to save predicted mask and masked frame
     if frame_num == 0:
         if os.path.isdir(io_args['output_mask_dir']):
-            os.system(f"rm -r {io_args['output_mask_dir']}")
+            shutil.rmtree(io_args['output_mask_dir'])
         if os.path.isdir(io_args['output_masked_frame_dir']):
-            os.system(f"rm -r {io_args['output_masked_frame_dir']}")
+            shutil.rmtree(io_args['output_masked_frame_dir'])
     output_mask_dir = io_args['output_mask_dir']
-    create_dir(io_args['output_mask_dir'])
-    create_dir(io_args['output_masked_frame_dir'])
+    os.makedirs(io_args['output_mask_dir'],exist_ok=True)
+    os.makedirs(io_args['output_masked_frame_dir'],exist_ok=True)
 
     if USE_CUDA: torch.cuda.empty_cache()
     gc.collect()
@@ -233,8 +226,13 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
     print("{} saved".format(io_args['output_gif']))
 
     # zip predicted mask
-    os.system(f"zip -r {io_args['tracking_result_dir']}/{video_name}_pred_mask.zip {io_args['output_mask_dir']}")
-
+    zip_path = f"{io_args['tracking_result_dir']}/{video_name}_pred_mask.zip"
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(io_args['output_mask_dir']):
+            for file in files:
+                full_path = os.path.join(root, file)
+                arcname = os.path.relpath(full_path, io_args['output_mask_dir'])
+                zipf.write(full_path, arcname)
     # manually release memory (after cuda out of memory)
     del SegTracker
     if USE_CUDA: torch.cuda.empty_cache()
@@ -258,13 +256,13 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps,
     # create dir to save predicted mask and masked frame
     if frame_num == 0:
         if os.path.isdir(io_args['output_mask_dir']):
-            os.system(f"rm -r {io_args['output_mask_dir']}")
+            shutil.rmtree(io_args['output_mask_dir'])
         if os.path.isdir(io_args['output_masked_frame_dir']):
-            os.system(f"rm -r {io_args['output_masked_frame_dir']}")
+            shutil.rmtree(io_args['output_masked_frame_dir'])
 
     output_mask_dir = io_args['output_mask_dir']
-    create_dir(io_args['output_mask_dir'])
-    create_dir(io_args['output_masked_frame_dir'])
+    os.makedirs(io_args['output_mask_dir'],exist_ok=True)
+    os.makedirs(io_args['output_masked_frame_dir'],exist_ok=True)
 
 
     i_frame_num = frame_num
@@ -350,7 +348,13 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps,
     print("{} saved".format(io_args['output_gif']))
 
     # zip predicted mask
-    os.system(f"zip -r {io_args['tracking_result_dir']}/{video_name}_pred_mask.zip {io_args['output_mask_dir']}")
+    zip_path = f"{io_args['tracking_result_dir']}/{video_name}_pred_mask.zip"
+    with zipfile.ZipFile(zip_path, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        for root, dirs, files in os.walk(io_args['output_mask_dir']):
+            for file in files:
+                full_path = os.path.join(root, file)
+                arcname = os.path.relpath(full_path, io_args['output_mask_dir'])
+                zipf.write(full_path, arcname)
 
     # manually release memory (after cuda out of memory)
     del SegTracker
