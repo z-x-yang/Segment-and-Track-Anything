@@ -82,10 +82,15 @@ def ASTpredict():
     # now load the visualization model
     ast_mdl = ASTModelVis(label_dim=527, input_tdim=input_tdim, imagenet_pretrain=False, audioset_pretrain=False)
     print(f'[*INFO] load checkpoint: {checkpoint_path}')
-    checkpoint = torch.load(checkpoint_path, map_location='cuda')
-    audio_model = torch.nn.DataParallel(ast_mdl, device_ids=[0])
-    audio_model.load_state_dict(checkpoint)
-    audio_model = audio_model.to(torch.device("cuda:0"))
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    checkpoint = torch.load(checkpoint_path, map_location=device)
+    if torch.cuda.is_available():
+        audio_model = torch.nn.DataParallel(ast_mdl, device_ids=[0])
+        audio_model.load_state_dict(checkpoint)
+    else:
+        audio_model = ast_mdl
+        audio_model.load_state_dict(checkpoint)
+    audio_model = audio_model.to(device)
     audio_model.eval()          
 
     # Load the AudioSet label set
@@ -94,13 +99,13 @@ def ASTpredict():
 
     feats = make_features("./audio.flac", mel_bins=128)           # shape(1024, 128)
     feats_data = feats.expand(1, input_tdim, 128)           # reshape the feature
-    feats_data = feats_data.to(torch.device("cuda:0"))
+    feats_data = feats_data.to(device)
     # do some masking of the input
     #feats_data[:, :512, :] = 0.
 
     # Make the prediction
     with torch.no_grad():
-        with autocast():
+        with autocast(enabled=device.type=="cuda"):
             output = audio_model.forward(feats_data)
             output = torch.sigmoid(output)
     result_output = output.data.cpu().numpy()[0]

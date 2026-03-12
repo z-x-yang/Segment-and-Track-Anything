@@ -8,7 +8,6 @@ import torch
 import gc
 import zipfile
 import imageio
-import shutil
 from contextlib import nullcontext
 from scipy.ndimage import binary_dilation
 
