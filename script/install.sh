@@ -18,7 +18,7 @@ pip install -e . --no-build-isolation
 cd ..
 
 # Install other lib
-pip install numpy opencv-python pycocotools matplotlib Pillow==9.2.0 scikit-image
+pip install numpy opencv-python pycocotools matplotlib Pillow scikit-image
 pip install gradio==3.39.0 gdown ffmpeg==1.4
 pip install timm==0.4.5
 pip install wget
