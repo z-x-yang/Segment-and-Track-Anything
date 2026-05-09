@@ -1,9 +1,7 @@
 # better create a virtual environment with python 3.10 especially and activate it
 py -3.10 -m venv venv
 source venv/Scripts/activate
-pip install --upgrade pip setuptools wheel
-# install torch and torchvision manually if you have cuda or cpu, according to the cuda version
-# from here https://pytorch.org/get-started/locally/
+pip install wheel
 
 # Install SAM
 cd sam; pip install -e .
@@ -13,6 +11,10 @@ cd ..
 git clone -b main https://github.com/IDEA-Research/GroundingDINO.git
 cd GroundingDINO
 grep -vE "torch|torchvision" requirements.txt > require.txt
+
+# install torch and torchvision manually if you have cuda or cpu, according to the cuda version
+# from here https://pytorch.org/get-started/locally/
+
 pip install -r require.txt
 pip install -e . --no-build-isolation
 cd ..
