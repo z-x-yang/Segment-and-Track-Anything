@@ -58,7 +58,6 @@ USER ${USER_ID}
 RUN python3 -m pip install --upgrade pip setuptools pathtools promise pybind11 numpy opencv-python pycocotools matplotlib scikit-image Pillow ffmpeg gdown gradio
 RUN pip install -e /home/user/cc/sam
 RUN pip install -e git+https://github.com/IDEA-Research/GroundingDINO.git@main#egg=GroundingDINO
-RUN pip install spatial-correlation-sampler
 # Change working directory
 WORKDIR /home/user/cc
 

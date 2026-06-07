@@ -26,12 +26,6 @@ pip install timm==0.4.5
 pip install wget
 pip install moviepy==1.0.3
 
-# Install Pytorch Correlation
-git clone https://github.com/ClementPinard/Pytorch-Correlation-extension.git
-cd Pytorch-Correlation-extension
-pip install .
-cd ..
-
 # Install AST
 git clone https://github.com/YuanGongND/ast.git ast_master
 cp ./prepare.py ./ast_master
