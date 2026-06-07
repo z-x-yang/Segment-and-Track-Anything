@@ -9,21 +9,31 @@ cd ..
 
 # Install Grounding-Dino
 git clone -b main https://github.com/IDEA-Research/GroundingDINO.git
-cd GroundingDINO
-grep -vE "torch|torchvision" requirements.txt > require.txt
 
-# install torch and torchvision manually if you have cuda or cpu, according to the cuda version
+############ IMPORTANT ###############
+# install torch, torchvision and torchaudio manually if you have cuda or cpu, according to the cuda version
 # from here https://pytorch.org/get-started/locally/
 
-pip install -r require.txt
+transformers==4.30.2
+addict==2.4.0
+yapf==0.40.2
+timm==0.4.5
+numpy==1.26.4
+opencv-python==4.10.0.84
+Pillow==10.4.0
+scikit-image==0.24.0
+matplotlib==3.9.2
+supervision==0.22.0
+pycocotools==2.0.8
+
+cd GroundingDINO
 pip install -e . --no-build-isolation
 cd ..
 
 # Install other lib
-pip install numpy opencv-python pycocotools matplotlib Pillow scikit-image
-pip install gradio==3.39.0 gdown ffmpeg==1.4
+pip install scikit-image
+pip install gradio==3.39.0 wget gdown
 pip install timm==0.4.5
-pip install wget
 pip install moviepy==1.0.3
 
 # Install AST
