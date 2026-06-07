@@ -35,6 +35,9 @@ pip install scikit-image
 pip install gradio==3.39.0
 pip install gradio_client==0.5.0 wget gdown
 pip install timm==0.4.5
+pip install pydantic==1.10.13
+pip install fastapi==0.100.1
+pip install starlette==0.27.0
 pip install moviepy==1.0.3
 
 # Install AST
