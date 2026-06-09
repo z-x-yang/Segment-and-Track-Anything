@@ -1,7 +1,7 @@
 # better create a virtual environment with python 3.10 especially and activate it
 py -3.10 -m venv venv
 source venv/Scripts/activate
-pip install --upgrade pip wheel setuptools
+pip install --upgrade pip wheel setuptools==80.9.0
 
 # Install SAM
 cd sam; pip install -e .
