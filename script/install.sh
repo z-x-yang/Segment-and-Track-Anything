@@ -7,7 +7,9 @@ pip install --upgrade pip wheel setuptools==80.9.0
 cd sam; pip install -e .
 cd ..
 
-# Install Grounding-Dino
+# Install Grounding-Dino. IF you get that "Failed to load custom C++" refer to
+# https://github.com/IDEA-Research/GroundingDINO/issues/8#issuecomment-1541892708
+
 git clone -b main https://github.com/IDEA-Research/GroundingDINO.git
 
 ############ IMPORTANT ###############
