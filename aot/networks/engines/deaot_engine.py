@@ -9,13 +9,18 @@ from networks.engines.aot_engine import AOTEngine, AOTInferEngine
 class DeAOTEngine(AOTEngine):
     def __init__(self,
                  aot_model,
-                 gpu_id=0,
+                 device="cuda",
                  long_term_mem_gap=9999,
                  short_term_mem_skip=1,
                  layer_loss_scaling_ratio=2.,
                  max_len_long_term=9999):
-        super().__init__(aot_model, gpu_id, long_term_mem_gap,
-                         short_term_mem_skip, max_len_long_term)
+        super().__init__(
+            aot_model,
+            device=device,
+            long_term_mem_gap=long_term_mem_gap,
+            short_term_mem_skip=short_term_mem_skip,
+            max_len_long_term=max_len_long_term,
+        )
         self.layer_loss_scaling_ratio = layer_loss_scaling_ratio
     def update_short_term_memory(self, curr_mask, curr_id_emb=None, skip_long_term_update=False):
 
@@ -51,7 +56,7 @@ class DeAOTEngine(AOTEngine):
 
         if self.frame_step - self.last_mem_step >= self.long_term_mem_gap:
             # skip the update of long-term memory or not
-            if not skip_long_term_update: 
+            if not skip_long_term_update:
                 self.update_long_term_memory(lstt_curr_memories)
             self.last_mem_step = self.frame_step
 
@@ -59,23 +64,32 @@ class DeAOTEngine(AOTEngine):
 class DeAOTInferEngine(AOTInferEngine):
     def __init__(self,
                  aot_model,
-                 gpu_id=0,
+                 device="cuda",
                  long_term_mem_gap=9999,
                  short_term_mem_skip=1,
                  max_aot_obj_num=None,
                  max_len_long_term=9999):
-        super().__init__(aot_model, gpu_id, long_term_mem_gap,
-                         short_term_mem_skip, max_aot_obj_num, max_len_long_term)
+        super().__init__(
+            aot_model,
+            device=device,
+            long_term_mem_gap=long_term_mem_gap,
+            short_term_mem_skip=short_term_mem_skip,
+            max_aot_obj_num=max_aot_obj_num,
+            max_len_long_term=max_len_long_term,
+        )
     def add_reference_frame(self, img, mask, obj_nums, frame_step=-1):
         if isinstance(obj_nums, list):
             obj_nums = obj_nums[0]
         self.obj_nums = obj_nums
         aot_num = max(np.ceil(obj_nums / self.max_aot_obj_num), 1)
         while (aot_num > len(self.aot_engines)):
-            new_engine = DeAOTEngine(self.AOT, self.gpu_id,
-                                     self.long_term_mem_gap,
-                                     self.short_term_mem_skip,
-                                     max_len_long_term = self.max_len_long_term)
+            new_engine = DeAOTEngine(
+                self.AOT,
+                device=self.device,
+                long_term_mem_gap=self.long_term_mem_gap,
+                short_term_mem_skip=self.short_term_mem_skip,
+                max_len_long_term=self.max_len_long_term,
+            )
             new_engine.eval()
             self.aot_engines.append(new_engine)
 

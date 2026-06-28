@@ -13,7 +13,7 @@ from networks.layers.basic import seq_to_2d
 class AOTEngine(nn.Module):
     def __init__(self,
                  aot_model,
-                 gpu_id=0,
+                 device="cuda",
                  long_term_mem_gap=9999,
                  short_term_mem_skip=1,
                  max_len_long_term=9999):
@@ -24,7 +24,10 @@ class AOTEngine(nn.Module):
         self.AOT = aot_model
 
         self.max_obj_num = aot_model.max_obj_num
-        self.gpu_id = gpu_id
+        if device == "cuda" and not torch.cuda.is_available():
+            device = "cpu"
+
+        self.device = torch.device(device)
         self.long_term_mem_gap = long_term_mem_gap
         self.short_term_mem_skip = short_term_mem_skip
         self.max_len_long_term = max_len_long_term
@@ -338,7 +341,7 @@ class AOTEngine(nn.Module):
 
         if self.frame_step - self.last_mem_step >= self.long_term_mem_gap:
             # skip the update of long-term memory or not
-            if not skip_long_term_update: 
+            if not skip_long_term_update:
                 self.update_long_term_memory(lstt_curr_memories)
             self.last_mem_step = self.frame_step
 
@@ -477,7 +480,7 @@ class AOTEngine(nn.Module):
 
         if enable_id_shuffle:
             self.id_shuffle_matrix = generate_permute_matrix(
-                self.max_obj_num + 1, batch_size, gpu_id=self.gpu_id)
+                self.max_obj_num + 1, batch_size, device = self.device)
         else:
             self.id_shuffle_matrix = None
 
@@ -490,7 +493,7 @@ class AOTEngine(nn.Module):
 class AOTInferEngine(nn.Module):
     def __init__(self,
                  aot_model,
-                 gpu_id=0,
+                 device="cuda",
                  long_term_mem_gap=9999,
                  short_term_mem_skip=1,
                  max_aot_obj_num=None,
@@ -505,7 +508,10 @@ class AOTInferEngine(nn.Module):
         else:
             self.max_aot_obj_num = max_aot_obj_num
 
-        self.gpu_id = gpu_id
+        if device == "cuda" and not torch.cuda.is_available():
+            device = "cpu"
+
+        self.device = torch.device(device)
         self.long_term_mem_gap = long_term_mem_gap
         self.short_term_mem_skip = short_term_mem_skip
         self.max_len_long_term = max_len_long_term
@@ -592,10 +598,13 @@ class AOTInferEngine(nn.Module):
         self.obj_nums = obj_nums
         aot_num = max(np.ceil(obj_nums / self.max_aot_obj_num), 1)
         while (aot_num > len(self.aot_engines)):
-            new_engine = AOTEngine(self.AOT, self.gpu_id,
-                                   self.long_term_mem_gap,
-                                   self.short_term_mem_skip,
-                                   self.max_len_long_term,)
+            new_engine = AOTEngine(
+                self.AOT,
+                device=self.device,
+                long_term_mem_gap=self.long_term_mem_gap,
+                short_term_mem_skip=self.short_term_mem_skip,
+                max_len_long_term=self.max_len_long_term,
+            )
             new_engine.eval()
             self.aot_engines.append(new_engine)
 
@@ -609,7 +618,7 @@ class AOTInferEngine(nn.Module):
                                         obj_nums=[separated_obj_num],
                                         frame_step=frame_step,
                                         img_embs=img_embs)
-                
+
             if img_embs is None:  # reuse image embeddings
                 img_embs = aot_engine.curr_enc_embs
 
@@ -634,7 +643,7 @@ class AOTInferEngine(nn.Module):
         separated_masks, _ = self.separate_mask(_curr_mask, self.obj_nums)
         for aot_engine, separated_mask in zip(self.aot_engines,
                                               separated_masks):
-            aot_engine.update_short_term_memory(separated_mask, 
+            aot_engine.update_short_term_memory(separated_mask,
                                                 skip_long_term_update=skip_long_term_update)
 
     def update_size(self):
