@@ -24,10 +24,12 @@ class AOTEngine(nn.Module):
         self.AOT = aot_model
 
         self.max_obj_num = aot_model.max_obj_num
-        if device == "cuda" and not torch.cuda.is_available():
-            device = "cpu"
 
-        self.device = torch.device(device)
+        device = torch.device(device)
+        if device.type == "cuda" and not torch.cuda.is_available():
+            device = torch.device("cpu")
+        self.device = device
+
         self.long_term_mem_gap = long_term_mem_gap
         self.short_term_mem_skip = short_term_mem_skip
         self.max_len_long_term = max_len_long_term
@@ -508,10 +510,11 @@ class AOTInferEngine(nn.Module):
         else:
             self.max_aot_obj_num = max_aot_obj_num
 
-        if device == "cuda" and not torch.cuda.is_available():
-            device = "cpu"
+        device = torch.device(device)
+        if device.type == "cuda" and not torch.cuda.is_available():
+            device = torch.device("cpu")
+        self.device = device
 
-        self.device = torch.device(device)
         self.long_term_mem_gap = long_term_mem_gap
         self.short_term_mem_skip = short_term_mem_skip
         self.max_len_long_term = max_len_long_term
