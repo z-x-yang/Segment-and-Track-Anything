@@ -25,7 +25,7 @@ class Detector:
         if not files:
             raise FileNotFoundError(f"No checkpoint found in {folder}")
         return files[0]
-    
+
     @staticmethod
     def infer_dino_config(ckpt_path):
         base = os.path.dirname(os.path.abspath(__file__))
@@ -40,12 +40,12 @@ class Detector:
         else:
             raise ValueError(f"Unknown GroundingDINO model type: {ckpt_path}")
 
-        return os.path.join(root, "src", "groundingdino", "groundingdino", "config", cfg)
-    
+        return os.path.join(root, "groundingdino", "groundingdino", "config", cfg)
+
     def __init__(self, device):
         grounding_dino_ckpt = self.find_dino_checkpoint()
         config_file = self.infer_dino_config(grounding_dino_ckpt)
-        args = SLConfig.fromfile(config_file) 
+        args = SLConfig.fromfile(config_file)
         args.device = device
         self.device = device
         self.gd = build_grounding_dino(args)
@@ -54,7 +54,7 @@ class Detector:
         log = self.gd.load_state_dict(clean_state_dict(checkpoint['model']), strict=False)
         print("Model loaded from {} \n => {}".format(grounding_dino_ckpt, log))
         self.gd.eval()
-        
+
     def image_transform_grounding(self, init_image):
         transform = T.Compose([
             T.RandomResize([800], max_size=1333),
@@ -80,10 +80,10 @@ class Detector:
             box = boxes[i]
             transfered_box = [[int(box[0]), int(box[1])], [int(box[2]), int(box[3])]]
             transfered_boxes.append(transfered_box)
-        
+
         transfered_boxes = np.array(transfered_boxes)
         return transfered_boxes
-        
+
     @torch.no_grad()
     def run_grounding(self, origin_frame, grounding_caption, box_threshold, text_threshold):
         '''
@@ -106,8 +106,8 @@ class Detector:
         boxes, logits, phrases = predict(self.gd, image_tensor, grounding_caption, box_threshold, text_threshold, device=self.device)
         annotated_frame = annotate(image_source=np.asarray(img_pil), boxes=boxes, logits=logits, phrases=phrases)[:, :, ::-1]
         annotated_frame = cv2.resize(annotated_frame, (width, height), interpolation=cv2.INTER_LINEAR)
-        
-        # transfer boxes to sam-format 
+
+        # transfer boxes to sam-format
         transfered_boxes = self.transfer_boxes_format(boxes, re_height, re_width)
         return annotated_frame, transfered_boxes
 
