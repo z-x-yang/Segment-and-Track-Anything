@@ -80,7 +80,7 @@ sam_args = {
         'crop_n_points_downscale_factor': 2,
         'min_mask_region_area': 200,
     },
-    'gpu_id': 0,
+    "device": "cuda",
 }
 aot_args = {
     'phase': 'PRE_YTB_DAV',
@@ -88,11 +88,11 @@ aot_args = {
     "model_path": deaot_ckpt,
     'long_term_mem_gap': 9999,
     'max_len_long_term': 9999,
-    'gpu_id': 0,
+    "device": "cuda",
 }
 segtracker_args = {
     'sam_gap': 10, # the interval to run sam to segment new objects
     'min_area': 200, # minimal mask area to add a new mask as a new object
     'max_obj_num': 255, # maximal object number to track in a video
-    'min_new_obj_iou': 0.8, # the background area ratio of a new object should > 80% 
+    'min_new_obj_iou': 0.8, # the background area ratio of a new object should > 80%
 }

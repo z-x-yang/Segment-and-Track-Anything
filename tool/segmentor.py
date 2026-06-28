@@ -3,21 +3,26 @@ import cv2
 import numpy as np
 from sam.segment_anything import sam_model_registry, SamPredictor, SamAutomaticMaskGenerator
 
+
 class Segmentor:
     def __init__(self, sam_args):
         """
         sam_args:
             sam_checkpoint: path of SAM checkpoint
             generator_args: args for everything_generator
-            gpu_id: device
+            device: device
         """
-        self.device = sam_args["gpu_id"]
+        device = sam_args["device"]
+        if device == "cuda" and not torch.cuda.is_available():
+            print("CUDA unavailable. Falling back to CPU.")
+            device = "cpu"
+        self.device = torch.device(device)
         self.sam = sam_model_registry[sam_args["model_type"]](checkpoint=sam_args["sam_checkpoint"])
         self.sam.to(device=self.device)
         self.everything_generator = SamAutomaticMaskGenerator(model=self.sam, **sam_args['generator_args'])
         self.interactive_predictor = self.everything_generator.predictor
         self.have_embedded = False
-        
+
     @torch.no_grad()
     def set_image(self, image):
         # calculate the embedding only once per frame.
@@ -26,29 +31,29 @@ class Segmentor:
             self.have_embedded = True
     @torch.no_grad()
     def interactive_predict(self, prompts, mode, multimask=True):
-        assert self.have_embedded, 'image embedding for sam need be set before predict.'        
-        
+        assert self.have_embedded, 'image embedding for sam need be set before predict.'
+
         if mode == 'point':
-            masks, scores, logits = self.interactive_predictor.predict(point_coords=prompts['point_coords'], 
-                                point_labels=prompts['point_modes'], 
+            masks, scores, logits = self.interactive_predictor.predict(point_coords=prompts['point_coords'],
+                                point_labels=prompts['point_modes'],
                                 multimask_output=multimask)
         elif mode == 'mask':
-            masks, scores, logits = self.interactive_predictor.predict(mask_input=prompts['mask_prompt'], 
+            masks, scores, logits = self.interactive_predictor.predict(mask_input=prompts['mask_prompt'],
                                 multimask_output=multimask)
         elif mode == 'point_mask':
-            masks, scores, logits = self.interactive_predictor.predict(point_coords=prompts['point_coords'], 
-                                point_labels=prompts['point_modes'], 
-                                mask_input=prompts['mask_prompt'], 
+            masks, scores, logits = self.interactive_predictor.predict(point_coords=prompts['point_coords'],
+                                point_labels=prompts['point_modes'],
+                                mask_input=prompts['mask_prompt'],
                                 multimask_output=multimask)
-                                
+
         return masks, scores, logits
-        
+
     @torch.no_grad()
     def segment_with_click(self, origin_frame, coords, modes, multimask=True):
         '''
-            
-            return: 
-                mask: one-hot 
+
+            return:
+                mask: one-hot
         '''
         self.set_image(origin_frame)
 
