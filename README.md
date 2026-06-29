@@ -10,6 +10,20 @@
 
 **Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
+## Impact
+
+> **390+ citations** across the AOT series (verified via Google Scholar).
+
+AOT/DeAOT has been adopted as core tracking infrastructure in published robotics research from **MIT CSAIL** and **Harvard SEAS**:
+
+| Project | Institutions | Venue | Details |
+|---------|-------------|-------|---------|
+| [Follow Anything (FAn)](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10436161) | MIT CSAIL · Harvard SEAS · Project CETI | IEEE RA-L | Open-vocabulary real-time drone tracking system using DeAOT as the video object tracking backbone, deployed on a physical micro aerial vehicle (MAV). Authors include Daniela Rus (MIT CSAIL Director) and Robert J. Wood (Harvard SEAS). |
+
+FAn uses DeAOT to track and follow arbitrary objects specified by text, image, or click — deployed in a live control loop on a drone at 6–20 fps on a commodity laptop GPU. This is not a benchmark citation; it is production use in a real robotic system.
+
+---
+
 ## :loudspeaker:New Features
 - [2024/4/23] We have added an audio-grounding feature that tracks the sound-making object within the video's soundtrack.
 - [2023/5/12] We have authored a technical report for SAM-Track.
