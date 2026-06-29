@@ -29,8 +29,12 @@ from torchvision import transforms
 class AOTTracker(object):
     def __init__(self, cfg, device="cuda"):
         if device == "cuda" and not torch.cuda.is_available():
-            print("CUDA unavailable. Falling back to CPU.")
-            device = "cpu"
+            if torch.backends.mps.is_available():
+                print("CUDA not available. Falling back to MPS.")
+                device = "mps"
+            else:
+                print("CUDA not available. Falling back to CPU.")
+                device = "cpu"
 
         self.device = torch.device(device)
 

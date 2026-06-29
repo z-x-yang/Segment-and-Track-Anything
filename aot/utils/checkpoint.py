@@ -6,18 +6,36 @@ from pathlib import Path
 
 def get_device(device=None):
     if device is None:
-        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+        if torch.cuda.is_available():
+            return torch.device("cuda")
+        if torch.backends.mps.is_available():
+            return torch.device("mps")
+        return torch.device("cpu")
 
     if isinstance(device, torch.device):
         return device
 
     if isinstance(device, str):
+        if device == "cuda" and not torch.cuda.is_available():
+            if torch.backends.mps.is_available():
+                return torch.device("mps")
+            return torch.device("cpu")
+
+        if device == "mps" and not torch.backends.mps.is_available():
+            if torch.cuda.is_available():
+                return torch.device("cuda")
+            return torch.device("cpu")
+
         return torch.device(device)
 
-    # Backward compatibility: integer GPU id
-    return torch.device(
-        f"cuda:{device}" if torch.cuda.is_available() else "cpu"
-    )
+    # Integer GPU id
+    if torch.cuda.is_available():
+        return torch.device(f"cuda:{device}")
+
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+
+    return torch.device("cpu")
 
 
 def load_network_and_optimizer(net, opt, pretrained_dir, gpu=None, scaler=None):

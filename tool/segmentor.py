@@ -14,8 +14,12 @@ class Segmentor:
         """
         device = sam_args["device"]
         if device == "cuda" and not torch.cuda.is_available():
-            print("CUDA unavailable. Falling back to CPU.")
-            device = "cpu"
+            if torch.backends.mps.is_available():
+                print("CUDA not available. Falling back to MPS.")
+                device = "mps"
+            else:
+                print("CUDA not available. Falling back to CPU.")
+                device = "cpu"
         self.device = torch.device(device)
         self.sam = sam_model_registry[sam_args["model_type"]](checkpoint=sam_args["sam_checkpoint"])
         self.sam.to(device=self.device)
@@ -97,5 +101,5 @@ class Segmentor:
             multimask_output=True
         )
         mask = masks[np.argmax(scores)]
-        
+
         return [mask]

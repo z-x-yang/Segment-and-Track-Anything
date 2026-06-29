@@ -47,8 +47,12 @@ class Detector:
         config_file = self.infer_dino_config(grounding_dino_ckpt)
         args = SLConfig.fromfile(config_file)
         if device == "cuda" and not torch.cuda.is_available():
-            print("CUDA not available. Falling back to CPU.")
-            device = "cpu"
+            if torch.backends.mps.is_available():
+                print("CUDA not available. Falling back to MPS.")
+                device = "mps"
+            else:
+                print("CUDA not available. Falling back to CPU.")
+                device = "cpu"
         self.device = device
         args.device = device
         self.gd = build_grounding_dino(args)
