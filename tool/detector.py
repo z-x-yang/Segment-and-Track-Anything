@@ -40,7 +40,7 @@ class Detector:
         else:
             raise ValueError(f"Unknown GroundingDINO model type: {ckpt_path}")
 
-        return os.path.join(root, "src", "groundingdino", "groundingdino", "config", cfg)
+        return os.path.join(root, "groundingdino", "groundingdino", "config", cfg)
 
     def __init__(self, device):
         grounding_dino_ckpt = self.find_dino_checkpoint()
