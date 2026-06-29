@@ -4,10 +4,20 @@ import numpy as np
 from pathlib import Path
 
 
-def get_device(gpu=None):
-    if torch.cuda.is_available():
-        return torch.device(f"cuda:{gpu}" if gpu is not None else "cuda")
-    return torch.device("cpu")
+def get_device(device=None):
+    if device is None:
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    if isinstance(device, torch.device):
+        return device
+
+    if isinstance(device, str):
+        return torch.device(device)
+
+    # Backward compatibility: integer GPU id
+    return torch.device(
+        f"cuda:{device}" if torch.cuda.is_available() else "cpu"
+    )
 
 
 def load_network_and_optimizer(net, opt, pretrained_dir, gpu=None, scaler=None):

@@ -171,16 +171,16 @@ class AOTTrackerInferEngine(AOTInferEngine):
 class DeAOTTrackerInferEngine(DeAOTInferEngine):
     def __init__(self,
                 aot_model,
-                gpu_id=0,
+                device="cuda",
                 long_term_mem_gap=9999,
                 short_term_mem_skip=1,
                 max_aot_obj_num=None):
         super().__init__(
             aot_model,
-            gpu_id,
-            long_term_mem_gap,
-            short_term_mem_skip,
-            max_aot_obj_num,
+            device="cuda",
+            long_term_mem_gap=long_term_mem_gap,
+            short_term_mem_skip=short_term_mem_skip,
+            max_aot_obj_num=max_aot_obj_num,
         )
     def add_reference_frame_incremental(self, img, mask, obj_nums, frame_step=-1):
         if isinstance(obj_nums, list):
