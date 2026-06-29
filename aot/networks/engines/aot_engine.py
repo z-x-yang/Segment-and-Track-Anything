@@ -24,10 +24,14 @@ class AOTEngine(nn.Module):
         self.AOT = aot_model
 
         self.max_obj_num = aot_model.max_obj_num
-
         device = torch.device(device)
-        if device.type == "cuda" and not torch.cuda.is_available():
-            device = torch.device("cpu")
+        if device == "cuda" and not torch.cuda.is_available():
+            if torch.backends.mps.is_available():
+                print("CUDA not available. Falling back to MPS.")
+                device = "mps"
+            else:
+                print("CUDA not available. Falling back to CPU.")
+                device = "cpu"
         self.device = device
 
         self.long_term_mem_gap = long_term_mem_gap
