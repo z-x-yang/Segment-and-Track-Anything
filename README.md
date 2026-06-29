@@ -12,13 +12,11 @@
 
 ## Impact
 
-AOT/DeAOT has been adopted as core tracking infrastructure in published robotics research from **MIT CSAIL** and **Harvard SEAS**:
+Segment and Track anything has been adopted as core infrastructure in published robotics research from **MIT CSAIL** and **Harvard SEAS**:
 
 | Project | Institutions | Venue | Details |
 |---------|-------------|-------|---------|
 | [Follow Anything (FAn)](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10436161) | MIT CSAIL · Harvard SEAS · Project CETI | IEEE RA-L | Open-vocabulary real-time drone tracking system using DeAOT as the video object tracking backbone, deployed on a physical micro aerial vehicle (MAV). Authors include Daniela Rus (MIT CSAIL Director) and Robert J. Wood (Harvard SEAS). |
-
-FAn uses DeAOT to track and follow arbitrary objects specified by text, image, or click — deployed in a live control loop on a drone at 6–20 fps on a commodity laptop GPU. This is not a benchmark citation; it is production use in a real robotic system.
 
 ---
 
