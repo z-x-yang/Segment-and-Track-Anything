@@ -12,8 +12,6 @@
 
 ## Impact
 
-> **390+ citations** across the AOT series (verified via Google Scholar).
-
 AOT/DeAOT has been adopted as core tracking infrastructure in published robotics research from **MIT CSAIL** and **Harvard SEAS**:
 
 | Project | Institutions | Venue | Details |
