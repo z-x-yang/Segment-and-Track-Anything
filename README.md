@@ -16,7 +16,7 @@ Segment and Track anything has been adopted as core infrastructure in published 
 
 | Project | Institutions | Venue | Details |
 |---------|-------------|-------|---------|
-| [Follow Anything (FAn)](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10436161) | MIT CSAIL · Harvard SEAS · Project CETI | IEEE RA-L | Open-vocabulary real-time drone tracking system using DeAOT as the video object tracking backbone, deployed on a physical micro aerial vehicle (MAV). Authors include Daniela Rus (MIT CSAIL Director) and Robert J. Wood (Harvard SEAS). |
+| [Follow Anything (FAn)](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10436161) | MIT CSAIL · Harvard SEAS · Project CETI | IEEE RA-L | Open-vocabulary real-time drone tracking system using DeAOT as the video object tracking backbone. |
 
 ---
 
