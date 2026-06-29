@@ -32,7 +32,7 @@ def clean():
     return None, None, None, None, None, None, [[], []]
 
 def audio_to_text(input_video, label_num, threshold):
-    from ast_predictor import ASTpredict
+    from tool.ast_predictor import ASTpredict
     if shutil.which("ffmpeg") is None:
         raise RuntimeError(
             "ffmpeg not found. Please install ffmpeg and ensure it is on PATH."
