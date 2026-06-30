@@ -11,11 +11,6 @@ import numpy as np
 from PIL import Image
 from skimage.morphology.binary import binary_dilation
 
-
-# To get a black and white mask, just change line 15 of aot_tracker.py to the following:
-# white_colors = [255, 255, 255] * 255
-# _palette = [0, 0, 0] + white_colors
-
 np.random.seed(200)
 _palette = ((np.random.random((3*255))*0.7+0.3)*255).astype(np.uint8).tolist()
 _palette = [0,0,0]+_palette
