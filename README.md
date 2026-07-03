@@ -135,6 +135,31 @@ Use the `install.sh` to install the necessary libs for SAM-Track
 bash script/install.sh
 ```
 
+### FFmpeg Requirement
+
+This project requires FFmpeg (used by MoviePy).
+
+Setup (for Windows)
+Download:
+https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+Extract to:
+C:\ffmpeg
+Add to PATH:
+C:\ffmpeg\bin
+Restart terminal and verify:
+ffmpeg -version
+
+Setup (for linux):
+sudo apt update
+sudo apt install ffmpeg
+ffmpeg -version
+
+Setup (for macOS):
+brew install ffmpeg
+ffmpeg -version
+
+
+
 ### :star:Model Preparation
 
 **- Download the SAM model to ckpt folder for running the code**
