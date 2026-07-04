@@ -10,6 +10,16 @@
 
 **Segment and Track Anything** is an open-source project that focuses on the segmentation and tracking of any objects in videos, utilizing both automatic and interactive methods. The primary algorithms utilized include the [**SAM** (Segment Anything Models)](https://github.com/facebookresearch/segment-anything) for automatic/interactive key-frame segmentation and the [**DeAOT** (Decoupling features in Associating Objects with Transformers)](https://github.com/yoxu515/aot-benchmark) (NeurIPS2022) for efficient multi-object tracking and propagation. The SAM-Track pipeline enables dynamic and automatic detection and segmentation of new objects by SAM, while DeAOT is responsible for tracking all identified objects.
 
+## Impact
+
+Segment and Track anything has been adopted as core infrastructure in published robotics research from **MIT CSAIL** and **Harvard SEAS**:
+
+| Project | Institutions | Venue | Details |
+|---------|-------------|-------|---------|
+| [Follow Anything (FAn)](https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber=10436161) | MIT CSAIL · Harvard SEAS · Project CETI | IEEE RA-L | Open-vocabulary real-time drone tracking system. |
+
+---
+
 ## :loudspeaker:New Features
 - [2024/4/23] We have added an audio-grounding feature that tracks the sound-making object within the video's soundtrack.
 - [2023/5/12] We have authored a technical report for SAM-Track.
@@ -125,6 +135,31 @@ Use the `install.sh` to install the necessary libs for SAM-Track
 bash script/install.sh
 ```
 
+### FFmpeg Requirement
+
+This project requires FFmpeg (used by MoviePy).
+
+Setup (for Windows)
+Download:
+https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
+Extract to:
+C:\ffmpeg
+Add to PATH:
+C:\ffmpeg\bin
+Restart terminal and verify:
+ffmpeg -version
+
+Setup (for linux):
+sudo apt update
+sudo apt install ffmpeg
+ffmpeg -version
+
+Setup (for macOS):
+brew install ffmpeg
+ffmpeg -version
+
+
+
 ### :star:Model Preparation
 
 **- Download the SAM model to ckpt folder for running the code**
@@ -197,6 +232,20 @@ Users can upload the video directly on the UI and use SegTracker to automaticall
 SegTracker-Parameters:
  - **aot_model**: used to select which version of DeAOT/AOT to use for tracking and propagation.
  - **sam_gap**: used to control how often SAM is used to add newly appearing objects at specified frame intervals. Increase to decrease the frequency of discovering new targets, but significantly improve speed of inference.
+
+ **Common issue:** – Unexpected new object detections after ~100 frames
+
+If you observe that only a subset of objects (e.g., 32 fish) were initially selected, but after around frame 100 the tracker suddenly detects many additional objects (e.g., 96 fish, including false positives in the background), this is expected behavior rather than a bug.
+
+By default, SAM is re-invoked every sam_gap = 100 frames to discover newly appearing objects. During this re-segmentation step, SAM may automatically detect additional objects or background regions, increasing the number of tracked instances.
+
+Solution: Increase the sam_gap value to a number larger than the total number of frames you intend to process (or larger than the frame index where this occurs). This prevents automatic SAM re-segmentation and keeps tracking only the objects that were initially selected.
+
+For example:
+
+Tracking a 150-frame video with fixed objects? Set sam_gap = 1000.
+Want SAM to discover genuinely new objects during tracking? Keep sam_gap at a smaller value.
+
  - **points_per_side**: used to control the number of points per side used for generating masks by sampling a grid over the image. Increasing the size enhances the ability to detect small objects, but larger targets may be segmented into finer granularity.
  - **max_obj_num**: used to limit the maximum number of objects that SAM-Track can detect and track. A larger number of objects necessitates a greater utilization of memory, with approximately 16GB of memory capable of processing a maximum of 255 objects.
 
