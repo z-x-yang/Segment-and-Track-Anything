@@ -33,6 +33,7 @@ RUN pip install \
     matplotlib==3.9.2 \
     supervision==0.22.0 \
     pycocotools==2.0.8 \
+    soundfile==0.13.1 \
     gradio==3.39.0 \
     gradio_client==0.5.0 \
     pydantic==1.10.13 \

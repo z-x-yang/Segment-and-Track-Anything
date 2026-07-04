@@ -329,19 +329,19 @@ def ASTpredict(wav_path="./audio.flac"):
         label = labels[idx]
         prob = float(result_output[idx])
 
-        # 🔒 sanitize for JSON string construction upstream
+        # sanitize for JSON string construction upstream
         label = label.replace('"', '').replace('\\', '')
 
         top_labels.append(label)
         top_labels_probs.append(prob)
 
-    # 🔒 guarantee length >= 10
+    # guarantee length >= 10
     if len(top_labels) < 10:
         pad = 10 - len(top_labels)
         top_labels += ["unknown"] * pad
         top_labels_probs += [0.0] * pad
 
-    # 🔒 guarantee at least ONE valid entry
+    # guarantee at least ONE valid entry
     if max(top_labels_probs[:10]) == 0.0:
         top_labels[0] = "silence"
         top_labels_probs[0] = 1.0

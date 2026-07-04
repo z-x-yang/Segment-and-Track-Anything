@@ -32,6 +32,7 @@ python -m pip install scikit-image==0.24.0
 python -m pip install matplotlib==3.9.2
 python -m pip install supervision==0.22.0
 python -m pip install pycocotools==2.0.8
+python -m pip install soundfile==0.13.1
 
 cd GroundingDINO
 python -m pip install -e . --no-build-isolation
