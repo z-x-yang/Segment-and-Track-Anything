@@ -181,12 +181,6 @@ ffmpeg -version
 | R50-DeAOTL   |    19.8   | [gdrive](https://drive.google.com/file/d/1QoChMkTVxdYZ_eBlZhK2acq9KMQZccPJ/view?usp=sharing) |
 | SwinB-DeAOTL |    70.3   | [gdrive](https://drive.google.com/file/d/1g4E-F0RPOx9Nd6J7tU9AE1TjsouL4oZq/view?usp=sharing) |
 
-**Download Grounding-DINO model to ckpt folder**
-
-| Name | Backbone | Training Data | Box AP (COCO) | Checkpoint |
-|------|----------|---------------|---------------|------------|
-| GroundingDINO-T | Swin-T | O365, GoldG, Cap4M | 48.4 (zero-shot) / 57.2 (fine-tuned) | [Download](https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha/groundingdino_swint_ogc.pth) |
-| GroundingDINO-B | Swin-B | COCO, O365, GoldG, Cap4M, OpenImages, ODinW-35, RefCOCO | 56.7 | [Download](https://github.com/IDEA-Research/GroundingDINO/releases/download/v0.1.0-alpha2/groundingdino_swinb_cogcoor.pth) |
 
 
 **Download AST model to ast_master/pretrained_models, after cloning the AST repository**
