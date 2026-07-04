@@ -7,15 +7,15 @@ WORKDIR /workspace
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        build-essential \
-        cmake \
-        git \
-        ffmpeg \
-        wget \
-        curl \
-        ca-certificates \
-        python3-dev && \
-    rm -rf /var/lib/apt/lists/*
+    build-essential \
+    cmake \
+    git \
+    ffmpeg \
+    wget \
+    curl \
+    ca-certificates \
+    python3-dev && \
+rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
