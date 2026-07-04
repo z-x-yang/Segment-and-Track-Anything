@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import zipfile
 import json
+from contextlib import nullcontext
 from matplotlib.pyplot import step
 
 from model_args import segtracker_args,sam_args,aot_args
@@ -32,6 +33,12 @@ from tool.transfer_tools import mask2bbox
 from ast_master.prepare import ASTpredict
 def clean():
     return None, None, None, None, None, None, [[], []]
+
+autocast_context = (
+    torch.amp.autocast("cuda")
+    if torch.cuda.is_available()
+    else nullcontext()
+)
 
 def audio_to_text(input_video, label_num, threshold):
     if shutil.which("ffmpeg") is None:
@@ -140,7 +147,7 @@ def get_meta_from_img_seq(input_img_seq):
     return first_frame, first_frame, first_frame, ""
 
 def SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask):
-    with torch.cuda.amp.autocast():
+    with autocast_context:
         # Reset the first frame's mask
         frame_idx = 0
         Seg_Tracker.restart_tracker()
@@ -363,9 +370,9 @@ def segment_everything(Seg_Tracker, aot_model, long_term_mem, max_len_long_term,
 
     frame_idx = 0
 
-    with torch.cuda.amp.autocast():
+    with autocast_context:
         pred_mask = Seg_Tracker.seg(origin_frame)
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available(): torch.cuda.empty_cache()
         gc.collect()
         Seg_Tracker.add_reference(origin_frame, pred_mask, frame_idx)
         Seg_Tracker.first_frame_mask = pred_mask
