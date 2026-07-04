@@ -37,6 +37,8 @@ def clean():
 autocast_context = (
     torch.amp.autocast("cuda")
     if torch.cuda.is_available()
+    else torch.amp.autocast("mps")
+    if torch.backends.mps.is_available()
     else nullcontext()
 )
 
