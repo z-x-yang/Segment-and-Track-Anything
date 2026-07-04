@@ -5,9 +5,13 @@
 
 
 ## Text-Prompts
-### 1. Clone Grounding-DINO to `./src`
+### 1. Clone Grounding-DINO to project root
 ```
-pip install -e git+https://github.com/IDEA-Research/GroundingDINO.git@main#egg=GroundingDINO
+git clone -b main https://github.com/IDEA-Research/GroundingDINO.git
+cd GroundingDINO
+python -m pip install -e . --no-build-isolation
+cd ..
+
 ```
 
 ### 2. Switch to Text-Tab by clicking `Text` Tab
