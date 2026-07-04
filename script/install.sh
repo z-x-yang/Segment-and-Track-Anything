@@ -47,8 +47,6 @@ starlette==0.27.0 \
 wget \
 gdown
 
-python -m pip install moviepy==1.0.3
-
 # Install AST
 git clone https://github.com/YuanGongND/ast.git ast_master
 cp ./prepare.py ./ast_master
