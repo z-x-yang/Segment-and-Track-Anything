@@ -46,7 +46,3 @@ fastapi==0.100.1 \
 starlette==0.27.0 \
 wget \
 gdown
-
-# Install AST
-git clone https://github.com/YuanGongND/ast.git ast_master
-cp ./prepare.py ./ast_master
