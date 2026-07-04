@@ -1,4 +1,3 @@
-from PIL.ImageOps import colorize, scale
 import gradio as gr
 import importlib
 import sys
@@ -29,11 +28,11 @@ import numpy as np
 import json
 from tool.transfer_tools import mask2bbox
 
-from ast_master.prepare import ASTpredict
 def clean():
     return None, None, None, None, None, None, [[], []]
 
 def audio_to_text(input_video, label_num, threshold):
+    from ast_predictor import ASTpredict
     if shutil.which("ffmpeg") is None:
         raise RuntimeError(
             "ffmpeg not found. Please install ffmpeg and ensure it is on PATH."
@@ -68,17 +67,16 @@ def audio_to_text(input_video, label_num, threshold):
         check=True,
     )
     top_labels,top_labels_probs = ASTpredict()
-    top_labels_and_probs = "{"
-    predicted_texts = ""
-    for k in range(10):
-        if(k<label_num and top_labels_probs[k]>threshold):
-                top_labels_and_probs += f"\"{top_labels[k]}\": {top_labels_probs[k]:.4f},"
-                predicted_texts +=top_labels[k]+ ' '
-        k+=1
-    top_labels_and_probs = top_labels_and_probs[:-1]
-    top_labels_and_probs += "}"
-    top_labels_and_probs_dic = json.loads(top_labels_and_probs)
-    print(top_labels_and_probs_dic)
+    top_labels_and_probs_dic = {}
+    predicted_texts = []
+    for k in range(min(10, len(top_labels))):
+        if k < label_num and top_labels_probs[k] > threshold:
+            top_labels_and_probs_dic[top_labels[k]] = round(
+                float(top_labels_probs[k]), 4
+            )
+            predicted_texts.append(top_labels[k])
+
+    predicted_texts = " ".join(predicted_texts)
     return predicted_texts, top_labels_and_probs_dic
 
 def get_click_prompt(click_stack, point):

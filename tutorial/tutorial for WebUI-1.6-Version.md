@@ -4,7 +4,7 @@
 
 
 ## audio-grounding
-### 1. Clone the audio-spectrum transformer (AST) model to `./ckpt` and download the pretrained model
+### 1. Download the audio-spectrum transformer (AST) pretrained model to `./ckpt` 
 ```
 
 wget -O ./ckpt/audio_mdl.pth https://www.dropbox.com/s/cv4knew8mvbrnvq/audioset_0.4593.pth?dl=1
