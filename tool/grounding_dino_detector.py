@@ -85,7 +85,7 @@ class Detector:
         results = self.processor.post_process_grounded_object_detection(
             outputs,
             inputs.input_ids,
-            box_threshold=box_threshold,
+            threshold=box_threshold,
             text_threshold=text_threshold,
             target_sizes=[img_pil.size[::-1]],
         )[0]
