@@ -1,10 +1,9 @@
-
-import os, csv, argparse
+import os, csv
 import sys
 import torch, timm
 import torch.nn as nn
 import wget
-from timm.layers import to_2tuple, trunc_normal_
+from timm.layers import trunc_normal_
 import numpy as np
 current_directory = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(current_directory)
@@ -219,7 +218,11 @@ def make_features(wav_name, mel_bins, target_length=1024):
     elif p < 0:
         fbank = fbank[0:target_length, :]
 
-    fbank = (fbank - (-4.2677393)) / (4.5689974 * 2)
+    # Normalize using the mean and std of the AudioSet training set fbank features
+    # (precomputed constants from the original AST paper/repo, not derived at runtime)
+    ast_audioset_mean = -4.2677393
+    ast_audioset_std = 4.5689974
+    fbank = (fbank - ast_audioset_mean) / (ast_audioset_std * 2)
     return fbank
 
 
@@ -333,3 +336,9 @@ def ASTpredict(wav_path="./audio.flac"):
         top_labels_probs[0] = 1.0
 
     return top_labels[:10], top_labels_probs[:10]
+
+
+if __name__ == '__main__':
+    top_labels, top_labels_probs = ASTpredict()
+    for label, prob in zip(top_labels, top_labels_probs):
+        print('- {}: {:.4f}'.format(label, prob))
