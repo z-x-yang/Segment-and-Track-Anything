@@ -1,5 +1,3 @@
-Ultimate app.py
-
 import gradio as gr
 import os
 import shutil
