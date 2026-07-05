@@ -1,31 +1,19 @@
 import gradio as gr
-import importlib
-import sys
 import os
-import pdb
 import shutil
 import subprocess
 import zipfile
-import json
-from matplotlib.pyplot import step
+import gc
+import numpy as np
+import cv2
+from PIL import Image
+import torch
+import math
 
 from model_args import segtracker_args,sam_args,aot_args
 from SegTracker import SegTracker
 from tool.transfer_tools import draw_outline, draw_points
-# sys.path.append('.')
-# sys.path.append('..')
-
-
-import cv2
-from PIL import Image
-from skimage.morphology.binary import binary_dilation
-import argparse
-import torch
-import time, math
 from seg_track_anything import aot_model2ckpt, tracking_objects_in_video, draw_mask
-import gc
-import numpy as np
-import json
 from tool.transfer_tools import mask2bbox
 
 def clean():
@@ -37,7 +25,6 @@ def audio_to_text(input_video, label_num, threshold):
         raise RuntimeError(
             "ffmpeg not found. Please install ffmpeg and ensure it is on PATH."
         )
-
     ffmpeg = shutil.which("ffmpeg")
     subprocess.run(
         [
