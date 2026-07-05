@@ -25,7 +25,7 @@ RUN pip install \
     transformers==4.30.2 \
     addict==2.4.0 \
     yapf==0.40.2 \
-    timm==0.4.5 \
+    timm==1.0.27 \
     numpy==1.26.4 \
     opencv-python==4.10.0.84 \
     Pillow==10.4.0 \
