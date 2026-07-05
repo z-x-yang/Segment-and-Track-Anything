@@ -30,7 +30,6 @@ import numpy as np
 import json
 from tool.transfer_tools import mask2bbox
 
-from ast_master.prepare import ASTpredict
 def clean():
     return None, None, None, None, None, None, [[], []]
 
@@ -677,7 +676,7 @@ def seg_track_app():
                                         "deaotl",
                                         "r50_deaotl"
                                     ],
-                                    value = "r50_deaotl",
+                                    value = "deaotb",
                                     interactive=True,
                                 )
                                 long_term_mem = gr.Slider(label="long term memory gap", minimum=1, maximum=9999, value=9999, step=1)
