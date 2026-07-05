@@ -26,7 +26,7 @@ python -m pip install addict==2.4.0
 python -m pip install yapf==0.40.2
 python -m pip install timm==1.0.27
 python -m pip install numpy==1.26.4
-python -m pip install opencv-python==4.10.0.84
+python -m pip install opencv-python-headless==4.10.0.84
 python -m pip install Pillow==10.4.0
 python -m pip install scikit-image==0.24.0
 python -m pip install matplotlib==3.9.2
