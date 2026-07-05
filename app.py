@@ -1,24 +1,36 @@
+from PIL.ImageOps import colorize, scale
 import gradio as gr
+import importlib
+import sys
 import os
+import pdb
 import shutil
 import subprocess
 import zipfile
+import json
+from matplotlib.pyplot import step
 from contextlib import nullcontext
-import gc
-import numpy as np
-import cv2
-from PIL import Image
-import torch
-import math
 
 from model_args import segtracker_args,sam_args,aot_args
 from SegTracker import SegTracker
 from tool.transfer_tools import draw_outline, draw_points
+# sys.path.append('.')
+# sys.path.append('..')
+
+
+import cv2
+from PIL import Image
+from skimage.morphology.binary import binary_dilation
+import argparse
+import torch
+import time, math
 from seg_track_anything import aot_model2ckpt, tracking_objects_in_video, draw_mask
+import gc
+import numpy as np
+import json
 from tool.transfer_tools import mask2bbox
 
-def clean():
-    return None, None, None, None, None, None, [[], []]
+from ast_master.prepare import ASTpredict
 
 autocast_context = (
     torch.amp.autocast("cuda")
@@ -27,12 +39,16 @@ autocast_context = (
     if torch.backends.mps.is_available()
     else nullcontext()
 )
+
+def clean():
+    return None, None, None, None, None, None, [[], []]
+
 def audio_to_text(input_video, label_num, threshold):
-    from tool.ast_predictor import ASTpredict
     if shutil.which("ffmpeg") is None:
         raise RuntimeError(
             "ffmpeg not found. Please install ffmpeg and ensure it is on PATH."
         )
+
     ffmpeg = shutil.which("ffmpeg")
     subprocess.run(
         [
@@ -62,18 +78,18 @@ def audio_to_text(input_video, label_num, threshold):
         check=True,
     )
     top_labels,top_labels_probs = ASTpredict()
-    top_labels_and_probs_dic = {}
-    predicted_texts = []
-    for k in range(min(10, len(top_labels))):
-        if k < label_num and top_labels_probs[k] > threshold:
-            top_labels_and_probs_dic[top_labels[k]] = round(
-                float(top_labels_probs[k]), 4
-            )
-            predicted_texts.append(top_labels[k])
-
-    predicted_texts = " ".join(predicted_texts)
+    top_labels_and_probs = "{"
+    predicted_texts = ""
+    for k in range(10):
+        if(k<label_num and top_labels_probs[k]>threshold):
+                top_labels_and_probs += f"\"{top_labels[k]}\": {top_labels_probs[k]:.4f},"
+                predicted_texts +=top_labels[k]+ ' '
+        k+=1
+    top_labels_and_probs = top_labels_and_probs[:-1]
+    top_labels_and_probs += "}"
+    top_labels_and_probs_dic = json.loads(top_labels_and_probs)
+    print(top_labels_and_probs_dic)
     return predicted_texts, top_labels_and_probs_dic
-
 
 def get_click_prompt(click_stack, point):
 
@@ -535,21 +551,21 @@ def seg_track_app():
 
         with gr.Row():
             # video input
-            with gr.Column(scale=1):
+            with gr.Column(scale=0.5):
 
                 tab_video_input = gr.Tab(label="Video type input")
                 with tab_video_input:
-                    input_video = gr.Video(label='Input video', height=550)
+                    input_video = gr.Video(label='Input video').style(height=550)
 
                 tab_img_seq_input = gr.Tab(label="Image-Seq type input")
                 with tab_img_seq_input:
                     with gr.Row():
-                        input_img_seq = gr.File(label='Input Image-Seq', height=550)
-                        with gr.Column(scale=1):
+                        input_img_seq = gr.File(label='Input Image-Seq').style(height=550)
+                        with gr.Column(scale=0.25):
                             extract_button = gr.Button(value="extract")
                             fps = gr.Slider(label='fps', minimum=5, maximum=50, value=8, step=1)
 
-                input_first_frame = gr.Image(label='Segment result of first frame',interactive=True, height=550)
+                input_first_frame = gr.Image(label='Segment result of first frame',interactive=True).style(height=550)
 
 
                 tab_everything = gr.Tab(label="Everything")
@@ -593,7 +609,7 @@ def seg_track_app():
 
                 tab_stroke = gr.Tab(label="Stroke")
                 with tab_stroke:
-                    drawing_board = gr.ImageEditor(label='Drawing Board')
+                    drawing_board = gr.Image(label='Drawing Board', tool="sketch", brush_radius=10, interactive=True)
                     with gr.Row():
                         seg_acc_stroke = gr.Button(value="Segment", interactive=True)
                         # stroke_reset_but = gr.Button(
@@ -607,11 +623,11 @@ def seg_track_app():
                     detect_button = gr.Button(value="Detect")
                     with gr.Accordion("Advanced options", open=False):
                         with gr.Row():
-                            with gr.Column(scale=1):
+                            with gr.Column(scale=0.5):
                                 box_threshold = gr.Slider(
                                     label="Box Threshold", minimum=0.0, maximum=1.0, value=0.25, step=0.001
                                 )
-                            with gr.Column(scale=1):
+                            with gr.Column(scale=0.5):
                                 text_threshold = gr.Slider(
                                     label="Text Threshold", minimum=0.0, maximum=1.0, value=0.25, step=0.001
                                 )
@@ -621,11 +637,11 @@ def seg_track_app():
                     threshold = gr.Slider(label="Threshold", minimum=0.0, maximum=1.0, value=0.05, step=0.01)
                     audio_to_text_button = gr.Button(value="detect the label of the sound-making object", interactive=True)
                     top_labels_and_probs_dic = gr.Label(label="Top Labels and Probabilities")
-                    predicted_texts = gr.Textbox(label="Predicted Text")
+                    predicted_texts = gr.outputs.Textbox(label="Predicted Text")
                     audio_grounding_button = gr.Button(value="ground the sound-making object", interactive=True)
 
                 with gr.Row():
-                    with gr.Column(scale=1):
+                    with gr.Column(scale=0.5):
                         with gr.Tab(label="SegTracker Args"):
                             # args for tracking in video do segment-everthing
                             points_per_side = gr.Slider(
@@ -662,7 +678,7 @@ def seg_track_app():
                                         "deaotl",
                                         "r50_deaotl"
                                     ],
-                                    value = "deaotb",
+                                    value = "r50_deaotl",
                                     interactive=True,
                                 )
                                 long_term_mem = gr.Slider(label="long term memory gap", minimum=1, maximum=9999, value=9999, step=1)
@@ -684,8 +700,8 @@ def seg_track_app():
                                 interactive=True,
                                 )
 
-            with gr.Column(scale=1):
-                # output_video = gr.Video(label='Output video', height=550)
+            with gr.Column(scale=0.5):
+                # output_video = gr.Video(label='Output video').style(height=550)
                 output_video = gr.File(label="Predicted video")
                 output_mask = gr.File(label="Predicted masks")
                 with gr.Row():
@@ -693,7 +709,7 @@ def seg_track_app():
                         with gr.Accordion("roll back options", open=False):
                         # tab_show_res = gr.Tab(label="Segment result of all frames")
                         # with tab_show_res:
-                            output_res = gr.Image(label='Segment result of all frames', height=550)
+                            output_res = gr.Image(label='Segment result of all frames').style(height=550)
                             frame_per = gr.Slider(
                                 label = "Percentage of Frames Viewed",
                                 minimum= 0.0,
@@ -703,7 +719,7 @@ def seg_track_app():
                             )
                             frame_per.release(show_res_by_slider, inputs=[input_video, input_img_seq, frame_per], outputs=[output_res, frame_num])
                             roll_back_button = gr.Button(value="Choose this mask to refine")
-                            refine_res = gr.Image(label='Refine masks', height=550)\
+                            refine_res = gr.Image(label='Refine masks').style(height=550)\
 
                             tab_roll_back_click = gr.Tab(label="Click")
                             with tab_roll_back_click:
@@ -1203,8 +1219,8 @@ def seg_track_app():
                 inputs=[input_img_seq],
             )
 
-    app.queue(default_concurrency_limit=1)
-    app.launch(debug=True,share=True)
+    app.queue(concurrency_count=1)
+    app.launch(debug=True, enable_queue=True, share=True)
 
 
 if __name__ == "__main__":
