@@ -8,8 +8,6 @@ from aot.networks.engines.aot_engine import AOTEngine,AOTInferEngine
 from aot.networks.engines.deaot_engine import DeAOTEngine,DeAOTInferEngine
 import importlib
 import numpy as np
-from PIL import Image
-from skimage.morphology.binary import binary_dilation
 
 
 np.random.seed(200)
@@ -39,10 +37,10 @@ class AOTTracker(object):
                                    short_term_mem_skip=1,
                                    long_term_mem_gap=cfg.TEST_LONG_TERM_MEM_GAP,
                                    max_len_long_term=cfg.MAX_LEN_LONG_TERM)
-       
+
         self.transform = transforms.Compose([
             tr.MultiRestrictSize(cfg.TEST_MAX_SHORT_EDGE,
-                                 cfg.TEST_MAX_LONG_EDGE, cfg.TEST_FLIP, 
+                                 cfg.TEST_MAX_LONG_EDGE, cfg.TEST_FLIP,
                                  cfg.TEST_MULTISCALE, cfg.MODEL_ALIGN_CORNERS),
             tr.MultiToTensor()
         ])
@@ -57,7 +55,7 @@ class AOTTracker(object):
             'current_img': frame,
             'current_label': mask,
         }
-    
+
         sample = self.transform(sample)
         frame = sample[0]['current_img'].unsqueeze(0).float().cuda(self.gpu_id)
         mask = sample[0]['current_label'].unsqueeze(0).float().cuda(self.gpu_id)
@@ -84,15 +82,15 @@ class AOTTracker(object):
                                     keepdim=True).float()
 
         return  pred_label
-    
+
     @torch.no_grad()
     def update_memory(self, pred_label):
         self.engine.update_memory(pred_label)
-    
+
     @torch.no_grad()
     def restart(self):
         self.engine.restart_engine()
-    
+
     @torch.no_grad()
     def build_tracker_engine(self, name, **kwargs):
         if name == 'aotengine':
@@ -131,7 +129,7 @@ class AOTTrackerInferEngine(AOTInferEngine):
                                             img_embs=img_embs)
             else:
                 aot_engine.update_short_term_memory(separated_mask)
-                
+
             if img_embs is None:  # reuse image embeddings
                 img_embs = aot_engine.curr_enc_embs
 
@@ -167,7 +165,7 @@ class DeAOTTrackerInferEngine(DeAOTInferEngine):
                                             img_embs=img_embs)
             else:
                 aot_engine.update_short_term_memory(separated_mask)
-                
+
             if img_embs is None:  # reuse image embeddings
                 img_embs = aot_engine.curr_enc_embs
 

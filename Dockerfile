@@ -29,7 +29,6 @@ RUN pip install \
     numpy==1.26.4 \
     opencv-python-headless==4.10.0.84 \
     Pillow==10.4.0 \
-    scikit-image==0.24.0 \
     matplotlib==3.9.2 \
     supervision==0.22.0 \
     pycocotools==2.0.8 \
