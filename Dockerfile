@@ -38,7 +38,6 @@ RUN pip install \
     pydantic==1.10.13 \
     fastapi==0.100.1 \
     starlette==0.27.0 \
-    wget \
     gdown
 
 RUN pip install -e sam

@@ -2,7 +2,7 @@ import os, csv
 import sys
 import torch, timm
 import torch.nn as nn
-import wget
+import urllib.request
 from timm.layers import trunc_normal_
 import numpy as np
 current_directory = os.path.dirname(os.path.abspath(__file__))
@@ -104,7 +104,7 @@ class ASTModel(nn.Module):
             audioset_mdl_url = 'https://www.dropbox.com/s/cv4knew8mvbrnvq/audioset_0.4593.pth?dl=1'
             if not os.path.exists(ckpt_path):
                 os.makedirs('ckpt', exist_ok=True)
-                wget.download(audioset_mdl_url, out=ckpt_path)
+                urllib.request.urlretrieve(audioset_mdl_url, ckpt_path)
 
             sd = torch.load(ckpt_path, map_location=device)
             audio_model = ASTModel(label_dim=527, fstride=10, tstride=10, input_fdim=128, input_tdim=1024, imagenet_pretrain=False, audioset_pretrain=False, model_size='base384', verbose=False)
@@ -280,7 +280,7 @@ def ASTpredict(wav_path="./audio.flac"):
 
         if not os.path.exists(path):
             os.makedirs(os.path.dirname(path), exist_ok=True)
-            wget.download(url, out=path)
+            urllib.request.urlretrieve(url, path)
 
         _labels_cache = load_label(path)
 

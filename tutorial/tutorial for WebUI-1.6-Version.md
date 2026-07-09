@@ -4,13 +4,14 @@
 
 
 ## audio-grounding
-### 1. Download the audio-spectrum transformer (AST) pretrained model to `./ckpt` 
+### 1. Download the audio-spectrum transformer (AST) pretrained model to `./ckpt`
 ```
 
-wget -O ./ckpt/audio_mdl.pth https://www.dropbox.com/s/cv4knew8mvbrnvq/audioset_0.4593.pth?dl=1
+curl -L "https://www.dropbox.com/s/cv4knew8mvbrnvq/audioset_0.4593.pth?dl=1" \
+  -o ./ckpt/audio_mdl.pth
 
-wget -O ./ckpt/class_labels_indices.csv \
-https://raw.githubusercontent.com/YuanGongND/ast/master/egs/audioset/data/class_labels_indices.csv
+curl -L https://raw.githubusercontent.com/YuanGongND/ast/master/egs/audioset/data/class_labels_indices.csv \
+  -o ./ckpt/class_labels_indices.csv
 
 ```
 
