@@ -255,7 +255,10 @@ def ASTpredict(wav_path="./audio.flac"):
             audioset_pretrain=False
         )
 
-        checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only = True)
+        try:
+            checkpoint = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+        except TypeError:
+            checkpoint = torch.load(checkpoint_path, map_location="cpu")
 
         if torch.cuda.is_available():
             audio_model = torch.nn.DataParallel(ast_mdl, device_ids=[0])
