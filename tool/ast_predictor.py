@@ -242,7 +242,8 @@ def ASTpredict(wav_path="./audio.flac"):
     global _audio_model, _audio_device, _labels_cache
 
     input_tdim = 1024
-    checkpoint_path = './ckpt/audio_mdl.pth'
+    ckpt_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "ckpt"))
+    checkpoint_path = os.path.join(ckpt_dir, "audio_mdl.pth")
 
     # ---------------------------
     # 1. Load model ONCE
@@ -278,7 +279,7 @@ def ASTpredict(wav_path="./audio.flac"):
     # 2. Load labels ONCE
     # ---------------------------
     if _labels_cache is None:
-        path = './ckpt/class_labels_indices.csv'
+        path = os.path.join(ckpt_dir, "class_labels_indices.csv")
         url = "https://raw.githubusercontent.com/YuanGongND/ast/master/egs/audioset/data/class_labels_indices.csv"
 
         if not os.path.exists(path):

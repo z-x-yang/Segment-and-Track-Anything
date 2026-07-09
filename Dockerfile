@@ -2,6 +2,8 @@ FROM pytorch/pytorch:2.0.1-cuda11.8-cudnn8-devel
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV CUDA_HOME=/usr/local/cuda
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -19,9 +21,9 @@ WORKDIR /workspace
 
 COPY . .
 
-RUN pip install --upgrade pip wheel setuptools
+RUN python -m pip install --upgrade pip setuptools==80.9.0 wheel
 
-RUN pip install \
+RUN pip install --no-cache-dir \
     transformers==4.30.2 \
     addict==2.4.0 \
     yapf==0.40.2 \
@@ -46,6 +48,5 @@ RUN git clone -b main https://github.com/IDEA-Research/GroundingDINO.git && \
     cd GroundingDINO && \
     pip install -e . --no-build-isolation
 
-WORKDIR /workspace
 
 CMD ["python", "app.py"]

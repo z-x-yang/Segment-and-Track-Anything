@@ -7,6 +7,8 @@
 ### 1. Download the audio-spectrum transformer (AST) pretrained model to `./ckpt`
 ```
 
+mkdir -p ./ckpt
+
 curl -L "https://www.dropbox.com/s/cv4knew8mvbrnvq/audioset_0.4593.pth?dl=1" \
   -o ./ckpt/audio_mdl.pth
 
