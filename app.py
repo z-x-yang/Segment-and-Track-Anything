@@ -9,7 +9,7 @@ import subprocess
 import zipfile
 import json
 from matplotlib.pyplot import step
-from contextlib import nullcontext
+
 
 from model_args import segtracker_args,sam_args,aot_args
 from SegTracker import SegTracker
@@ -32,6 +32,7 @@ from tool.transfer_tools import mask2bbox
 
 from ast_master.prepare import ASTpredict
 
+from contextlib import nullcontext
 autocast_context = (
     torch.amp.autocast("cuda")
     if torch.cuda.is_available()
