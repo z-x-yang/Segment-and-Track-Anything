@@ -40,19 +40,7 @@ def audio_to_text(input_video, label_num, threshold):
         check=True,
     )
 
-    subprocess.run(
-        [
-            ffmpeg,
-            "-y",
-            "-i",
-            input_video,
-            "-c",
-            "copy",
-            "-an",
-            "video_without_audio.mp4",
-        ],
-        check=True,
-    )
+
     top_labels,top_labels_probs = ASTpredict()
     top_labels_and_probs_dic = {}
     predicted_texts = []
