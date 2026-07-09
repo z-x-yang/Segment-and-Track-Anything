@@ -123,7 +123,7 @@ if __name__ == "__main__":
     grounding_caption = "swan.water"
     box_threshold = 0.25
     text_threshold = 0.25
-
+    detector = Detector(device)
     annotated_frame, boxes = detector.run_grounding(origin_frame, grounding_caption, box_threshold, text_threshold)
     cv2.imwrite('./debug/x.png', annotated_frame)
 
