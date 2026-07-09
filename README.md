@@ -136,29 +136,41 @@ bash script/install.sh
 ```
 
 ### FFmpeg Requirement
-
 This project requires FFmpeg (used by MoviePy).
 
-Setup (for Windows)
-Download:
-https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
-Extract to:
-C:\ffmpeg
-Add to PATH:
-C:\ffmpeg\bin
-Restart terminal and verify:
-ffmpeg -version
+Windows
 
-Setup (for linux):
+Download a **shared** FFmpeg build from:
+https://github.com/GyanD/codexffmpeg/releases
+
+Extract it, for example, to:
+```text
+C:\ffmpeg
+```
+Add the following directory to your `PATH`:
+```text
+C:\ffmpeg\bin
+```
+Open a new terminal and verify the installation:
+
+```bash
+ffmpeg -version
+```
+
+#### Linux
+
+```bash
 sudo apt update
 sudo apt install ffmpeg
-ffmpeg -version
 
-Setup (for macOS):
+ffmpeg -version
+```
+#### macOS
+
+```bash
 brew install ffmpeg
 ffmpeg -version
-
-
+```
 
 ### :star:Model Preparation
 
