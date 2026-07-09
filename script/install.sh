@@ -44,6 +44,6 @@ gradio_client==0.5.0 \
 pydantic==1.10.13 \
 fastapi==0.100.1 \
 starlette==0.27.0 \
-gdown
+gdown==6.1.0
 
 # ffmpeg - readme
