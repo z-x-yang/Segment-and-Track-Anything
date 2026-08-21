@@ -138,7 +138,7 @@ def video_type_input_tracking(SegTracker, input_video, io_args, video_name, fram
     sam_gap = SegTracker.sam_gap
     frame_idx = 0
 
-    amp_ctx = torch.cuda.amp.autocast if USE_CUDA else nullcontext
+    amp_ctx = torch.amp.autocast("cuda") if USE_CUDA else nullcontext
     with amp_ctx():
         while cap.isOpened():
             ret, frame  = cap.read()  
@@ -270,7 +270,7 @@ def img_seq_type_input_tracking(SegTracker, io_args, video_name, imgs_path, fps,
     sam_gap = SegTracker.sam_gap
     frame_idx = 0
 
-    amp_ctx = torch.cuda.amp.autocast if USE_CUDA else nullcontext
+    amp_ctx = torch.amp.autocast("cuda") if USE_CUDA else nullcontext
     with amp_ctx():
         for img_path in imgs_path:
             if i_frame_num > 0:

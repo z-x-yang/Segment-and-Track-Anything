@@ -2,7 +2,7 @@ import os, csv, argparse
 import sys
 import torch, torchaudio, timm
 import numpy as np
-from torch.cuda.amp import autocast
+from torch.amp import autocast
 import IPython
 current_directory = os.path.dirname(os.path.abspath(__file__))  
 sys.path.append(current_directory)  
@@ -105,7 +105,7 @@ def ASTpredict():
 
     # Make the prediction
     with torch.no_grad():
-        with autocast(enabled=device.type=="cuda"):
+        with autocast("cuda", enabled=device.type == "cuda"):
             output = audio_model.forward(feats_data)
             output = torch.sigmoid(output)
     result_output = output.data.cpu().numpy()[0]
