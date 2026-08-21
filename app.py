@@ -140,7 +140,7 @@ def get_meta_from_img_seq(input_img_seq):
     return first_frame, first_frame, first_frame, ""
 
 def SegTracker_add_first_frame(Seg_Tracker, origin_frame, predicted_mask):
-    with torch.cuda.amp.autocast():
+    with torch.amp.autocast("cuda"):
         # Reset the first frame's mask
         frame_idx = 0
         Seg_Tracker.restart_tracker()
@@ -363,7 +363,7 @@ def segment_everything(Seg_Tracker, aot_model, long_term_mem, max_len_long_term,
 
     frame_idx = 0
 
-    with torch.cuda.amp.autocast():
+    with torch.amp.autocast("cuda"):
         pred_mask = Seg_Tracker.seg(origin_frame)
         torch.cuda.empty_cache()
         gc.collect()
